@@ -1,0 +1,28 @@
+From c75f183372b131fbb4b803b8ad2197694994e834 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <Andrei.Kholodnyi@gmail.com>
+Date: Sat, 25 Aug 2018 23:51:45 +0200
+Subject: [PATCH 2/3] system time ib VxWorks is in millisecs
+
+---
+ rclcpp/include/rclcpp/executor.hpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/rclcpp/include/rclcpp/executor.hpp b/rclcpp/include/rclcpp/executor.hpp
+index 657529f..83ec4ac 100644
+--- a/rclcpp/include/rclcpp/executor.hpp
++++ b/rclcpp/include/rclcpp/executor.hpp
+@@ -229,7 +229,11 @@ public:
+     std::chrono::nanoseconds timeout_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+       timeout);
+     if (timeout_ns > std::chrono::nanoseconds::zero()) {
++#if defined (__VXWORKS__)
++      end_time += std::chrono::duration_cast<std::chrono::milliseconds> (timeout_ns);
++#else
+       end_time += timeout_ns;
++#endif
+     }
+     std::chrono::nanoseconds timeout_left = timeout_ns;
+ 
+-- 
+2.17.1
+

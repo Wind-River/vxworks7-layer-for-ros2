@@ -1,0 +1,15 @@
+diff --git a/rosidl_generator_cpp/resource/msg__struct.hpp.em b/rosidl_generator_cpp/resource/msg__struct.hpp.em
+index 83a0496..d8438b2 100644
+--- a/rosidl_generator_cpp/resource/msg__struct.hpp.em
++++ b/rosidl_generator_cpp/resource/msg__struct.hpp.em
+@@ -220,6 +220,10 @@ def generate_zero_string(membset, fill_args):
+   }
+ @[end for]@
+ 
++#ifdef UPDATE
++  #undef UPDATE
++#endif
++
+   // constant declarations
+ @[for constant in spec.constants]@
+ @[if constant.type == 'string']

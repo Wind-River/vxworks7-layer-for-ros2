@@ -1,0 +1,35 @@
+diff --git a/src/error_handling.c b/src/error_handling.c
+index 01f3458..2cceee2 100644
+--- a/src/error_handling.c
++++ b/src/error_handling.c
+@@ -194,7 +194,7 @@ rcutils_set_error_state(
+   error_state.line_number = line_number;
+ #if RCUTILS_REPORT_ERROR_HANDLING_ERRORS
+   // Only warn of overwritting if the new error is different from the old ones.
+-  size_t characters_to_compare = strnlen(error_string, RCUTILS_ERROR_MESSAGE_MAX_LENGTH);
++  size_t characters_to_compare = strnlen_s(error_string, RCUTILS_ERROR_MESSAGE_MAX_LENGTH);
+   // assumption is that message length is <= max error string length
+   static_assert(
+     sizeof(gtls_rcutils_error_state.message) <= sizeof(gtls_rcutils_error_string.str),
+diff --git a/src/error_handling_helpers.h b/src/error_handling_helpers.h
+index a0e898f..e0eee08 100644
+--- a/src/error_handling_helpers.h
++++ b/src/error_handling_helpers.h
+@@ -54,7 +54,7 @@ __rcutils_copy_string(char * dst, size_t dst_size, const char * src)
+   assert(dst_size > 0);
+   assert(src != NULL);
+   // doesn't matter how long src actually is if it is longer than dst, so limit to dst + 1
+-  size_t src_length = strnlen(src, dst_size);
++  size_t src_length = strnlen_s(src, dst_size);
+   size_t size_to_copy = src_length;
+   // the destination must be one byte bigger to store the NULL terminating character
+   if (src_length >= dst_size) {
+@@ -130,7 +130,7 @@ __rcutils_convert_uint64_t_into_c_str(uint64_t number, char * buffer, size_t buf
+   buffer[i] = '\0';
+ 
+   // reverse the string in place
+-  __rcutils_reverse_str(buffer, strnlen(buffer, 21));
++  __rcutils_reverse_str(buffer, strnlen_s(buffer, 21));
+ }
+ 
+ // do not use externally, internal function which is only to be used by error_handling.c

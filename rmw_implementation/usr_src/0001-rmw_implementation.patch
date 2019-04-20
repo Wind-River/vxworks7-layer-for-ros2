@@ -1,0 +1,15 @@
+diff --git a/rmw_implementation/CMakeLists.txt b/rmw_implementation/CMakeLists.txt
+index c23861e..84c7838 100644
+--- a/rmw_implementation/CMakeLists.txt
++++ b/rmw_implementation/CMakeLists.txt
+@@ -16,8 +16,8 @@ find_package(ament_cmake REQUIRED)
+ find_package(rcutils REQUIRED)
+ 
+ # provides FindPoco.cmake and Poco on platforms without it
+-find_package(poco_vendor)
+-find_package(Poco COMPONENTS Foundation)
++#find_package(poco_vendor)
++#find_package(Poco COMPONENTS Foundation)
+ find_package(rmw_implementation_cmake REQUIRED)
+ 
+ if(BUILD_TESTING)

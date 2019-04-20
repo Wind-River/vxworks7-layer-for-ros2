@@ -1,0 +1,14 @@
+--- a/rosidl_typesupport_cpp/src/type_support_dispatch.cpp	2019-03-14 13:39:38.729174812 +0100
++++ b/rosidl_typesupport_cpp/src/type_support_dispatch.cpp	2019-03-13 15:42:16.425420240 +0100
+@@ -41,7 +41,11 @@
+   filename_extension = ".dylib";
+ #else
+   env_var = "LD_LIBRARY_PATH";
++#ifdef __VXWORKS__
++  separator = ';';
++#else
+   separator = ':';
++#endif
+   filename_prefix = "lib";
+   filename_extension = ".so";
+ #endif

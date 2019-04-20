@@ -1,0 +1,62 @@
+diff --git a/rosidl_typesupport_cpp/src/type_support_dispatch.hpp b/rosidl_typesupport_cpp/src/type_support_dispatch.hpp
+index 4941b3e..dbb1ff6 100644
+--- a/rosidl_typesupport_cpp/src/type_support_dispatch.hpp
++++ b/rosidl_typesupport_cpp/src/type_support_dispatch.hpp
+@@ -24,6 +24,8 @@
+ 
+ #ifdef ROSIDL_TYPESUPPORT_CPP_USE_POCO
+ #include "Poco/SharedLibrary.h"
++#else
++#include "rosidl_typesupport_cpp/SharedLibrary.h"
+ #endif
+ 
+ #include "rosidl_typesupport_cpp/type_support_map.h"
+@@ -50,7 +52,6 @@ get_typesupport_handle_function(
+     return handle;
+   }
+ 
+-#ifdef ROSIDL_TYPESUPPORT_CPP_USE_POCO
+   if (handle->typesupport_identifier == rosidl_typesupport_cpp::typesupport_identifier) {
+     const type_support_map_t * map = \
+       static_cast<const type_support_map_t *>(handle->data);
+@@ -58,7 +59,11 @@ get_typesupport_handle_function(
+       if (strcmp(map->typesupport_identifier[i], identifier) != 0) {
+         continue;
+       }
++#ifdef ROSIDL_TYPESUPPORT_CPP_USE_POCO
+       Poco::SharedLibrary * lib = nullptr;
++#else
++      shared_library::SharedLibrary * lib = nullptr;
++#endif
+       if (!map->data[i]) {
+         char library_name[1024];
+         snprintf(
+@@ -69,11 +74,20 @@ get_typesupport_handle_function(
+           fprintf(stderr, "Failed to find library '%s'\n", library_name);
+           return nullptr;
+         }
++#ifdef ROSIDL_TYPESUPPORT_CPP_USE_POCO
+         lib = new Poco::SharedLibrary(library_path);
++#else
++        lib = new shared_library::SharedLibrary(library_path);
++#endif
+         map->data[i] = lib;
+       }
++#ifdef ROSIDL_TYPESUPPORT_CPP_USE_POCO
+       auto clib = static_cast<const Poco::SharedLibrary *>(map->data[i]);
+       lib = const_cast<Poco::SharedLibrary *>(clib);
++#else
++      auto clib = static_cast<const shared_library::SharedLibrary *>(map->data[i]);
++      lib = const_cast<shared_library::SharedLibrary *>(clib);
++#endif
+       if (!lib->hasSymbol(map->symbol_name[i])) {
+         fprintf(stderr, "Failed to find symbol '%s' in library\n", map->symbol_name[i]);
+         return nullptr;
+@@ -86,7 +100,6 @@ get_typesupport_handle_function(
+       return ts;
+     }
+   }
+-#endif
+ 
+   return nullptr;
+ }

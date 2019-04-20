@@ -1,0 +1,13 @@
+diff --git a/src/cpp/rtps/persistence/sqlite3.c b/src/cpp/rtps/persistence/sqlite3.c
+index 2fff4f6e..ceaf63bc 100644
+--- a/src/cpp/rtps/persistence/sqlite3.c
++++ b/src/cpp/rtps/persistence/sqlite3.c
+@@ -31227,7 +31227,7 @@ static struct unix_syscall {
+ #define osMmap ((void*(*)(void*,size_t,int,int,int,off_t))aSyscall[22].pCurrent)
+ 
+ #if !defined(SQLITE_OMIT_WAL) || SQLITE_MAX_MMAP_SIZE>0
+-  { "munmap",       (sqlite3_syscall_ptr)munmap,          0 },
++  { "munmap",       (sqlite3_syscall_ptr)0,          0 },
+ #else
+   { "munmap",       (sqlite3_syscall_ptr)0,               0 },
+ #endif

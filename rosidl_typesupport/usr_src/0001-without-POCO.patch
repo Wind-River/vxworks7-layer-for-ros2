@@ -1,0 +1,143 @@
+diff --git a/rosidl_typesupport_c/CMakeLists.txt b/rosidl_typesupport_c/CMakeLists.txt
+index a925dc7..c47d004 100644
+--- a/rosidl_typesupport_c/CMakeLists.txt
++++ b/rosidl_typesupport_c/CMakeLists.txt
+@@ -17,11 +17,10 @@ endif()
+ 
+ find_package(ament_cmake_ros REQUIRED)
+ # provides FindPoco.cmake and Poco on platforms without it
+-find_package(poco_vendor)
+-find_package(Poco COMPONENTS Foundation)
+-find_package(rosidl_generator_c REQUIRED)
+-
++#find_package(poco_vendor QUIET)
++#find_package(Poco COMPONENTS Foundation)
+ link_directories(${Poco_LIBRARY_DIR})
++find_package(rosidl_generator_c REQUIRED)
+ 
+ ament_export_dependencies(rosidl_typesupport_interface)
+ 
+@@ -42,11 +41,16 @@ if(WIN32)
+   target_compile_definitions(${PROJECT_NAME}
+     PRIVATE "ROSIDL_TYPESUPPORT_C_BUILDING_DLL")
+ endif()
+-target_include_directories(${PROJECT_NAME}
+-  PUBLIC
+-  include ${Poco_INCLUDE_DIRS}
+-)
+-target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
++if(Poco_FOUND)
++  target_include_directories(${PROJECT_NAME}
++    PUBLIC
++    ${Poco_INCLUDE_DIRS}
++  )
++  target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
++endif()
++
++target_include_directories(${PROJECT_NAME} PUBLIC include)
++
+ ament_target_dependencies(${PROJECT_NAME} "rosidl_generator_c")
+ ament_export_libraries(${PROJECT_NAME})
+ 
+diff --git a/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_action_interfaces.cmake b/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_action_interfaces.cmake
+index 7f2bb6d..eb5fc4a 100644
+--- a/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_action_interfaces.cmake
++++ b/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_action_interfaces.cmake
+@@ -125,8 +125,8 @@ else()
+     message(FATAL_ERROR "Multiple typesupports but static linking was requested")
+   endif()
+   if(NOT rosidl_typesupport_c_SUPPORTS_POCO)
+-    message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
+-      "rosidl_typesupport_c was built")
++	  #message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
++	  #"rosidl_typesupport_c was built")
+   endif()
+ endif()
+ 
+diff --git a/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_interfaces.cmake b/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_interfaces.cmake
+index 61ccafe..fef4517 100644
+--- a/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_interfaces.cmake
++++ b/rosidl_typesupport_c/cmake/rosidl_typesupport_c_generate_interfaces.cmake
+@@ -142,8 +142,8 @@ else()
+       "linking was requested")
+   endif()
+   if(NOT rosidl_typesupport_c_SUPPORTS_POCO)
+-    message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
+-      "not available when rosidl_typesupport_c was built")
++	  #message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
++	  #"not available when rosidl_typesupport_c was built")
+   endif()
+ endif()
+ 
+diff --git a/rosidl_typesupport_cpp/CMakeLists.txt b/rosidl_typesupport_cpp/CMakeLists.txt
+index 2deab67..c7f38c4 100644
+--- a/rosidl_typesupport_cpp/CMakeLists.txt
++++ b/rosidl_typesupport_cpp/CMakeLists.txt
+@@ -13,11 +13,10 @@ endif()
+ 
+ find_package(ament_cmake_ros REQUIRED)
+ # provides FindPoco.cmake and Poco on platforms without it
+-find_package(poco_vendor)
+-find_package(Poco COMPONENTS Foundation)
+-find_package(rosidl_generator_c REQUIRED)
+-
++#find_package(poco_vendori QUIET)
++#find_package(Poco COMPONENTS Foundation)
+ link_directories(${Poco_LIBRARY_DIR})
++find_package(rosidl_generator_c REQUIRED)
+ 
+ ament_export_dependencies(rosidl_typesupport_interface)
+ ament_export_dependencies(rosidl_typesupport_c)
+@@ -34,16 +33,17 @@ add_library(${PROJECT_NAME}
+ if(Poco_FOUND)
+   target_compile_definitions(${PROJECT_NAME}
+     PRIVATE "ROSIDL_TYPESUPPORT_CPP_USE_POCO")
++  target_include_directories(${PROJECT_NAME}
++    PUBLIC
++    ${Poco_INCLUDE_DIRS}
++  )
++  target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
+ endif()
+ if(WIN32)
+   target_compile_definitions(${PROJECT_NAME}
+     PRIVATE "ROSIDL_TYPESUPPORT_CPP_BUILDING_DLL")
+ endif()
+-target_include_directories(${PROJECT_NAME}
+-  PUBLIC
+-  include ${Poco_INCLUDE_DIRS}
+-)
+-target_link_libraries(${PROJECT_NAME} ${Poco_LIBRARIES})
++target_include_directories(${PROJECT_NAME} PUBLIC include)
+ ament_target_dependencies(${PROJECT_NAME} "rosidl_generator_c")
+ ament_export_libraries(${PROJECT_NAME})
+ 
+diff --git a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_action_interfaces.cmake b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_action_interfaces.cmake
+index e55e380..28629aa 100644
+--- a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_action_interfaces.cmake
++++ b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_action_interfaces.cmake
+@@ -127,8 +127,8 @@ else()
+     message(FATAL_ERROR "Multiple typesupports but static linking was requested")
+   endif()
+   if(NOT rosidl_typesupport_cpp_SUPPORTS_POCO)
+-    message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
+-      "rosidl_typesupport_cpp was built")
++	  #message(FATAL_ERROR "Multiple typesupports but Poco was not available when "
++	  #"rosidl_typesupport_cpp was built")
+   endif()
+ endif()
+ 
+diff --git a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
+index 388c946..4f2f2b1 100644
+--- a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
++++ b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
+@@ -128,8 +128,8 @@ else()
+       "linking was requested")
+   endif()
+   if(NOT rosidl_typesupport_cpp_SUPPORTS_POCO)
+-    message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
+-      "not available when rosidl_typesupport_cpp was built")
++	  #message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
++	  #"not available when rosidl_typesupport_cpp was built")
+   endif()
+ endif()
+ 

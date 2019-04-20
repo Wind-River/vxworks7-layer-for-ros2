@@ -1,0 +1,15 @@
+diff --git a/include/fastrtps/rtps/resources/TimedEvent.h b/include/fastrtps/rtps/resources/TimedEvent.h
+index 80e77d7b..302f2e6a 100644
+--- a/include/fastrtps/rtps/resources/TimedEvent.h
++++ b/include/fastrtps/rtps/resources/TimedEvent.h
+@@ -48,6 +48,10 @@ public:
+ 		EVENT_MSG
+ 	};
+ 
++#ifdef NONE
++#undef NONE
++#endif
++
+     enum AUTODESTRUCTION_MODE
+     {
+         NONE,

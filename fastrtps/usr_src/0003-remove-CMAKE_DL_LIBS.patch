@@ -1,0 +1,13 @@
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index 379d7c9a..83d61eba 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -277,7 +277,7 @@ elseif(NOT EPROSIMA_INSTALLER)
+ 
+     # Link library to external libraries.
+     target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr
+-        ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS}
++        ${CMAKE_THREAD_LIBS_INIT}
+         ${TINYXML2_LIBRARY}
+         $<$<BOOL:${SECURITY}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto>
+         $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>

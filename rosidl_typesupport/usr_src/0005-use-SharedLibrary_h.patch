@@ -1,0 +1,60 @@
+--- a/rosidl_typesupport_c/src/type_support_dispatch.hpp	2019-03-14 13:39:38.729174812 +0100
++++ b/rosidl_typesupport_c/src/type_support_dispatch.hpp	2019-03-13 15:42:16.173414400 +0100
+@@ -24,6 +24,8 @@
+ 
+ #ifdef ROSIDL_TYPESUPPORT_C_USE_POCO
+ #include "Poco/SharedLibrary.h"
++#else
++#include "rosidl_typesupport_c/SharedLibrary.h"
+ #endif
+ 
+ #include "rosidl_typesupport_c/identifier.h"
+@@ -51,7 +53,6 @@
+     return handle;
+   }
+ 
+-#ifdef ROSIDL_TYPESUPPORT_C_USE_POCO
+   if (handle->typesupport_identifier == rosidl_typesupport_c__typesupport_identifier) {
+     const type_support_map_t * map = \
+       static_cast<const type_support_map_t *>(handle->data);
+@@ -59,7 +60,11 @@
+       if (strcmp(map->typesupport_identifier[i], identifier) != 0) {
+         continue;
+       }
++#ifdef ROSIDL_TYPESUPPORT_C_USE_POCO
+       Poco::SharedLibrary * lib = nullptr;
++#else
++      shared_library::SharedLibrary * lib = nullptr;
++#endif
+       if (!map->data[i]) {
+         char library_name[1024];
+         snprintf(
+@@ -70,11 +75,20 @@
+           fprintf(stderr, "Failed to find library '%s'\n", library_name);
+           return nullptr;
+         }
++#ifdef ROSIDL_TYPESUPPORT_C_USE_POCO
+         lib = new Poco::SharedLibrary(library_path);
++#else
++        lib = new shared_library::SharedLibrary(library_path);
++#endif
+         map->data[i] = lib;
+       }
++#ifdef ROSIDL_TYPESUPPORT_C_USE_POCO
+       auto clib = static_cast<const Poco::SharedLibrary *>(map->data[i]);
+       lib = const_cast<Poco::SharedLibrary *>(clib);
++#else
++      auto clib = static_cast<const shared_library::SharedLibrary *>(map->data[i]);
++      lib = const_cast<shared_library::SharedLibrary *>(clib);
++#endif
+       if (!lib->hasSymbol(map->symbol_name[i])) {
+         fprintf(stderr, "Failed to find symbol '%s' in library\n", map->symbol_name[i]);
+         return nullptr;
+@@ -87,7 +101,6 @@
+       return ts;
+     }
+   }
+-#endif
+ 
+   return nullptr;
+ }

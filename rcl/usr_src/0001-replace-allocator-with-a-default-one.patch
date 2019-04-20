@@ -1,0 +1,142 @@
+diff --git a/rcl/src/rcl/client.c b/rcl/src/rcl/client.c
+index 2acef58..ae3e1d1 100644
+--- a/rcl/src/rcl/client.c
++++ b/rcl/src/rcl/client.c
+@@ -74,9 +74,8 @@ rcl_client_init(
+     return RCL_RET_ALREADY_INIT;
+   }
+   // Expand the given service name.
+-  rcutils_allocator_t rcutils_allocator = *allocator;  // implicit conversion to rcutils version
+   rcutils_string_map_t substitutions_map = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_get_default_allocator());
+   if (rcutils_ret != RCUTILS_RET_OK) {
+     RCL_SET_ERROR_MSG(rcutils_get_error_string().str);
+     if (rcutils_ret == RCUTILS_RET_BAD_ALLOC) {
+diff --git a/rcl/src/rcl/publisher.c b/rcl/src/rcl/publisher.c
+index 8709a99..76300ae 100644
+--- a/rcl/src/rcl/publisher.c
++++ b/rcl/src/rcl/publisher.c
+@@ -74,9 +74,8 @@ rcl_publisher_init(
+   RCUTILS_LOG_DEBUG_NAMED(
+     ROS_PACKAGE_NAME, "Initializing publisher for topic name '%s'", topic_name);
+   // Expand the given topic name.
+-  rcutils_allocator_t rcutils_allocator = *allocator;  // implicit conversion to rcutils version
+   rcutils_string_map_t substitutions_map = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_get_default_allocator());
+   if (rcutils_ret != RCUTILS_RET_OK) {
+     RCL_SET_ERROR_MSG(rcutils_get_error_string().str);
+     if (rcutils_ret == RCUTILS_RET_BAD_ALLOC) {
+diff --git a/rcl/src/rcl/remap.c b/rcl/src/rcl/remap.c
+index 0dd51cd..f5a3818 100644
+--- a/rcl/src/rcl/remap.c
++++ b/rcl/src/rcl/remap.c
+@@ -237,7 +237,7 @@ rcl_remap_topic_name(
+   RCL_CHECK_ARGUMENT_FOR_NULL(topic_name, RCL_RET_INVALID_ARGUMENT);
+ 
+   rcutils_string_map_t substitutions = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions, 0, allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions, 0, rcutils_get_default_allocator());
+   rcl_ret_t ret = RCL_RET_ERROR;
+   if (RCUTILS_RET_OK == rcutils_ret) {
+     ret = rcl_get_default_topic_name_substitutions(&substitutions);
+@@ -267,7 +267,7 @@ rcl_remap_service_name(
+   RCL_CHECK_ARGUMENT_FOR_NULL(service_name, RCL_RET_INVALID_ARGUMENT);
+ 
+   rcutils_string_map_t substitutions = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions, 0, allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions, 0, rcutils_get_default_allocator());
+   rcl_ret_t ret = RCL_RET_ERROR;
+   if (rcutils_ret == RCUTILS_RET_OK) {
+     ret = rcl_get_default_topic_name_substitutions(&substitutions);
+diff --git a/rcl/src/rcl/service.c b/rcl/src/rcl/service.c
+index 70ddd76..283eb48 100644
+--- a/rcl/src/rcl/service.c
++++ b/rcl/src/rcl/service.c
+@@ -71,9 +71,8 @@ rcl_service_init(
+     return RCL_RET_ALREADY_INIT;
+   }
+   // Expand the given service name.
+-  rcutils_allocator_t rcutils_allocator = *allocator;  // implicit conversion to rcutils version
+   rcutils_string_map_t substitutions_map = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_get_default_allocator());
+   if (rcutils_ret != RCUTILS_RET_OK) {
+     RCL_SET_ERROR_MSG(rcutils_get_error_string().str);
+     if (RCUTILS_RET_BAD_ALLOC == rcutils_ret) {
+diff --git a/rcl/src/rcl/subscription.c b/rcl/src/rcl/subscription.c
+index 1d8762d..eea5489 100644
+--- a/rcl/src/rcl/subscription.c
++++ b/rcl/src/rcl/subscription.c
+@@ -55,8 +55,8 @@ rcl_subscription_init(
+ 
+   // Check options and allocator first, so the allocator can be used in errors.
+   RCL_CHECK_ARGUMENT_FOR_NULL(options, RCL_RET_INVALID_ARGUMENT);
+-  rcl_allocator_t * allocator = (rcl_allocator_t *)&options->allocator;
+-  RCL_CHECK_ALLOCATOR_WITH_MSG(allocator, "invalid allocator", return RCL_RET_INVALID_ARGUMENT);
++  rcl_allocator_t allocator = rcl_get_default_allocator();
++  RCL_CHECK_ALLOCATOR_WITH_MSG(&allocator, "invalid allocator", return RCL_RET_INVALID_ARGUMENT);
+   RCL_CHECK_ARGUMENT_FOR_NULL(subscription, RCL_RET_INVALID_ARGUMENT);
+   if (!rcl_node_is_valid(node)) {
+     return RCL_RET_NODE_INVALID;  // error already set
+@@ -70,9 +70,8 @@ rcl_subscription_init(
+     return RCL_RET_ALREADY_INIT;
+   }
+   // Expand the given topic name.
+-  rcutils_allocator_t rcutils_allocator = *allocator;  // implicit conversion to rcutils version
+   rcutils_string_map_t substitutions_map = rcutils_get_zero_initialized_string_map();
+-  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
++  rcutils_ret_t rcutils_ret = rcutils_string_map_init(&substitutions_map, 0, rcutils_get_default_allocator());
+   if (rcutils_ret != RCUTILS_RET_OK) {
+     RCL_SET_ERROR_MSG(rcutils_get_error_string().str);
+     if (RCUTILS_RET_BAD_ALLOC == rcutils_ret) {
+@@ -102,7 +101,7 @@ rcl_subscription_init(
+     rcl_node_get_name(node),
+     rcl_node_get_namespace(node),
+     &substitutions_map,
+-    *allocator,
++    allocator,
+     &expanded_topic_name);
+   rcutils_ret = rcutils_string_map_fini(&substitutions_map);
+   if (rcutils_ret != RCUTILS_RET_OK) {
+@@ -131,7 +130,7 @@ rcl_subscription_init(
+   }
+   ret = rcl_remap_topic_name(
+     &(node_options->arguments), global_args, expanded_topic_name,
+-    rcl_node_get_name(node), rcl_node_get_namespace(node), *allocator, &remapped_topic_name);
++    rcl_node_get_name(node), rcl_node_get_namespace(node), allocator, &remapped_topic_name);
+   if (RCL_RET_OK != ret) {
+     goto fail;
+   } else if (NULL == remapped_topic_name) {
+@@ -153,8 +152,8 @@ rcl_subscription_init(
+     goto cleanup;
+   }
+   // Allocate memory for the implementation struct.
+-  subscription->impl = (rcl_subscription_impl_t *)allocator->allocate(
+-    sizeof(rcl_subscription_impl_t), allocator->state);
++  subscription->impl = (rcl_subscription_impl_t *)allocator.allocate(
++    sizeof(rcl_subscription_impl_t), allocator.state);
+   RCL_CHECK_FOR_NULL_WITH_MSG(
+     subscription->impl, "allocating memory failed", ret = RCL_RET_BAD_ALLOC; goto cleanup);
+   // Fill out the implemenation struct.
+@@ -177,16 +176,16 @@ rcl_subscription_init(
+   goto cleanup;
+ fail:
+   if (subscription->impl) {
+-    allocator->deallocate(subscription->impl, allocator->state);
++    allocator.deallocate(subscription->impl, allocator.state);
+   }
+   ret = fail_ret;
+   // Fall through to cleanup
+ cleanup:
+   if (NULL != expanded_topic_name) {
+-    allocator->deallocate(expanded_topic_name, allocator->state);
++    allocator.deallocate(expanded_topic_name, allocator.state);
+   }
+   if (NULL != remapped_topic_name) {
+-    allocator->deallocate(remapped_topic_name, allocator->state);
++    allocator.deallocate(remapped_topic_name, allocator.state);
+   }
+   return ret;
+ }

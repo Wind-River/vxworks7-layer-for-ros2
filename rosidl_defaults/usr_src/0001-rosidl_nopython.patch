@@ -1,0 +1,11 @@
+--- a/rosidl_default_generators/package.xml
++++ b/rosidl_default_generators/package.xml
+@@ -14,7 +14,7 @@
+ 
+   <buildtool_export_depend>rosidl_generator_c</buildtool_export_depend>
+   <buildtool_export_depend>rosidl_generator_cpp</buildtool_export_depend>
+-  <buildtool_export_depend>rosidl_generator_py</buildtool_export_depend>
++  <!--buildtool_export_depend>rosidl_generator_py</buildtool_export_depend>-->
+ 
+   <buildtool_export_depend>rosidl_typesupport_c</buildtool_export_depend>
+   <buildtool_export_depend>rosidl_typesupport_cpp</buildtool_export_depend>

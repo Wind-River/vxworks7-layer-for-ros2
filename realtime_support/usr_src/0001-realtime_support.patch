@@ -1,0 +1,90 @@
+diff --git a/rttest/CMakeLists.txt b/rttest/CMakeLists.txt
+index 0c4d509..9bd8f81 100644
+--- a/rttest/CMakeLists.txt
++++ b/rttest/CMakeLists.txt
+@@ -20,7 +20,7 @@ if(${ament_cmake_FOUND})
+ 
+   include_directories(include)
+   add_library(rttest SHARED src/rttest.cpp)
+-  target_link_libraries(rttest m stdc++ ${CMAKE_THREAD_LIBS_INIT})
++  target_link_libraries(rttest ${CMAKE_THREAD_LIBS_INIT})
+ 
+   ament_export_include_directories(include)
+   set(exported_libraries rttest pthread)
+@@ -72,7 +72,7 @@ else()
+ 
+   find_package(Threads REQUIRED)
+   add_library(rttest ${PROJECT_SOURCE_DIR}/src/rttest.cpp)
+-  target_link_libraries(rttest m stdc++ ${CMAKE_THREAD_LIBS_INIT})
++  target_link_libraries(rttest ${CMAKE_THREAD_LIBS_INIT})
+ 
+   include_directories(rttest ${PROJECT_SOURCE_DIR}/include)
+ 
+diff --git a/rttest/src/rttest.cpp b/rttest/src/rttest.cpp
+index f11371c..73eca03 100644
+--- a/rttest/src/rttest.cpp
++++ b/rttest/src/rttest.cpp
+@@ -16,7 +16,12 @@
+ #include <rttest/utils.h>
+ 
+ #include <limits.h>
++#if defined(__VXWORKS__)
++#include <stdlib.h>
++#include <pthread.h>
++#else
+ #include <malloc.h>
++#endif
+ #include <sys/mman.h>
+ #include <sys/resource.h>
+ #include <string.h>
+@@ -647,6 +652,7 @@ int rttest_lock_and_prefault_dynamic()
+ 
+ int Rttest::lock_and_prefault_dynamic()
+ {
++#if !defined(__VXWORKS__)
+   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
+     perror("mlockall failed");
+     return -1;
+@@ -706,6 +712,7 @@ int Rttest::lock_and_prefault_dynamic()
+   for (auto & ptr : prefaulter) {
+     delete[] ptr;
+   }
++#endif
+   return 0;
+ }
+ 
+diff --git a/tlsf_cpp/CMakeLists.txt b/tlsf_cpp/CMakeLists.txt
+index 81824d0..d3591c6 100644
+--- a/tlsf_cpp/CMakeLists.txt
++++ b/tlsf_cpp/CMakeLists.txt
+@@ -19,6 +19,8 @@ find_package(rclcpp REQUIRED)
+ find_package(rmw REQUIRED)
+ find_package(std_msgs REQUIRED)
+ find_package(tlsf REQUIRED)
++find_package(libyaml_vendor REQUIRED)
++find_package(yaml REQUIRED)
+ 
+ include_directories(include)
+ 
+@@ -27,7 +29,8 @@ add_executable(tlsf_allocator_example
+ ament_target_dependencies(tlsf_allocator_example
+   "rclcpp"
+   "std_msgs"
+-  "tlsf")
++  "tlsf"
++  "yaml")
+ install(TARGETS tlsf_allocator_example
+   DESTINATION bin)
+ 
+diff --git a/tlsf_cpp/package.xml b/tlsf_cpp/package.xml
+index ebef7a6..aef1184 100644
+--- a/tlsf_cpp/package.xml
++++ b/tlsf_cpp/package.xml
+@@ -15,6 +15,7 @@
+   <build_depend>rmw</build_depend>
+   <build_depend>std_msgs</build_depend>
+   <build_depend>tlsf</build_depend>
++  <build_depend>libyaml_vendor</build_depend>
+ 
+   <exec_depend>ament_cmake</exec_depend>
+   <exec_depend>rclcpp</exec_depend>

@@ -1,0 +1,9 @@
+diff --git a/tinydir_cmakelists.txt b/tinydir_cmakelists.txt
+index 2a1f641..0e21258 100644
+--- a/tinydir_cmakelists.txt
++++ b/tinydir_cmakelists.txt
+@@ -1,3 +1,4 @@
+ cmake_minimum_required(VERSION 3.5)
++project(tinydir NONE)
+ install(FILES tinydir.h
+         DESTINATION include/tinydir)

@@ -1,0 +1,30 @@
+diff --git a/rosidl_typesupport_cpp/CMakeLists.txt b/rosidl_typesupport_cpp/CMakeLists.txt
+index 0c67620..f2768f4 100644
+--- a/rosidl_typesupport_cpp/CMakeLists.txt
++++ b/rosidl_typesupport_cpp/CMakeLists.txt
+@@ -13,8 +13,8 @@ endif()
+
+ find_package(ament_cmake_ros REQUIRED)
+ # provides FindPoco.cmake and Poco on platforms without it
+-find_package(poco_vendor)
+-find_package(Poco COMPONENTS Foundation)
++#find_package(poco_vendor)
++#find_package(Poco COMPONENTS Foundation)
+ find_package(rosidl_generator_c REQUIRED)
+
+ link_directories(${Poco_LIBRARY_DIR})
+diff --git a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
+index 388c946..4f2f2b1 100644
+--- a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
++++ b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
+@@ -128,8 +128,8 @@ else()
+       "linking was requested")
+   endif()
+   if(NOT rosidl_typesupport_cpp_SUPPORTS_POCO)
+-    message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
+-      "not available when rosidl_typesupport_cpp was built")
++	  #message(FATAL_ERROR "Multiple typesupports [${typesupports}] but Poco was "
++	  #"not available when rosidl_typesupport_cpp was built")
+   endif()
+ endif()
+ 

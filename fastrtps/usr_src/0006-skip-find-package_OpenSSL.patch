@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c01c682d..41576c83 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -225,7 +225,7 @@ option(SECURITY "Activate security" OFF)
+ if(SECURITY)
+     find_package(OpenSSL REQUIRED)
+ else()
+-    find_package(OpenSSL)
++	#    find_package(OpenSSL)
+ endif()
+ 
+ option(NO_TLS "Disables TLS Support" OFF)

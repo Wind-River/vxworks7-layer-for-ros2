@@ -1,13 +1,21 @@
 diff --git a/rclcpp/minimal_action_client/CMakeLists.txt b/rclcpp/minimal_action_client/CMakeLists.txt
-index 1dab0e6..4057ffc 100644
+index 4404a0f..e8973cd 100644
 --- a/rclcpp/minimal_action_client/CMakeLists.txt
 +++ b/rclcpp/minimal_action_client/CMakeLists.txt
-@@ -14,24 +14,29 @@ find_package(ament_cmake REQUIRED)
+@@ -14,30 +14,36 @@ find_package(ament_cmake REQUIRED)
  find_package(example_interfaces REQUIRED)
  find_package(rclcpp REQUIRED)
  find_package(rclcpp_action REQUIRED)
 +find_package(libyaml_vendor REQUIRED)
 +find_package(yaml REQUIRED)
+ 
+ add_executable(action_client_member_functions member_functions.cpp)
+ ament_target_dependencies(action_client_member_functions
+   "rclcpp"
+   "rclcpp_action"
+-  "example_interfaces")
++  "example_interfaces"
++  "yaml")
  
  add_executable(action_client_not_composable not_composable.cpp)
  ament_target_dependencies(action_client_not_composable
@@ -34,17 +42,25 @@ index 1dab0e6..4057ffc 100644
 +  "yaml")
  
  install(TARGETS
-   action_client_not_composable
+   action_client_member_functions
 diff --git a/rclcpp/minimal_action_server/CMakeLists.txt b/rclcpp/minimal_action_server/CMakeLists.txt
-index a4c488e..a20b3c2 100644
+index 6c0a09e..bae067e 100644
 --- a/rclcpp/minimal_action_server/CMakeLists.txt
 +++ b/rclcpp/minimal_action_server/CMakeLists.txt
-@@ -14,12 +14,15 @@ find_package(ament_cmake REQUIRED)
+@@ -14,18 +14,23 @@ find_package(ament_cmake REQUIRED)
  find_package(example_interfaces REQUIRED)
  find_package(rclcpp REQUIRED)
  find_package(rclcpp_action REQUIRED)
 +find_package(libyaml_vendor REQUIRED)
 +find_package(yaml REQUIRED)
+ 
+ add_executable(action_server_member_functions member_functions.cpp)
+ ament_target_dependencies(action_server_member_functions
+   "rclcpp"
+   "rclcpp_action"
+-  "example_interfaces")
++  "example_interfaces"
++  "yaml")
  
  add_executable(action_server_not_composable not_composable.cpp)
  ament_target_dependencies(action_server_not_composable
@@ -53,9 +69,10 @@ index a4c488e..a20b3c2 100644
 -  "example_interfaces")
 +  "example_interfaces"
 +  "yaml")
++
  
- install(TARGETS action_server_not_composable
-   DESTINATION lib/${PROJECT_NAME})
+ install(TARGETS
+   action_server_not_composable
 diff --git a/rclcpp/minimal_client/CMakeLists.txt b/rclcpp/minimal_client/CMakeLists.txt
 index eb51bef..0671174 100644
 --- a/rclcpp/minimal_client/CMakeLists.txt
@@ -74,12 +91,12 @@ index eb51bef..0671174 100644
  
  install(TARGETS client_main
 diff --git a/rclcpp/minimal_composition/CMakeLists.txt b/rclcpp/minimal_composition/CMakeLists.txt
-index f856e43..7bf0140 100644
+index aaa0c5d..d1522df 100644
 --- a/rclcpp/minimal_composition/CMakeLists.txt
 +++ b/rclcpp/minimal_composition/CMakeLists.txt
 @@ -14,6 +14,8 @@ find_package(ament_cmake REQUIRED)
- find_package(class_loader REQUIRED)
  find_package(rclcpp REQUIRED)
+ find_package(rclcpp_components REQUIRED)
  find_package(std_msgs REQUIRED)
 +find_package(libyaml_vendor REQUIRED)
 +find_package(yaml REQUIRED)

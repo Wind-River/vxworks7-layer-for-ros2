@@ -1,0 +1,13 @@
+diff --git a/rcl/src/rcl/security_directory.c b/rcl/src/rcl/security_directory.c
+index 6e7d9f5..85f9b1f 100644
+--- a/rcl/src/rcl/security_directory.c
++++ b/rcl/src/rcl/security_directory.c
+@@ -103,7 +103,7 @@ static bool get_best_matching_directory(
+       goto cleanup;
+     }
+     if (file.is_dir) {
+-      size_t matched_name_length = strnlen(file.name, sizeof(file.name) - 1);
++      size_t matched_name_length = strnlen_s(file.name, sizeof(file.name) - 1);
+       if (0 ==
+         strncmp(file.name, node_name,
+         matched_name_length) && matched_name_length > max_match_length)

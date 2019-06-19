@@ -1,0 +1,14 @@
+diff --git a/include/fastrtps/transport/TCPTransportDescriptor.h b/include/fastrtps/transport/TCPTransportDescriptor.h
+index 2a8ac097..a66422bc 100644
+--- a/include/fastrtps/transport/TCPTransportDescriptor.h
++++ b/include/fastrtps/transport/TCPTransportDescriptor.h
+@@ -29,6 +29,9 @@ namespace rtps{
+ */
+ typedef struct TCPTransportDescriptor : public SocketTransportDescriptor
+ {
++#ifdef NONE
++#undef NONE
++#endif
+     struct TLSConfig
+     {
+         enum TLSOptions : uint32_t

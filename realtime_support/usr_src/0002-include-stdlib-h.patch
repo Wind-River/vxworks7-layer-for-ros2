@@ -1,0 +1,18 @@
+diff --git a/rttest/src/rttest.cpp b/rttest/src/rttest.cpp
+index f11371c..b46421e 100644
+--- a/rttest/src/rttest.cpp
++++ b/rttest/src/rttest.cpp
+@@ -16,7 +16,12 @@
+ #include <rttest/utils.h>
+ 
+ #include <limits.h>
+-#include <malloc.h>
++#if !defined(__VXWORKS__)
++ #include <malloc.h>
++#else
++ #include <stdlib.h>
++#endif
++#include <pthread.h>
+ #include <sys/mman.h>
+ #include <sys/resource.h>
+ #include <string.h>

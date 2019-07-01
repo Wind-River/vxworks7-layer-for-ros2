@@ -1,0 +1,41 @@
+diff --git a/rttest/CMakeLists.txt b/rttest/CMakeLists.txt
+index 027d78c..a9dc57e 100644
+--- a/rttest/CMakeLists.txt
++++ b/rttest/CMakeLists.txt
+@@ -20,7 +20,10 @@ if(${ament_cmake_FOUND})
+ 
+   include_directories(include)
+   add_library(rttest SHARED src/rttest.cpp)
+-  target_link_libraries(rttest m stdc++ ${CMAKE_THREAD_LIBS_INIT})
++  if(NOT (${CMAKE_SYSTEM_NAME} MATCHES VxWorks))
++    target_link_libraries(rttest m stdc++)
++  endif()
++  target_link_libraries(rttest ${CMAKE_THREAD_LIBS_INIT})
+ 
+   ament_export_include_directories(include)
+   set(exported_libraries rttest pthread)
+@@ -72,7 +75,10 @@ else()
+ 
+   find_package(Threads REQUIRED)
+   add_library(rttest ${PROJECT_SOURCE_DIR}/src/rttest.cpp)
+-  target_link_libraries(rttest m stdc++ ${CMAKE_THREAD_LIBS_INIT})
++  if(NOT (${CMAKE_SYSTEM_NAME} MATCHES VxWorks))
++    target_link_libraries(rttest m stdc++)
++  endif()
++  target_link_libraries(rttest ${CMAKE_THREAD_LIBS_INIT})
+ 
+   include_directories(rttest ${PROJECT_SOURCE_DIR}/include)
+ 
+diff --git a/rttest/rttestConfig.cmake.in b/rttest/rttestConfig.cmake.in
+index 28ef19d..c29de0d 100644
+--- a/rttest/rttestConfig.cmake.in
++++ b/rttest/rttestConfig.cmake.in
+@@ -4,5 +4,7 @@ get_filename_component(rttest_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+ set(rttest_INCLUDE_DIR "@rttest_INCLUDE_DIR@")
+ set(rttest_INCLUDE_DIRS "${rttest_INCLUDE_DIR}")
+ set(rttest_LIBRARY_DIR "@rttest_LIB_DIR@")
+-set(rttest_LIBRARIES rttest m stdc++ pthread)
++if(NOT (${CMAKE_SYSTEM_NAME} MATCHES VxWorks))
++  set(rttest_LIBRARIES rttest m stdc++ pthread)
++endif()
+ set(rttest_FLAGS "-std=c++14")

@@ -1,0 +1,24 @@
+diff --git a/tlsf_cpp/CMakeLists.txt b/tlsf_cpp/CMakeLists.txt
+index 81824d0..983e620 100644
+--- a/tlsf_cpp/CMakeLists.txt
++++ b/tlsf_cpp/CMakeLists.txt
+@@ -19,6 +19,8 @@ find_package(rclcpp REQUIRED)
+ find_package(rmw REQUIRED)
+ find_package(std_msgs REQUIRED)
+ find_package(tlsf REQUIRED)
++find_package(libyaml_vendor REQUIRED)
++find_package(yaml REQUIRED)
+ 
+ include_directories(include)
+ 
+@@ -27,7 +29,9 @@ add_executable(tlsf_allocator_example
+ ament_target_dependencies(tlsf_allocator_example
+   "rclcpp"
+   "std_msgs"
+-  "tlsf")
++  "tlsf"
++  "yaml"
++)
+ install(TARGETS tlsf_allocator_example
+   DESTINATION bin)
+ 

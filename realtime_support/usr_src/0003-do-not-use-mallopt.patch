@@ -1,0 +1,32 @@
+diff --git a/rttest/src/rttest.cpp b/rttest/src/rttest.cpp
+index f11371c..b46421e 100644
+--- a/rttest/src/rttest.cpp
++++ b/rttest/src/rttest.cpp
+@@ -652,6 +657,7 @@ int Rttest::lock_and_prefault_dynamic()
+     return -1;
+   }
+ 
++#if !defined(__VXWORKS__)
+   // Turn off malloc trimming.
+   if (mallopt(M_TRIM_THRESHOLD, -1) == 0) {
+     perror("mallopt for trim threshold failed");
+@@ -666,6 +672,7 @@ int Rttest::lock_and_prefault_dynamic()
+     munlockall();
+     return -1;
+   }
++#endif
+ 
+   struct rusage usage;
+   size_t page_size = sysconf(_SC_PAGESIZE);
+@@ -687,9 +694,10 @@ int Rttest::lock_and_prefault_dynamic()
+       for (auto & ptr : prefaulter) {
+         delete[] ptr;
+       }
+-
++#if !defined(__VXWORKS__)
+       mallopt(M_TRIM_THRESHOLD, 128 * 1024);
+       mallopt(M_MMAP_MAX, 65536);
++#endif
+       munlockall();
+       return -1;
+     }

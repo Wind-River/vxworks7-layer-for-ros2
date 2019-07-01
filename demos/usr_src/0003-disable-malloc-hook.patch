@@ -1,0 +1,20 @@
+diff --git a/pendulum_control/src/pendulum_demo.cpp b/pendulum_control/src/pendulum_demo.cpp
+index a88abff..b7ce791 100644
+--- a/pendulum_control/src/pendulum_demo.cpp
++++ b/pendulum_control/src/pendulum_demo.cpp
+@@ -41,6 +45,7 @@ static bool running = false;
+ 
+ // Initialize a malloc hook so we can show that no mallocs are made during real-time execution
+ 
++#if !defined(__VXWORKS__)
+ /// Declare a function pointer into which we will store the default malloc.
+ static void * (* prev_malloc_hook)(size_t, const void *);
+ 
+@@ -87,6 +92,7 @@ void init_malloc_hook()
+ 
+ /// Set the hook for malloc initialize so that init_malloc_hook gets called.
+ void(*volatile __malloc_initialize_hook)(void) = init_malloc_hook;
++#endif
+ 
+ using rclcpp::strategies::message_pool_memory_strategy::MessagePoolMemoryStrategy;
+ using rclcpp::memory_strategies::allocator_memory_strategy::AllocatorMemoryStrategy;

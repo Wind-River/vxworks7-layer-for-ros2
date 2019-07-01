@@ -1,0 +1,15 @@
+diff --git a/pendulum_control/src/pendulum_teleop.cpp b/pendulum_control/src/pendulum_teleop.cpp
+index 5e99949..d31bfec 100644
+--- a/pendulum_control/src/pendulum_teleop.cpp
++++ b/pendulum_control/src/pendulum_teleop.cpp
+@@ -23,7 +23,9 @@
+ #include "rttest/utils.h"
+ 
+ #include "pendulum_msgs/msg/joint_command.hpp"
+-
++#ifndef M_PI
++#define M_PI        3.14159265358979323846264338327950288   /* pi             */
++#endif
+ using namespace std::chrono_literals;
+ 
+ // Non real-time safe node for publishing a user-specified pendulum setpoint exactly once

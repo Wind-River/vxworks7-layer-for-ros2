@@ -1,0 +1,17 @@
+diff --git a/pendulum_control/src/pendulum_demo.cpp b/pendulum_control/src/pendulum_demo.cpp
+index a88abff..b7ce791 100644
+--- a/pendulum_control/src/pendulum_demo.cpp
++++ b/pendulum_control/src/pendulum_demo.cpp
+@@ -12,8 +12,12 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++#if !defined(__VXWORKS__)
+ #include <execinfo.h>
+ #include <malloc.h>
++#else
++#include <stdlib.h>
++#endif
+ #include <sys/mman.h>
+ #include <sys/resource.h>
+ #include <unistd.h>

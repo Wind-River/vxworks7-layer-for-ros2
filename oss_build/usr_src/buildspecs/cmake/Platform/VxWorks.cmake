@@ -40,7 +40,7 @@ set(CMAKE_FIND_ROOT_PATH $ENV{PRJ_WS}/install)
 
 set(CMAKE_INCLUDE_PATH
         /usr/root/include
-        /usr/h/published/UTILS
+        /usr/h/published/UTILS_UNIX
         /usr/h/public)
 
 set(CMAKE_LIBRARY_PATH

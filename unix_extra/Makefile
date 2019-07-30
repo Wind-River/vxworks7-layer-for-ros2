@@ -23,7 +23,7 @@ include $(WIND_KRNL_MK)/defs.layers.mk
 ifdef _WRS_CONFIG_UNIX
 ifdef _WRS_CONFIG_RTP
 USER_PUBLIC_H_DIRS += publish_h
-USER_PUBLIC_H_DIR_PATH_publish_h = ../published/UTILS
+USER_PUBLIC_H_DIR_PATH_publish_h = ../published/UTILS_UNIX
 BUILD_USER_DIRS += user_src
 endif
 endif

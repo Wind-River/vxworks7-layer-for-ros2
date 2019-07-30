@@ -32,6 +32,6 @@ include $(WIND_USR_MK)/defs.library.mk
 C_SOURCE := $(sort $(wildcard *.c))
 OBJS=$(C_SOURCE:.c=.o)
 
-PRE_INCLUDE := -isystem$(VSB_DIR)/usr/h/published/UTILS
+PRE_INCLUDE := -isystem$(VSB_DIR)/usr/h/published/UTILS_UNIX
 
 include $(WIND_USR_MK)/rules.library.mk

@@ -40,6 +40,7 @@ PKG_BUILD_DIR = build
 PKG_SRC_DIR = asio-asio-1-12-0/asio
 
 ADDED_LIBS := -lunix -lnet
+PRE_INCLUDE := -isystem$(VSB_DIR)/usr/h/published/UTILS_UNIX
 
 include $(WIND_USR_MK)/defs.packages.mk
 include $(WIND_USR_MK)/rules.env.sh.mk

@@ -6,8 +6,8 @@ diff -ruN asio-asio-1-12-0.orig/asio/include/asio/detail/impl/socket_ops.ipp asi
  #endif // defined(ASIO_WINDOWS_RUNTIME)
  
 +#if defined(__VXWORKS__)
-+#include "ioLib.h" // ioctl
-+#include "wrapper/wrapperHostLib.h" // gethostname
++#include "ioLib.h" // OPT_TANDEM
++// #include "wrapper/wrapperHostLib.h" // gethostname
 +#endif // defined(__VXWORKS__)
 +
  #if defined(ASIO_WINDOWS) || defined(__CYGWIN__) \

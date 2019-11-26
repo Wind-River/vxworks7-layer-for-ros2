@@ -1,0 +1,159 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 641f09f..65ffae0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,22 +18,31 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(rclcpp REQUIRED)
+ find_package(sensor_msgs REQUIRED)
+-find_package(Boost REQUIRED system)
++find_package(Asio CONFIG QUIET)
++if(Asio_FOUND)
++   message(STATUS "Found Asio")
++endif()
++find_package(libyaml_vendor REQUIRED)
++find_package(yaml REQUIRED)
++
+ 
+ ################################################################################
+ # Build
+ ################################################################################
++find_path(ASIO_INCLUDE_DIR NAMES asio.hpp)
+ include_directories(
+   include
+-  ${Boost_INCLUDE_DIRS}
++  ${ASIO_INCLUDE_DIR}
+ )
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE") 
+ 
+ add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
+-target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
++target_link_libraries(hlds_laser_publisher)
+ ament_target_dependencies(hlds_laser_publisher
+   rclcpp
+   std_msgs
+   sensor_msgs
++  yaml
+ )
+ 
+ ################################################################################
+diff --git a/include/hls_lfcd_lds_driver/lfcd_laser.hpp b/include/hls_lfcd_lds_driver/lfcd_laser.hpp
+index b09f9ec..6f9c402 100644
+--- a/include/hls_lfcd_lds_driver/lfcd_laser.hpp
++++ b/include/hls_lfcd_lds_driver/lfcd_laser.hpp
+@@ -34,8 +34,7 @@
+ 
+ #include <string>
+ #include <sensor_msgs/msg/laser_scan.hpp>
+-#include <boost/asio.hpp>
+-#include <boost/array.hpp>
++#include <asio.hpp>
+ 
+ namespace hls_lfcd_lds
+ {
+@@ -49,7 +48,7 @@ public:
+ 	* @param baud_rate The baud rate to open the serial port at.
+ 	* @param io Boost ASIO IO Service to use when creating the serial port object
+ 	*/
+-	LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io);
++	LFCDLaser(const std::string& port, uint32_t baud_rate, asio::io_service& io);
+ 
+ 	/**
+ 	* @brief Default destructor
+@@ -71,7 +70,7 @@ private:
+ 	std::string port_; ///< @brief The serial port the driver is attached to
+ 	uint32_t baud_rate_; ///< @brief The baud rate for the serial connection
+ 	bool shutting_down_; ///< @brief Flag for whether the driver is supposed to be shutting down or not
+-	boost::asio::serial_port serial_; ///< @brief Actual serial port object for reading/writing to the LFCD Laser Scanner
++	asio::serial_port serial_; ///< @brief Actual serial port object for reading/writing to the LFCD Laser Scanner
+ 	uint16_t motor_speed_; ///< @brief current motor speed as reported by the LFCD.
+ 	//rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr laser_pub_;
+ };
+diff --git a/package.xml b/package.xml
+index 680097e..c37ec58 100644
+--- a/package.xml
++++ b/package.xml
+@@ -20,7 +20,6 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <depend>rclcpp</depend>
+   <depend>sensor_msgs</depend>
+-  <depend>libboost-system-dev</depend>
+   <export>
+     <build_type>ament_cmake</build_type>
+   </export>
+diff --git a/src/hlds_laser_publisher.cpp b/src/hlds_laser_publisher.cpp
+index 0c83f96..9aa957e 100644
+--- a/src/hlds_laser_publisher.cpp
++++ b/src/hlds_laser_publisher.cpp
+@@ -34,29 +34,29 @@
+ 
+ #include <rclcpp/rclcpp.hpp>
+ #include <sensor_msgs/msg/laser_scan.hpp>
+-#include <boost/asio.hpp>
++#include <asio.hpp>
+ #include <hls_lfcd_lds_driver/lfcd_laser.hpp>
+ 
+ namespace hls_lfcd_lds
+ {
+-LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io)
++LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, asio::io_service& io)
+   : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
+ {
+-  serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
++  serial_.set_option(asio::serial_port_base::baud_rate(baud_rate_));
+ 
+-  boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
++  asio::write(serial_, asio::buffer("b", 1));  // start motor
+ }
+ 
+ LFCDLaser::~LFCDLaser()
+ {
+-  boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
++  asio::write(serial_, asio::buffer("e", 1));  // stop motor
+ }
+ 
+ void LFCDLaser::poll(sensor_msgs::msg::LaserScan::SharedPtr scan)
+ {
+   uint8_t start_count = 0;
+   bool got_scan = false;
+-  boost::array<uint8_t, 2520> raw_bytes;
++  std::array<uint8_t, 2520> raw_bytes;
+   uint8_t good_sets = 0;
+   uint32_t motor_speed = 0;
+   rpms=0;
+@@ -65,7 +65,7 @@ void LFCDLaser::poll(sensor_msgs::msg::LaserScan::SharedPtr scan)
+   while (!shutting_down_ && !got_scan)
+   {
+     // Wait until first data sync of frame: 0xFA, 0xA0
+-    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[start_count],1));
++    asio::read(serial_, asio::buffer(&raw_bytes[start_count],1));
+ 
+     if(start_count == 0)
+     {
+@@ -83,7 +83,7 @@ void LFCDLaser::poll(sensor_msgs::msg::LaserScan::SharedPtr scan)
+         // Now that entire start sequence has been found, read in the rest of the message
+         got_scan = true;
+ 
+-        boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
++        asio::read(serial_,asio::buffer(&raw_bytes[2], 2518));
+ 
+         scan->angle_increment = (2.0*M_PI/360.0);
+         scan->angle_min = 0.0;
+@@ -138,7 +138,7 @@ int main(int argc, char **argv)
+ 
+   auto node = rclcpp::Node::make_shared("hlds_laser_publisher");
+   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr laser_pub;
+-  boost::asio::io_service io;
++  asio::io_service io;
+ 
+   std::string port;
+   std::string frame_id;
+@@ -172,7 +172,7 @@ int main(int argc, char **argv)
+ 
+     return 0;
+   }
+-  catch (boost::system::system_error ex)
++  catch (asio::system_error ex)
+   {
+     //ROS_ERROR("An exception was thrown: %s", ex.what());
+     return -1;

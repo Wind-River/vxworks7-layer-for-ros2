@@ -1,0 +1,13 @@
+--- /dev/null	2019-11-21 07:55:25.735487649 +0100
++++ 0001-add-if-BUILD-TESTING.patch	2019-11-28 15:34:16.562389322 +0100
+@@ -0,0 +1,10 @@
++--- a/CMakeLists.txt	2019-11-28 14:59:03.776817093 +0100
+++++ b/CMakeLists.txt	2019-11-28 15:00:27.167288539 +0100
++@@ -117,4 +117,6 @@
++   ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/console_bridge.pc)
++ 
++ enable_testing()
++-add_subdirectory(test)
+++if(BUILD_TESTING)
+++  add_subdirectory(test)
+++endif()

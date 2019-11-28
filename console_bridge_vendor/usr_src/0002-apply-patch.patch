@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 795c6df..95be2d2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,6 +17,12 @@ macro(build_console_bridge)
+   if(DEFINED CMAKE_BUILD_TYPE)
+     list(APPEND extra_cmake_args -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+   endif()
++  if(DEFINED CMAKE_MODULE_PATH)
++    list(APPEND extra_cmake_args -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH})
++  endif()
++  if(DEFINED BUILD_TESTING)
++    list(APPEND extra_cmake_args -DBUILD_TESTING=${BUILD_TESTING})
++  endif()
+   if(DEFINED CMAKE_TOOLCHAIN_FILE)
+     list(APPEND extra_cmake_args "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+     if(ANDROID)
+@@ -53,6 +59,7 @@ macro(build_console_bridge)
+   ExternalProject_Add(console_bridge-0.4.1
+     URL https://github.com/ros/console_bridge/archive/0.4.1.tar.gz
+     URL_MD5 6bb0f640db1712cf2277e7923e7bab68
++    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/0001-add-if-BUILD-TESTING.patch
+     TIMEOUT 600
+     CMAKE_ARGS
+       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_install

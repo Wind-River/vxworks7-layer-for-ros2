@@ -1,0 +1,14 @@
+diff --git a/turtlebot3_node/include/turtlebot3_node/control_table.hpp b/turtlebot3_node/include/turtlebot3_node/control_table.hpp
+index 55130b8..87c83d3 100644
+--- a/turtlebot3_node/include/turtlebot3_node/control_table.hpp
++++ b/turtlebot3_node/include/turtlebot3_node/control_table.hpp
+@@ -28,6 +28,9 @@ namespace turtlebot3
+ constexpr uint8_t EEPROM = 1;
+ constexpr uint8_t RAM = 2;
+ 
++#ifdef READ
++#undef READ
++#endif
+ constexpr uint8_t READ = 1;
+ constexpr uint8_t READ_WRITE = 3;
+ 

@@ -1,0 +1,37 @@
+diff --git a/tf2_ros/CMakeLists.txt b/tf2_ros/CMakeLists.txt
+index 519c1ae..9e63d7d 100644
+--- a/tf2_ros/CMakeLists.txt
++++ b/tf2_ros/CMakeLists.txt
+@@ -22,6 +22,8 @@ find_package(message_filters REQUIRED)
+ find_package(rclcpp REQUIRED)
+ find_package(tf2 REQUIRED)
+ find_package(tf2_msgs REQUIRED)
++find_package(libyaml_vendor REQUIRED)
++find_package(yaml REQUIRED)
+ 
+ include_directories(include
+   ${geometry_msgs_INCLUDE_DIRS}
+@@ -72,6 +74,7 @@ target_link_libraries(static_transform_publisher
+   ${rclcpp_LIBRARIES}
+   ${tf2_LIBRARIES}
+   ${tf2_msgs_LIBRARIES}
++  "yaml"
+   )
+ 
+ add_executable(tf2_echo
+@@ -83,6 +86,7 @@ target_link_libraries(tf2_echo
+   ${rclcpp_LIBRARIES}
+   ${tf2_LIBRARIES}
+   ${tf2_msgs_LIBRARIES}
++  "yaml"
+   )
+ 
+   add_executable(tf2_monitor
+@@ -94,6 +98,7 @@ target_link_libraries(tf2_echo
+     ${rclcpp_LIBRARIES}
+     ${tf2_LIBRARIES}
+     ${tf2_msgs_LIBRARIES}
++    "yaml"
+     )
+ 
+ # Install rules

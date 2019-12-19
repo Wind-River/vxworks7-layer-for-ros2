@@ -1,0 +1,665 @@
+From 80458e441dd4872d9640da180ea0849da27bbb80 Mon Sep 17 00:00:00 2001
+From: "Dragusu, Mihai" <Mihai.Dragusu@windriver.com>
+Date: Thu, 19 Dec 2019 14:58:26 +0200
+Subject: [PATCH] add vxworks serial port handler
+
+note:
+
+odometry and add_sensor have been removed due to instabilities
+needs investigation
+
+Signed-off-by: Dragusu, Mihai <Mihai.Dragusu@windriver.com>
+---
+ dynamixel_sdk/CMakeLists.txt                  |   1 +
+ .../include/dynamixel_sdk/port_handler.h      |   2 +-
+ .../dynamixel_sdk/port_handler_vxworks.h      | 171 +++++++++++
+ .../src/dynamixel_sdk/group_bulk_read.cpp     |   4 +-
+ .../src/dynamixel_sdk/group_bulk_write.cpp    |   2 +
+ .../src/dynamixel_sdk/group_sync_read.cpp     |   4 +-
+ .../src/dynamixel_sdk/group_sync_write.cpp    |   4 +-
+ .../src/dynamixel_sdk/packet_handler.cpp      |   4 +
+ .../src/dynamixel_sdk/port_handler.cpp        |   9 +-
+ .../dynamixel_sdk/port_handler_vxworks.cpp    | 278 ++++++++++++++++++
+ .../protocol1_packet_handler.cpp              |   2 +
+ .../protocol2_packet_handler.cpp              |   6 +-
+ 12 files changed, 478 insertions(+), 9 deletions(-)
+ create mode 100644 dynamixel_sdk/include/dynamixel_sdk/port_handler_vxworks.h
+ create mode 100644 dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+
+diff --git a/dynamixel_sdk/CMakeLists.txt b/dynamixel_sdk/CMakeLists.txt
+index 90a2933..e59a2cd 100644
+--- a/dynamixel_sdk/CMakeLists.txt
++++ b/dynamixel_sdk/CMakeLists.txt
+@@ -47,6 +47,7 @@ else()
+     src/dynamixel_sdk/group_bulk_write.cpp
+     src/dynamixel_sdk/port_handler.cpp
+     src/dynamixel_sdk/port_handler_linux.cpp
++    src/dynamixel_sdk/port_handler_vxworks.cpp
+   )
+ endif()
+ 
+diff --git a/dynamixel_sdk/include/dynamixel_sdk/port_handler.h b/dynamixel_sdk/include/dynamixel_sdk/port_handler.h
+index 63976c0..6d577e2 100644
+--- a/dynamixel_sdk/include/dynamixel_sdk/port_handler.h
++++ b/dynamixel_sdk/include/dynamixel_sdk/port_handler.h
+@@ -22,7 +22,7 @@
+ #ifndef DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_PORTHANDLER_H_
+ #define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_PORTHANDLER_H_
+ 
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__VXWORKS__)
+ #define WINDECLSPEC
+ #elif defined(__APPLE__)
+ #define WINDECLSPEC
+diff --git a/dynamixel_sdk/include/dynamixel_sdk/port_handler_vxworks.h b/dynamixel_sdk/include/dynamixel_sdk/port_handler_vxworks.h
+new file mode 100644
+index 0000000..755f2fe
+--- /dev/null
++++ b/dynamixel_sdk/include/dynamixel_sdk/port_handler_vxworks.h
+@@ -0,0 +1,171 @@
++/*******************************************************************************
++* Copyright 2017 ROBOTIS CO., LTD.
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*******************************************************************************/
++
++////////////////////////////////////////////////////////////////////////////////
++/// @file The file for port control in Linux
++/// @author Zerom, Leon (RyuWoon Jung)
++////////////////////////////////////////////////////////////////////////////////
++
++#ifndef DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PORTHANDLERVXWORKS_H_
++#define DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PORTHANDLERVXWORKS_H_
++
++
++#include "port_handler.h"
++
++namespace dynamixel
++{
++
++////////////////////////////////////////////////////////////////////////////////
++/// @brief The class for control port in Linux
++////////////////////////////////////////////////////////////////////////////////
++class PortHandlerVxworks : public PortHandler
++{
++ private:
++  int     socket_fd_;
++  int     baudrate_;
++  char    port_name_[100];
++
++  double  packet_start_time_;
++  double  packet_timeout_;
++  double  tx_time_per_byte;
++
++  bool    setupPort(const int cflag_baud);
++  bool    setCustomBaudrate(int speed);
++  int     getCFlagBaud(const int baudrate);
++
++  double  getCurrentTime();
++  double  getTimeSinceStart();
++
++ public:
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that initializes instance of PortHandler and gets port_name
++  /// @description The function initializes instance of PortHandler and gets port_name.
++  ////////////////////////////////////////////////////////////////////////////////
++  PortHandlerVxworks(const char *port_name);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that closes the port
++  /// @description The function calls PortHandlerVxworks::closePort() to close the port.
++  ////////////////////////////////////////////////////////////////////////////////
++  virtual ~PortHandlerVxworks() { closePort(); }
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that opens the port
++  /// @description The function calls PortHandlerVxworks::setBaudRate() to open the port.
++  /// @return communication results which come from PortHandlerVxworks::setBaudRate()
++  ////////////////////////////////////////////////////////////////////////////////
++  bool    openPort();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that closes the port
++  /// @description The function closes the port.
++  ////////////////////////////////////////////////////////////////////////////////
++  void    closePort();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that clears the port
++  /// @description The function clears the port.
++  ////////////////////////////////////////////////////////////////////////////////
++  void    clearPort();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that sets port name into the port handler
++  /// @description The function sets port name into the port handler.
++  /// @param port_name Port name
++  ////////////////////////////////////////////////////////////////////////////////
++  void    setPortName(const char *port_name);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that returns port name set into the port handler
++  /// @description The function returns current port name set into the port handler.
++  /// @return Port name
++  ////////////////////////////////////////////////////////////////////////////////
++  char   *getPortName();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that sets baudrate into the port handler
++  /// @description The function sets baudrate into the port handler.
++  /// @param baudrate Baudrate
++  /// @return false
++  /// @return   when error was occurred during port opening
++  /// @return or true
++  ////////////////////////////////////////////////////////////////////////////////
++  bool    setBaudRate(const int baudrate);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that returns current baudrate set into the port handler
++  /// @description The function returns current baudrate set into the port handler.
++  /// @return Baudrate
++  ////////////////////////////////////////////////////////////////////////////////
++  int     getBaudRate();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that checks how much bytes are able to be read from the port buffer
++  /// @description The function checks how much bytes are able to be read from the port buffer
++  /// @description and returns the number.
++  /// @return Length of read-able bytes in the port buffer
++  ////////////////////////////////////////////////////////////////////////////////
++  int     getBytesAvailable();
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that reads bytes from the port buffer
++  /// @description The function gets bytes from the port buffer,
++  /// @description and returns a number of bytes read.
++  /// @param packet Buffer for the packet received
++  /// @param length Length of the buffer for read
++  /// @return -1
++  /// @return   when error was occurred
++  /// @return or Length of bytes read
++  ////////////////////////////////////////////////////////////////////////////////
++  int     readPort(uint8_t *packet, int length);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that writes bytes on the port buffer
++  /// @description The function writes bytes on the port buffer,
++  /// @description and returns a number of bytes which are successfully written.
++  /// @param packet Buffer which would be written on the port buffer
++  /// @param length Length of the buffer for write
++  /// @return -1
++  /// @return   when error was occurred
++  /// @return or Length of bytes written
++  ////////////////////////////////////////////////////////////////////////////////
++  int     writePort(uint8_t *packet, int length);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that sets and starts stopwatch for watching packet timeout
++  /// @description The function sets the stopwatch by getting current time and the time of packet timeout with packet_length.
++  /// @param packet_length Length of the packet expected to be received
++  ////////////////////////////////////////////////////////////////////////////////
++  void    setPacketTimeout(uint16_t packet_length);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that sets and starts stopwatch for watching packet timeout
++  /// @description The function sets the stopwatch by getting current time and the time of packet timeout with msec.
++  /// @param packet_length Length of the packet expected to be received
++  ////////////////////////////////////////////////////////////////////////////////
++  void    setPacketTimeout(double msec);
++
++  ////////////////////////////////////////////////////////////////////////////////
++  /// @brief The function that checks whether packet timeout is occurred
++  /// @description The function checks whether current time is passed by the time of packet timeout from the time set by PortHandlerVxworks::setPacketTimeout().
++  ////////////////////////////////////////////////////////////////////////////////
++  bool    isPacketTimeout();
++};
++
++}
++
++
++#endif /* DYNAMIXEL_SDK_INCLUDE_DYNAMIXEL_SDK_LINUX_PortHandlerVxworks_H_ */
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_read.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_bulk_read.cpp
+index bcea755..9901964 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_read.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/group_bulk_read.cpp
+@@ -21,6 +21,8 @@
+ 
+ #if defined(__linux__)
+ #include "group_bulk_read.h"
++#elif defined(__VXWORKS__)
++#include "group_bulk_read.h"
+ #elif defined(__APPLE__)
+ #include "group_bulk_read.h"
+ #elif defined(_WIN32) || defined(_WIN64)
+@@ -242,4 +244,4 @@ bool GroupBulkRead::getError(uint8_t id, uint8_t* error)
+   {
+     return false;
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp
+index 665378f..4c33bd8 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp
+@@ -20,6 +20,8 @@
+ 
+ #if defined(__linux__)
+ #include "group_bulk_write.h"
++#elif defined(__VXWORKS__)
++#include "group_bulk_write.h"
+ #elif defined(__APPLE__)
+ #include "group_bulk_write.h"
+ #elif defined(_WIN32) || defined(_WIN64)
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_sync_read.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_sync_read.cpp
+index f392943..e8c0dfb 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/group_sync_read.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/group_sync_read.cpp
+@@ -20,6 +20,8 @@
+ 
+ #if defined(__linux__)
+ #include "group_sync_read.h"
++#elif defined(__VXWORKS__)
++#include "group_sync_read.h"
+ #elif defined(__APPLE__)
+ #include "group_sync_read.h"
+ #elif defined(_WIN32) || defined(_WIN64)
+@@ -211,4 +213,4 @@ bool GroupSyncRead::getError(uint8_t id, uint8_t* error)
+   {
+     return false;
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp
+index 1202d47..3620706 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp
+@@ -18,7 +18,9 @@
+ 
+ #include <algorithm>
+ 
+-#if defined(__linux__)
++#if defined(__linux__) 
++#include "group_sync_write.h"
++#elif defined(__VXWORKS__)
+ #include "group_sync_write.h"
+ #elif defined(__APPLE__)
+ #include "group_sync_write.h"
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/packet_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/packet_handler.cpp
+index c926715..fbd9853 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/packet_handler.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/packet_handler.cpp
+@@ -20,6 +20,10 @@
+ #include "packet_handler.h"
+ #include "protocol1_packet_handler.h"
+ #include "protocol2_packet_handler.h"
++#elif defined(__VXWORKS__)
++#include "packet_handler.h"
++#include "protocol1_packet_handler.h"
++#include "protocol2_packet_handler.h"
+ #elif defined(__APPLE__)
+ #include "packet_handler.h"
+ #include "protocol1_packet_handler.h"
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/port_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/port_handler.cpp
+index 3054c85..305f159 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/port_handler.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/port_handler.cpp
+@@ -16,10 +16,13 @@
+ 
+ /* Author: zerom, Ryu Woon Jung (Leon) */
+ 
+-#if defined(__linux__)
++#if  defined(__VXWORKS__)
++#include "port_handler.h"
++#include "port_handler_vxworks.h"
++#elif defined(__linux__) 
+ #include "port_handler.h"
+ #include "port_handler_linux.h"
+-#elif defined(__APPLE__)
++#elif defined(__APPLE__) 
+ #include "port_handler.h"
+ #include "port_handler_mac.h"
+ #elif defined(_WIN32) || defined(_WIN64)
+@@ -43,5 +46,7 @@ PortHandler *PortHandler::getPortHandler(const char *port_name)
+   return (PortHandler *)(new PortHandlerWindows(port_name));
+ #elif defined(ARDUINO) || defined(__OPENCR__) || defined(__OPENCM904__)
+   return (PortHandler *)(new PortHandlerArduino(port_name));
++#elif defined(__VXWORKS__)
++  return (PortHandler *)(new PortHandlerVxworks(port_name));
+ #endif
+ }
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+new file mode 100644
+index 0000000..dca3ed1
+--- /dev/null
++++ b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+@@ -0,0 +1,278 @@
++/*******************************************************************************
++* Copyright 2017 ROBOTIS CO., LTD.
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*******************************************************************************/
++
++/* Author: zerom, Ryu Woon Jung (Leon) */
++
++#ifdef __VXWORKS__
++
++#include <stdio.h>
++#include <fcntl.h>
++#include <string.h>
++#include <unistd.h>
++#include <time.h>
++#include <sys/time.h>
++#include <sys/ioctl.h>
++#include <stdlib.h>
++#include <vxWorks.h>
++#include <fcntl.h>
++#include <sys/ioctl.h>
++#include <sioLib.h>
++#include <unistd.h>
++
++#include "port_handler_vxworks.h"
++
++#define LATENCY_TIMER  16  // msec (USB latency timer)
++                           // You should adjust the latency timer value. From the version Ubuntu 16.04.2, the default latency timer of the usb serial is '16 msec'.
++                           // When you are going to use sync / bulk read, the latency timer should be loosen.
++                           // the lower latency timer value, the faster communication speed.
++
++                           // Note:
++                           // You can check its value by:
++                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
++                           //
++                           // If you think that the communication is too slow, type following after plugging the usb in to change the latency timer
++                           //
++                           // Method 1. Type following (you should do this everytime when the usb once was plugged out or the connection was dropped)
++                           // $ echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
++                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
++                           //
++                           // Method 2. If you want to set it as be done automatically, and don't want to do above everytime, make rules file in /etc/udev/rules.d/. For example,
++                           // $ echo ACTION==\"add\", SUBSYSTEM==\"usb-serial\", DRIVER==\"ftdi_sio\", ATTR{latency_timer}=\"1\" > 99-dynamixelsdk-usb.rules
++                           // $ sudo cp ./99-dynamixelsdk-usb.rules /etc/udev/rules.d/
++                           // $ sudo udevadm control --reload-rules
++                           // $ sudo udevadm trigger --action=add
++                           // $ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
++                           //
++                           // or if you have another good idea that can be an alternatives,
++                           // please give us advice via github issue https://github.com/ROBOTIS-GIT/DynamixelSDK/issues
++
++using namespace dynamixel;
++#undef VXROSDEBUG
++
++PortHandlerVxworks::PortHandlerVxworks(const char *port_name)
++  : socket_fd_(-1),
++    baudrate_(DEFAULT_BAUDRATE_),
++    packet_start_time_(0.0),
++    packet_timeout_(0.0),
++    tx_time_per_byte(0.0)
++{
++  is_using_ = false;
++  setPortName(port_name);
++}
++
++bool PortHandlerVxworks::openPort()
++{
++  return setBaudRate(baudrate_);
++}
++
++void PortHandlerVxworks::closePort()
++{
++  if(socket_fd_ != -1)
++    close(socket_fd_);
++  socket_fd_ = -1;
++}
++
++void PortHandlerVxworks::clearPort()
++{
++  int ret = 0;
++  /*FIOFLUSH - 0x1E*/
++  ret = ioctl(socket_fd_, 0x1E);
++  if (ret != 0) {
++     printf("Cannot ioctl flush on %s\n",port_name_);
++  }
++
++}
++
++void PortHandlerVxworks::setPortName(const char *port_name)
++{
++  strcpy(port_name_, port_name);
++}
++
++char *PortHandlerVxworks::getPortName()
++{
++  return port_name_;
++}
++
++// TODO: baud number ??
++bool PortHandlerVxworks::setBaudRate(const int baudrate)
++{
++  int baud = getCFlagBaud(baudrate);
++
++  closePort();
++
++  if(baud <= 0)   // custom baudrate
++  {
++    setupPort(38400);
++    baudrate_ = baudrate;
++    return setCustomBaudrate(baudrate);
++  }
++  else
++  {
++    baudrate_ = baudrate;
++    return setupPort(baud);
++  }
++}
++
++int PortHandlerVxworks::getBaudRate()
++{
++  return baudrate_;
++}
++
++int PortHandlerVxworks::getBytesAvailable()
++{
++  int bytes_available;
++  ioctl(socket_fd_, FIONREAD, &bytes_available);
++  return bytes_available;
++}
++
++int PortHandlerVxworks::readPort(uint8_t *packet, int length)
++{
++  int val = 0;
++  int i = 0;
++#ifdef VXROSDEBUG
++  for(i = 0; i < length; i++)
++  {
++    packet[i] = 0;
++  }
++#endif  
++  val = read(socket_fd_, packet, length);
++
++#ifdef VXROSDEBUG
++  if (val < 0)
++    fprintf(stderr,"return is %d \n", val);
++  else
++  {
++    fprintf(stderr,"reading: ");
++    for(i = 0; i < length; i++)
++    {
++      fprintf(stderr,"%02x ", packet[i]);
++    }
++    fprintf(stderr,"\n");
++  }
++#endif
++
++  return val;
++}
++
++int PortHandlerVxworks::writePort(uint8_t *packet, int length)
++{
++  int val = 0;
++  int i = 0;
++
++#ifdef VXROSDEBUG
++  fprintf(stderr,"writing: ");
++  for(i = 0; i < length; i++)
++    fprintf(stderr,"%02x ", packet[i]);
++  fprintf(stderr,"\n");
++#endif
++  val = write(socket_fd_, packet, length);
++  return val; 
++}
++
++void PortHandlerVxworks::setPacketTimeout(uint16_t packet_length)
++{
++  packet_start_time_  = getCurrentTime();
++  packet_timeout_     = (tx_time_per_byte * (double)packet_length) + (LATENCY_TIMER * 2.0) + 2.0;
++}
++
++void PortHandlerVxworks::setPacketTimeout(double msec)
++{
++  packet_start_time_  = getCurrentTime();
++  packet_timeout_     = msec;
++}
++
++bool PortHandlerVxworks::isPacketTimeout()
++{
++  if(getTimeSinceStart() > packet_timeout_)
++  {
++    packet_timeout_ = 0;
++    return true;
++  }
++  return false;
++}
++
++double PortHandlerVxworks::getCurrentTime()
++{
++	struct timespec tv;
++	clock_gettime(CLOCK_REALTIME, &tv);
++	return ((double)tv.tv_sec * 1000.0 + (double)tv.tv_nsec * 0.001 * 0.001);
++}
++
++double PortHandlerVxworks::getTimeSinceStart()
++{
++  double time;
++
++  time = getCurrentTime() - packet_start_time_;
++  if(time < 0.0)
++    packet_start_time_ = getCurrentTime();
++
++  return time;
++}
++
++bool PortHandlerVxworks::setupPort(int cflag_baud)
++{
++  int ret = 0;
++  socket_fd_ = open(port_name_, O_RDWR|O_NOCTTY|O_NONBLOCK);
++  if(socket_fd_ < 0)
++  {
++    printf("[PortHandlerVxworks::SetupPort] Error opening serial port!\n");
++    return false;
++  }
++  // clean the buffer and activate the settings for the port
++  /*FIOFLUSH - 0x1E*/
++  ret = ioctl(socket_fd_, 0x1E);
++  if (ret != 0) {
++     printf("Cannot ioctl flush on %s\n",port_name_);
++  }
++
++  ret = ioctl(socket_fd_, SIO_BAUD_SET, cflag_baud);
++  if (ret != 0) {
++    fprintf(stderr, "SIO_BAUD_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
++      printf("Cannot ioctl on %s\n",port_name_);
++      
++  }
++
++  ret = ioctl(socket_fd_, SIO_HW_OPTS_SET, CLOCAL|CREAD|CS8);
++  
++  if (ret != 0) {
++     fprintf(stderr, "SIO_HW_OPTS_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
++     printf("Cannot ioctl on %s\n",port_name_);     
++  }
++
++  tx_time_per_byte = (1000.0 / (double)baudrate_) * 10.0;
++  return true;
++}
++
++bool PortHandlerVxworks::setCustomBaudrate(int speed)
++{
++  int ret = 0;
++  printf("setCustomBaudrate not TESTED on VXWORKS!!!\n");
++  ret = ioctl(socket_fd_, SIO_BAUD_SET, speed);
++  if (ret != 0) {
++    fprintf(stderr, "SIO_BAUD_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
++      printf("Cannot ioctl on %s\n",port_name_);
++      
++  }
++  tx_time_per_byte = (1000.0 / (double)speed) * 10.0;
++  return true;
++}
++
++int PortHandlerVxworks::getCFlagBaud(int baudrate)
++{
++  return baudrate;
++}
++
++#endif
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
+index 2525968..cafaebd 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
+@@ -18,6 +18,8 @@
+ 
+ #if defined(__linux__)
+ #include "protocol1_packet_handler.h"
++#elif defined(__VXWORKS__)
++#include "protocol1_packet_handler.h"
+ #elif defined(__APPLE__)
+ #include "protocol1_packet_handler.h"
+ #elif defined(_WIN32) || defined(_WIN64)
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
+index c9d90c6..0ebd205 100755
+--- a/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
+@@ -16,7 +16,7 @@
+ 
+ /* Author: zerom, Ryu Woon Jung (Leon) */
+ 
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__VXWORKS__)
+ #include <unistd.h>
+ #include "protocol2_packet_handler.h"
+ #elif defined(__APPLE__)
+@@ -405,8 +405,8 @@ int Protocol2PacketHandler::rxPacket(PortHandler *port, uint8_t *rxpacket)
+         break;
+       }
+     }
+-#if defined(__linux__) || defined(__APPLE__)
+-    usleep(0);
++#if defined(__linux__) || defined(__APPLE__) || (__VXWORKS__)
++    usleep(0.0);
+ #elif defined(_WIN32) || defined(_WIN64)
+     Sleep(0);
+ #endif
+-- 
+2.24.0
+

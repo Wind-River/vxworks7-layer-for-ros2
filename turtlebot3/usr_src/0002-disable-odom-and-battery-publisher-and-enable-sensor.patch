@@ -1,0 +1,48 @@
+From fe927cd6d34b10ec46c89a70393b1f657ab64066 Mon Sep 17 00:00:00 2001
+From: "Dragusu, Mihai" <Mihai.Dragusu@windriver.com>
+Date: Wed, 22 Jan 2020 14:22:53 +0200
+Subject: [PATCH] disable odom and battery publisher and enable sensors
+
+batter and imu(odomentry) publisher crash on init
+
+Signed-off-by: Dragusu, Mihai <Mihai.Dragusu@windriver.com>
+---
+ turtlebot3_node/src/turtlebot3.cpp | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/turtlebot3_node/src/turtlebot3.cpp b/turtlebot3_node/src/turtlebot3.cpp
+index 1e97458..a311dac 100644
+--- a/turtlebot3_node/src/turtlebot3.cpp
++++ b/turtlebot3_node/src/turtlebot3.cpp
+@@ -33,9 +33,8 @@ TurtleBot3::TurtleBot3(const std::string & usb_port)
+ 
+   add_motors();
+   add_wheels();
+-#ifndef __VXWORKS__
++
+   add_sensors();
+-#endif
+   add_devices();
+ 
+   run();
+@@ -165,7 +164,7 @@ void TurtleBot3::add_sensors()
+   bool is_connected_ir = this->get_parameter("sensors.ir").as_bool();
+ 
+   bool is_connected_sonar = this->get_parameter("sensors.sonar").as_bool();
+-
++#ifndef __VXWORKS__
+   sensors_.push_back(new sensors::BatteryState(
+     node_handle_,
+     "battery_state"));
+@@ -175,7 +174,7 @@ void TurtleBot3::add_sensors()
+     "imu",
+     "magnetic_field",
+     "imu_link"));
+-
++#endif
+   sensors_.push_back(new sensors::SensorState(
+     node_handle_,
+     "sensor_state",
+-- 
+2.25.0
+

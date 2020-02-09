@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 99e6826..4956306 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,6 +9,9 @@ macro(build_libyaml)
+   if(DEFINED CMAKE_BUILD_TYPE)
+     list(APPEND extra_cmake_args -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+   endif()
++  if(DEFINED CMAKE_MODULE_PATH)
++    list(APPEND extra_cmake_args -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH})
++  endif()
+ 
+   list(APPEND extra_cmake_args -DBUILD_SHARED_LIBS=ON)
+   list(APPEND extra_cmake_args -DBUILD_TESTING=OFF)

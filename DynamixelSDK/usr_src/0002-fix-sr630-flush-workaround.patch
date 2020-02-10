@@ -1,0 +1,37 @@
+From 8e7831da403fce05e681510bf31b46298c7595d7 Mon Sep 17 00:00:00 2001
+From: "Dragusu, Mihai" <Mihai.Dragusu@windriver.com>
+Date: Mon, 10 Feb 2020 09:55:09 +0200
+Subject: [PATCH] fix  sr630 flush workaround
+
+Signed-off-by: Dragusu, Mihai <Mihai.Dragusu@windriver.com>
+---
+ dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+index dca3ed1..b1a885d 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+@@ -88,8 +88,9 @@ void PortHandlerVxworks::closePort()
+ void PortHandlerVxworks::clearPort()
+ {
+   int ret = 0;
++  int dummy = 0; /* sr630 workaround*/
+   /*FIOFLUSH - 0x1E*/
+-  ret = ioctl(socket_fd_, 0x1E);
++  ret = ioctl(socket_fd_, 0x1E, &dummy);
+   if (ret != 0) {
+      printf("Cannot ioctl flush on %s\n",port_name_);
+   }
+@@ -233,7 +234,8 @@ bool PortHandlerVxworks::setupPort(int cflag_baud)
+   }
+   // clean the buffer and activate the settings for the port
+   /*FIOFLUSH - 0x1E*/
+-  ret = ioctl(socket_fd_, 0x1E);
++  int dummy = 0;
++  ret = ioctl(socket_fd_, 0x1E, &dummy);
+   if (ret != 0) {
+      printf("Cannot ioctl flush on %s\n",port_name_);
+   }
+--
+2.25.0

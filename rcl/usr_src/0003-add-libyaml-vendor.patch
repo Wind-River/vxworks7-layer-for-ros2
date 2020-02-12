@@ -1,0 +1,12 @@
+diff --git a/rcl_yaml_param_parser/CMakeLists.txt b/rcl_yaml_param_parser/CMakeLists.txt
+index 95143c8..1be2dff 100644
+--- a/rcl_yaml_param_parser/CMakeLists.txt
++++ b/rcl_yaml_param_parser/CMakeLists.txt
+@@ -54,6 +54,7 @@ if(BUILD_TESTING)
+ endif()
+ 
+ ament_export_dependencies(ament_cmake)
++ament_export_dependencies(libyaml_vendor)
+ ament_export_include_directories(include)
+ install(
+   DIRECTORY include/

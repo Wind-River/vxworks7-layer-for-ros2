@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 641f09f..0c201c7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,18 +18,24 @@ endif()
+ find_package(ament_cmake REQUIRED)
+ find_package(rclcpp REQUIRED)
+ find_package(sensor_msgs REQUIRED)
+-find_package(Boost REQUIRED system)
++find_package(Asio CONFIG QUIET)
++if(Asio_FOUND)
++   message(STATUS "Found Asio")
++endif()
++
+ 
+ ################################################################################
+ # Build
+ ################################################################################
++find_path(ASIO_INCLUDE_DIR NAMES asio.hpp)
+ include_directories(
+   include
+-  ${Boost_INCLUDE_DIRS}
++  ${ASIO_INCLUDE_DIR}
+ )
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE") 
+ 
+ add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
+-target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
++target_link_libraries(hlds_laser_publisher)
+ ament_target_dependencies(hlds_laser_publisher
+   rclcpp
+   std_msgs

@@ -1,3 +1,13 @@
+From b63809a5c39cbe62dca0b691050cb429c33e3355 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:46:36 +0200
+Subject: [PATCH 2/2] disable odom and battery publisher and enable sensor
+
+---
+ turtlebot3_node/src/odometry.cpp   | 3 ++-
+ turtlebot3_node/src/turtlebot3.cpp | 5 +++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
 diff --git a/turtlebot3_node/src/odometry.cpp b/turtlebot3_node/src/odometry.cpp
 index 898cb59..d926844 100644
 --- a/turtlebot3_node/src/odometry.cpp
@@ -43,3 +53,6 @@ index f714819..a311dac 100644
    sensors_.push_back(new sensors::SensorState(
      node_handle_,
      "sensor_state",
+-- 
+2.17.1
+

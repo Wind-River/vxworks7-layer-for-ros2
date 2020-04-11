@@ -1,3 +1,12 @@
+From 013f100f427212e5be046c078f0f6a1e8b847852 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:46:04 +0200
+Subject: [PATCH 1/2] vxworks specific undef
+
+---
+ turtlebot3_node/include/turtlebot3_node/control_table.hpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
 diff --git a/turtlebot3_node/include/turtlebot3_node/control_table.hpp b/turtlebot3_node/include/turtlebot3_node/control_table.hpp
 index 55130b8..87c83d3 100644
 --- a/turtlebot3_node/include/turtlebot3_node/control_table.hpp
@@ -12,3 +21,6 @@ index 55130b8..87c83d3 100644
  constexpr uint8_t READ = 1;
  constexpr uint8_t READ_WRITE = 3;
  
+-- 
+2.17.1
+

@@ -1,3 +1,13 @@
+From 609720827635d9f2851135039e097792f9c87e48 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:32:20 +0200
+Subject: [PATCH 1/2] rmw_implementation
+
+---
+ rmw_implementation/CMakeLists.txt    |  7 +++---
+ rmw_implementation/src/functions.cpp | 33 ++++++++++++++++++++++++++++
+ 2 files changed, 36 insertions(+), 4 deletions(-)
+
 diff --git a/rmw_implementation/CMakeLists.txt b/rmw_implementation/CMakeLists.txt
 index 2258edf..a86aac3 100644
 --- a/rmw_implementation/CMakeLists.txt
@@ -112,3 +122,6 @@ index dd62fe5..cddedef 100644
      if (msg) {
        RMW_SET_ERROR_MSG(msg);
        allocator.deallocate(msg, allocator.state);
+-- 
+2.17.1
+

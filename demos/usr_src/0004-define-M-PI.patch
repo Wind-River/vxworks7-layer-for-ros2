@@ -1,3 +1,12 @@
+From 68398096382d2eace234f8bee11bf91f43e694b1 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 7 Apr 2020 23:46:10 +0200
+Subject: [PATCH 4/4] define M PI
+
+---
+ pendulum_control/src/pendulum_teleop.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
 diff --git a/pendulum_control/src/pendulum_teleop.cpp b/pendulum_control/src/pendulum_teleop.cpp
 index 5e99949..d31bfec 100644
 --- a/pendulum_control/src/pendulum_teleop.cpp
@@ -13,3 +22,6 @@ index 5e99949..d31bfec 100644
  using namespace std::chrono_literals;
  
  // Non real-time safe node for publishing a user-specified pendulum setpoint exactly once
+-- 
+2.17.1
+

@@ -1,9 +1,19 @@
+From 4ce599cc1ace626e3f5573fb3d701607f000822e Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:03:18 +0200
+Subject: [PATCH 3/8] without POCO
+
+---
+ rosidl_typesupport_cpp/CMakeLists.txt                         | 4 ++--
+ .../cmake/rosidl_typesupport_cpp_generate_interfaces.cmake    | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
 diff --git a/rosidl_typesupport_cpp/CMakeLists.txt b/rosidl_typesupport_cpp/CMakeLists.txt
 index 0c67620..f2768f4 100644
 --- a/rosidl_typesupport_cpp/CMakeLists.txt
 +++ b/rosidl_typesupport_cpp/CMakeLists.txt
 @@ -13,8 +13,8 @@ endif()
-
+ 
  find_package(ament_cmake_ros REQUIRED)
  # provides FindPoco.cmake and Poco on platforms without it
 -find_package(poco_vendor)
@@ -11,13 +21,13 @@ index 0c67620..f2768f4 100644
 +#find_package(poco_vendor)
 +#find_package(Poco COMPONENTS Foundation)
  find_package(rosidl_generator_c REQUIRED)
-
+ 
  link_directories(${Poco_LIBRARY_DIR})
 diff --git a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
-index 388c946..4f2f2b1 100644
+index 05cafda..43b9675 100644
 --- a/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
 +++ b/rosidl_typesupport_cpp/cmake/rosidl_typesupport_cpp_generate_interfaces.cmake
-@@ -128,8 +128,8 @@ else()
+@@ -110,8 +110,8 @@ else()
        "linking was requested")
    endif()
    if(NOT rosidl_typesupport_cpp_SUPPORTS_POCO)
@@ -28,3 +38,6 @@ index 388c946..4f2f2b1 100644
    endif()
  endif()
  
+-- 
+2.17.1
+

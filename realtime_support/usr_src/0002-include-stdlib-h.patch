@@ -1,5 +1,14 @@
+From d862783170b9b6879fe96982922d09410f47acb6 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:18:13 +0200
+Subject: [PATCH 2/3] include stdlib.h
+
+---
+ rttest/src/rttest.cpp | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
 diff --git a/rttest/src/rttest.cpp b/rttest/src/rttest.cpp
-index f11371c..b46421e 100644
+index f11371c..3050651 100644
 --- a/rttest/src/rttest.cpp
 +++ b/rttest/src/rttest.cpp
 @@ -16,7 +16,12 @@
@@ -16,3 +25,6 @@ index f11371c..b46421e 100644
  #include <sys/mman.h>
  #include <sys/resource.h>
  #include <string.h>
+-- 
+2.17.1
+

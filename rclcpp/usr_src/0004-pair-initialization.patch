@@ -1,3 +1,13 @@
+From a9099f5b605c4eb14f8edfc5cbbca0ac6ddc7f5e Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 19:32:39 +0200
+Subject: [PATCH 3/3] pair initialization
+
+---
+ rclcpp/src/rclcpp/node_interfaces/node_parameters.cpp | 3 ++-
+ rclcpp_components/src/component_manager.cpp           | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
 diff --git a/rclcpp/src/rclcpp/node_interfaces/node_parameters.cpp b/rclcpp/src/rclcpp/node_interfaces/node_parameters.cpp
 index d3b21e2..8643459 100644
 --- a/rclcpp/src/rclcpp/node_interfaces/node_parameters.cpp
@@ -26,3 +36,6 @@ index b7e8746..0c8953c 100644
    }
    return resources;
  }
+-- 
+2.17.1
+

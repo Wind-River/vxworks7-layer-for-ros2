@@ -1,0 +1,91 @@
+From 317bdc225ab065bd9901bca633cdd28ed720c936 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sat, 11 Apr 2020 18:59:40 +0200
+Subject: [PATCH] remove lambda
+
+---
+ .../include/minimal_composition/subscriber_node.hpp  |  4 ++++
+ rclcpp/minimal_composition/src/subscriber_node.cpp   |  7 ++++---
+ rclcpp/minimal_subscriber/lambda.cpp                 | 12 +++++++++---
+ 3 files changed, 17 insertions(+), 6 deletions(-)
+
+diff --git a/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp b/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
+index e521529..9a5c781 100644
+--- a/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
++++ b/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
+@@ -25,6 +25,10 @@ public:
+   MINIMAL_COMPOSITION_PUBLIC SubscriberNode(rclcpp::NodeOptions options);
+ 
+ private:
++  void topic_callback(const std_msgs::msg::String::UniquePtr msg) const
++  {
++    RCLCPP_INFO(this->get_logger(), "Subscriber: '%s'", msg->data.c_str());
++  }
+   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+ };
+ 
+diff --git a/rclcpp/minimal_composition/src/subscriber_node.cpp b/rclcpp/minimal_composition/src/subscriber_node.cpp
+index 0f5e32c..87069f4 100644
+--- a/rclcpp/minimal_composition/src/subscriber_node.cpp
++++ b/rclcpp/minimal_composition/src/subscriber_node.cpp
+@@ -16,15 +16,16 @@
+ #include "rclcpp/rclcpp.hpp"
+ #include "std_msgs/msg/string.hpp"
+ 
++using std::placeholders::_1;
++
+ SubscriberNode::SubscriberNode(rclcpp::NodeOptions options)
+ : Node("subscriber_node", options)
+ {
+   subscription_ = create_subscription<std_msgs::msg::String>(
+     "topic",
+     10,
+-    [this](std_msgs::msg::String::UniquePtr msg) {
+-      RCLCPP_INFO(this->get_logger(), "Subscriber: '%s'", msg->data.c_str());
+-    });
++    std::bind(&SubscriberNode::topic_callback, this, _1)
++    );
+ }
+ 
+ #include "rclcpp_components/register_node_macro.hpp"
+diff --git a/rclcpp/minimal_subscriber/lambda.cpp b/rclcpp/minimal_subscriber/lambda.cpp
+index c63ca43..61639cc 100644
+--- a/rclcpp/minimal_subscriber/lambda.cpp
++++ b/rclcpp/minimal_subscriber/lambda.cpp
+@@ -18,24 +18,30 @@
+ #include "rclcpp/rclcpp.hpp"
+ #include "std_msgs/msg/string.hpp"
+ 
++using std::placeholders::_1;
++
+ class MinimalSubscriber : public rclcpp::Node
+ {
+ public:
++
+   MinimalSubscriber()
+   : Node("minimal_subscriber")
+   {
+     subscription_ = this->create_subscription<std_msgs::msg::String>(
+       "topic",
+       10,
+-      [this](std_msgs::msg::String::UniquePtr msg) {
+-        RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
+-      });
++      std::bind(&MinimalSubscriber::topic_callback, this, _1));
+   }
+ 
+ private:
++  void topic_callback(const std_msgs::msg::String::SharedPtr msg) const
++  {
++    RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
++  }
+   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+ };
+ 
++
+ int main(int argc, char * argv[])
+ {
+   rclcpp::init(argc, argv);
+-- 
+2.17.1
+

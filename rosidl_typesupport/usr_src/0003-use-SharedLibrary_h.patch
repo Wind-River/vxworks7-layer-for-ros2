@@ -1,3 +1,12 @@
+From e95c775f871c6cc3e3c0a20ab3c88db4c10e0c42 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:04:11 +0200
+Subject: [PATCH 4/8] use SharedLibrary h
+
+---
+ .../src/type_support_dispatch.hpp               | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
 diff --git a/rosidl_typesupport_cpp/src/type_support_dispatch.hpp b/rosidl_typesupport_cpp/src/type_support_dispatch.hpp
 index 4941b3e..dbb1ff6 100644
 --- a/rosidl_typesupport_cpp/src/type_support_dispatch.hpp
@@ -60,3 +69,6 @@ index 4941b3e..dbb1ff6 100644
  
    return nullptr;
  }
+-- 
+2.17.1
+

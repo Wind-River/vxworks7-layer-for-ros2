@@ -1,3 +1,12 @@
+From b58fee8b1c600c57fb16123479126a1cea5d5dc7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 7 Apr 2020 22:50:37 +0200
+Subject: [PATCH 2/2] apply patch
+
+---
+ CMakeLists.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 795c6df..95be2d2 100644
 --- a/CMakeLists.txt
@@ -23,3 +32,6 @@ index 795c6df..95be2d2 100644
      TIMEOUT 600
      CMAKE_ARGS
        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_install
+-- 
+2.17.1
+

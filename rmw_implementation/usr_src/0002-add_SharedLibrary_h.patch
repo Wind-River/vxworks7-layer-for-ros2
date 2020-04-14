@@ -1,6 +1,19 @@
---- /dev/null	2020-01-07 11:34:31.718909703 +0100
-+++ b/rmw_implementation/src/SharedLibrary.h	2020-01-08 13:12:14.243951693 +0100
-@@ -0,0 +1,142 @@
+From f7b6a25fe6e51542d3adfb247d184d7c8b9f104e Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:32:53 +0200
+Subject: [PATCH 2/2] add SharedLibrary.h
+
+---
+ rmw_implementation/src/SharedLibrary.h | 142 +++++++++++++++++++++++++
+ 1 file changed, 142 insertions(+)
+ create mode 100644 rmw_implementation/src/SharedLibrary.h
+
+diff --git a/rmw_implementation/src/SharedLibrary.h b/rmw_implementation/src/SharedLibrary.h
+new file mode 100644
+index 0000000..87f906f
+--- /dev/null
++++ b/rmw_implementation/src/SharedLibrary.h
+@@ -0,0 +1,141 @@
 +//
 +// SharedLibrary.h
 +//
@@ -142,4 +155,6 @@
 +} // namespace shared_library
 +
 +#endif // CLASS_LOADER__SHARED_LIBRARY_H_
-+
+-- 
+2.17.1
+

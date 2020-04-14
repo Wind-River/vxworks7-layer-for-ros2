@@ -1,8 +1,17 @@
+From 1e8efb1bb16eccedde4b7a4aece6ee8ee2799368 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 7 Apr 2020 23:45:16 +0200
+Subject: [PATCH 3/4] disable malloc hook
+
+---
+ pendulum_control/src/pendulum_demo.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
 diff --git a/pendulum_control/src/pendulum_demo.cpp b/pendulum_control/src/pendulum_demo.cpp
-index a88abff..b7ce791 100644
+index 50b0481..285509e 100644
 --- a/pendulum_control/src/pendulum_demo.cpp
 +++ b/pendulum_control/src/pendulum_demo.cpp
-@@ -41,6 +45,7 @@ static bool running = false;
+@@ -45,6 +45,7 @@ static bool running = false;
  
  // Initialize a malloc hook so we can show that no mallocs are made during real-time execution
  
@@ -10,7 +19,7 @@ index a88abff..b7ce791 100644
  /// Declare a function pointer into which we will store the default malloc.
  static void * (* prev_malloc_hook)(size_t, const void *);
  
-@@ -87,6 +92,7 @@ void init_malloc_hook()
+@@ -91,6 +92,7 @@ void init_malloc_hook()
  
  /// Set the hook for malloc initialize so that init_malloc_hook gets called.
  void(*volatile __malloc_initialize_hook)(void) = init_malloc_hook;
@@ -18,3 +27,6 @@ index a88abff..b7ce791 100644
  
  using rclcpp::strategies::message_pool_memory_strategy::MessagePoolMemoryStrategy;
  using rclcpp::memory_strategies::allocator_memory_strategy::AllocatorMemoryStrategy;
+-- 
+2.17.1
+

@@ -1,6 +1,19 @@
---- /dev/null	2019-02-22 14:30:16.208240102 +0100
-+++ b/rosidl_typesupport_c/include/rosidl_typesupport_c/SharedLibrary.h	2019-03-13 15:42:16.025410969 +0100
-@@ -0,0 +1,142 @@
+From 56c85fc1a854b7b21c99e922a8f1676af2d43fd7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:05:04 +0200
+Subject: [PATCH 5/8] add SharedLibrary h
+
+---
+ .../rosidl_typesupport_c/SharedLibrary.h      | 141 ++++++++++++++++++
+ 1 file changed, 141 insertions(+)
+ create mode 100644 rosidl_typesupport_c/include/rosidl_typesupport_c/SharedLibrary.h
+
+diff --git a/rosidl_typesupport_c/include/rosidl_typesupport_c/SharedLibrary.h b/rosidl_typesupport_c/include/rosidl_typesupport_c/SharedLibrary.h
+new file mode 100644
+index 0000000..341a772
+--- /dev/null
++++ b/rosidl_typesupport_c/include/rosidl_typesupport_c/SharedLibrary.h
+@@ -0,0 +1,141 @@
 +//
 +// SharedLibrary.h
 +//
@@ -142,4 +155,6 @@
 +} // namespace shared_library
 +
 +#endif // CLASS_LOADER__SHARED_LIBRARY_H_
-+
+-- 
+2.17.1
+

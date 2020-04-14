@@ -1,5 +1,18 @@
+From 91a6c7c9fccd9c7b1f11e53b3cc7fc75376d785b Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 7 Apr 2020 22:39:58 +0200
+Subject: [PATCH 2/2] add Poco optionally
+
+---
+ CMakeLists.txt                             |  9 +++-
+ class_loader-extras.cmake                  |  4 +-
+ include/class_loader/class_loader_core.hpp |  8 +++
+ src/class_loader.cpp                       |  5 +-
+ src/class_loader_core.cpp                  | 62 +++++++++++++++++++---
+ 5 files changed, 74 insertions(+), 14 deletions(-)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 66d0c7b..05ccefb 100644
+index e731007..eb053a6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,10 +18,15 @@ endif()
@@ -218,3 +231,6 @@ index 75e2d6e..7670e7e 100644
        c, (libs.at(c)).first.c_str(), reinterpret_cast<void *>((libs.at(c)).second));
    }
  
+-- 
+2.17.1
+

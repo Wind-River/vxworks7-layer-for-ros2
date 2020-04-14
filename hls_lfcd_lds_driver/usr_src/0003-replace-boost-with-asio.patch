@@ -1,3 +1,12 @@
+From a68801a81f4a5b3a414a1fe58c08f2e5442bd3fb Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Wed, 8 Apr 2020 21:20:32 +0200
+Subject: [PATCH 3/3] replace boost with asio
+
+---
+ CMakeLists.txt | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 641f09f..0c201c7 100644
 --- a/CMakeLists.txt
@@ -22,7 +31,7 @@ index 641f09f..0c201c7 100644
 -  ${Boost_INCLUDE_DIRS}
 +  ${ASIO_INCLUDE_DIR}
  )
-+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE") 
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE")
  
  add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
 -target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
@@ -30,3 +39,6 @@ index 641f09f..0c201c7 100644
  ament_target_dependencies(hlds_laser_publisher
    rclcpp
    std_msgs
+-- 
+2.17.1
+

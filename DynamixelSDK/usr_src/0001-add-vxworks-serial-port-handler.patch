@@ -1,14 +1,8 @@
-From 80458e441dd4872d9640da180ea0849da27bbb80 Mon Sep 17 00:00:00 2001
-From: "Dragusu, Mihai" <Mihai.Dragusu@windriver.com>
-Date: Thu, 19 Dec 2019 14:58:26 +0200
+From ffd69249cc5e8eb1b4c842741ab1e260af6f99dc Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Wed, 8 Apr 2020 00:05:50 +0200
 Subject: [PATCH] add vxworks serial port handler
 
-note:
-
-odometry and add_sensor have been removed due to instabilities
-needs investigation
-
-Signed-off-by: Dragusu, Mihai <Mihai.Dragusu@windriver.com>
 ---
  dynamixel_sdk/CMakeLists.txt                  |   1 +
  .../include/dynamixel_sdk/port_handler.h      |   2 +-
@@ -290,7 +284,7 @@ index 1202d47..3620706 100644
  #include <algorithm>
  
 -#if defined(__linux__)
-+#if defined(__linux__) 
++#if defined(__linux__)
 +#include "group_sync_write.h"
 +#elif defined(__VXWORKS__)
  #include "group_sync_write.h"
@@ -323,11 +317,11 @@ index 3054c85..305f159 100644
 +#if  defined(__VXWORKS__)
 +#include "port_handler.h"
 +#include "port_handler_vxworks.h"
-+#elif defined(__linux__) 
++#elif defined(__linux__)
  #include "port_handler.h"
  #include "port_handler_linux.h"
 -#elif defined(__APPLE__)
-+#elif defined(__APPLE__) 
++#elif defined(__APPLE__)
  #include "port_handler.h"
  #include "port_handler_mac.h"
  #elif defined(_WIN32) || defined(_WIN64)
@@ -494,7 +488,7 @@ index 0000000..dca3ed1
 +  {
 +    packet[i] = 0;
 +  }
-+#endif  
++#endif
 +  val = read(socket_fd_, packet, length);
 +
 +#ifdef VXROSDEBUG
@@ -526,7 +520,7 @@ index 0000000..dca3ed1
 +  fprintf(stderr,"\n");
 +#endif
 +  val = write(socket_fd_, packet, length);
-+  return val; 
++  return val;
 +}
 +
 +void PortHandlerVxworks::setPacketTimeout(uint16_t packet_length)
@@ -589,14 +583,14 @@ index 0000000..dca3ed1
 +  if (ret != 0) {
 +    fprintf(stderr, "SIO_BAUD_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
 +      printf("Cannot ioctl on %s\n",port_name_);
-+      
++
 +  }
 +
 +  ret = ioctl(socket_fd_, SIO_HW_OPTS_SET, CLOCAL|CREAD|CS8);
-+  
++
 +  if (ret != 0) {
 +     fprintf(stderr, "SIO_HW_OPTS_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
-+     printf("Cannot ioctl on %s\n",port_name_);     
++     printf("Cannot ioctl on %s\n",port_name_);
 +  }
 +
 +  tx_time_per_byte = (1000.0 / (double)baudrate_) * 10.0;
@@ -611,7 +605,7 @@ index 0000000..dca3ed1
 +  if (ret != 0) {
 +    fprintf(stderr, "SIO_BAUD_SET:%s:%d err %d \n", __FUNCTION__, __LINE__,ret);
 +      printf("Cannot ioctl on %s\n",port_name_);
-+      
++
 +  }
 +  tx_time_per_byte = (1000.0 / (double)speed) * 10.0;
 +  return true;
@@ -624,7 +618,7 @@ index 0000000..dca3ed1
 +
 +#endif
 diff --git a/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
-index 2525968..cafaebd 100644
+index 668adfa..af4d92a 100644
 --- a/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
 +++ b/dynamixel_sdk/src/dynamixel_sdk/protocol1_packet_handler.cpp
 @@ -18,6 +18,8 @@
@@ -637,7 +631,7 @@ index 2525968..cafaebd 100644
  #include "protocol1_packet_handler.h"
  #elif defined(_WIN32) || defined(_WIN64)
 diff --git a/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp b/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
-index c9d90c6..0ebd205 100755
+index 06dae1d..5a59717 100755
 --- a/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
 +++ b/dynamixel_sdk/src/dynamixel_sdk/protocol2_packet_handler.cpp
 @@ -16,7 +16,7 @@
@@ -661,5 +655,5 @@ index c9d90c6..0ebd205 100755
      Sleep(0);
  #endif
 -- 
-2.24.0
+2.17.1
 

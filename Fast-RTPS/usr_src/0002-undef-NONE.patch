@@ -1,5 +1,14 @@
+From 36c388b11ab264f34517d221f1361a0dd6f612fe Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Wed, 8 Apr 2020 21:04:30 +0200
+Subject: [PATCH 2/7] undef NONE
+
+---
+ include/fastrtps/rtps/resources/TimedEvent.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
 diff --git a/include/fastrtps/rtps/resources/TimedEvent.h b/include/fastrtps/rtps/resources/TimedEvent.h
-index 80e77d7b..302f2e6a 100644
+index 3aa4d89ce..766e4f673 100644
 --- a/include/fastrtps/rtps/resources/TimedEvent.h
 +++ b/include/fastrtps/rtps/resources/TimedEvent.h
 @@ -48,6 +48,10 @@ public:
@@ -13,3 +22,6 @@ index 80e77d7b..302f2e6a 100644
      enum AUTODESTRUCTION_MODE
      {
          NONE,
+-- 
+2.17.1
+

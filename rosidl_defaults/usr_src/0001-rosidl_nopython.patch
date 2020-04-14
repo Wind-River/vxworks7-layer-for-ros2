@@ -1,3 +1,14 @@
+From b4453d1af94a8722b8c09b7b3425084a1f6520dd Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:57:31 +0200
+Subject: [PATCH] rosidl nopython
+
+---
+ rosidl_default_generators/package.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rosidl_default_generators/package.xml b/rosidl_default_generators/package.xml
+index 929a420..d2e0b00 100644
 --- a/rosidl_default_generators/package.xml
 +++ b/rosidl_default_generators/package.xml
 @@ -14,7 +14,7 @@
@@ -9,3 +20,6 @@
  
    <buildtool_export_depend>rosidl_typesupport_c</buildtool_export_depend>
    <buildtool_export_depend>rosidl_typesupport_cpp</buildtool_export_depend>
+-- 
+2.17.1
+

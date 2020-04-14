@@ -1,3 +1,12 @@
+From 38a1e23ddeda5980da371f9932348c38adfeb6bd Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Wed, 8 Apr 2020 21:31:34 +0200
+Subject: [PATCH] add CMAKE_MODULE_PATH
+
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 99e6826..4956306 100644
 --- a/CMakeLists.txt
@@ -12,3 +21,6 @@ index 99e6826..4956306 100644
  
    list(APPEND extra_cmake_args -DBUILD_SHARED_LIBS=ON)
    list(APPEND extra_cmake_args -DBUILD_TESTING=OFF)
+-- 
+2.17.1
+

@@ -1,3 +1,12 @@
+From e5b101aff7ac04c79240f2c9023f58f83315c8af Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:15:01 +0200
+Subject: [PATCH 2/2] use getprogname
+
+---
+ src/process.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/src/process.c b/src/process.c
 index a6fcb33..d490859 100644
 --- a/src/process.c
@@ -11,3 +20,6 @@ index a6fcb33..d490859 100644
    const char * appname = getprogname();
  #elif defined __GNUC__
    const char * appname = program_invocation_name;
+-- 
+2.17.1
+

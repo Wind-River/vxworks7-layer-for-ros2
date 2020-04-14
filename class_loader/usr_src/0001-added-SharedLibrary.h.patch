@@ -1,6 +1,16 @@
+From 3fe1fde1c972874b5ffb823fccbc8845e360b3a6 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 7 Apr 2020 22:39:27 +0200
+Subject: [PATCH 1/2] added SharedLibrary.h
+
+---
+ include/class_loader/SharedLibrary.h | 142 +++++++++++++++++++++++++++
+ 1 file changed, 142 insertions(+)
+ create mode 100644 include/class_loader/SharedLibrary.h
+
 diff --git a/include/class_loader/SharedLibrary.h b/include/class_loader/SharedLibrary.h
 new file mode 100644
-index 0000000..0758476
+index 0000000..87f906f
 --- /dev/null
 +++ b/include/class_loader/SharedLibrary.h
 @@ -0,0 +1,142 @@
@@ -146,3 +156,6 @@ index 0000000..0758476
 +
 +#endif // CLASS_LOADER__SHARED_LIBRARY_H_
 +
+-- 
+2.17.1
+

@@ -1,3 +1,12 @@
+From ed72b99b1207959044d3d31689c9cfe20e1a9709 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 23:15:51 +0200
+Subject: [PATCH] project NONE
+
+---
+ tinydir_cmakelists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
 diff --git a/tinydir_cmakelists.txt b/tinydir_cmakelists.txt
 index 2a1f641..0e21258 100644
 --- a/tinydir_cmakelists.txt
@@ -7,3 +16,6 @@ index 2a1f641..0e21258 100644
 +project(tinydir NONE)
  install(FILES tinydir.h
          DESTINATION include/tinydir)
+-- 
+2.17.1
+

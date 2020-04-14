@@ -1,8 +1,17 @@
+From 36d52b62b676ab5362728dea1fd3e92fdfbf07a1 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:18:48 +0200
+Subject: [PATCH 3/3] do not use mallopt
+
+---
+ rttest/src/rttest.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
 diff --git a/rttest/src/rttest.cpp b/rttest/src/rttest.cpp
-index f11371c..b46421e 100644
+index 3050651..b46421e 100644
 --- a/rttest/src/rttest.cpp
 +++ b/rttest/src/rttest.cpp
-@@ -652,6 +657,7 @@ int Rttest::lock_and_prefault_dynamic()
+@@ -657,6 +657,7 @@ int Rttest::lock_and_prefault_dynamic()
      return -1;
    }
  
@@ -10,7 +19,7 @@ index f11371c..b46421e 100644
    // Turn off malloc trimming.
    if (mallopt(M_TRIM_THRESHOLD, -1) == 0) {
      perror("mallopt for trim threshold failed");
-@@ -666,6 +672,7 @@ int Rttest::lock_and_prefault_dynamic()
+@@ -671,6 +672,7 @@ int Rttest::lock_and_prefault_dynamic()
      munlockall();
      return -1;
    }
@@ -18,7 +27,7 @@ index f11371c..b46421e 100644
  
    struct rusage usage;
    size_t page_size = sysconf(_SC_PAGESIZE);
-@@ -687,9 +694,10 @@ int Rttest::lock_and_prefault_dynamic()
+@@ -692,9 +694,10 @@ int Rttest::lock_and_prefault_dynamic()
        for (auto & ptr : prefaulter) {
          delete[] ptr;
        }
@@ -30,3 +39,6 @@ index f11371c..b46421e 100644
        munlockall();
        return -1;
      }
+-- 
+2.17.1
+

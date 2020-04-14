@@ -1,8 +1,17 @@
+From ab2ec51338f6d47219aadfcfb705bb0d72df0037 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 9 Apr 2020 22:42:09 +0200
+Subject: [PATCH] undef UPDATE
+
+---
+ rosidl_generator_cpp/resource/msg__struct.hpp.em | 4 ++++
+ 1 file changed, 4 insertions(+)
+
 diff --git a/rosidl_generator_cpp/resource/msg__struct.hpp.em b/rosidl_generator_cpp/resource/msg__struct.hpp.em
-index 83a0496..d8438b2 100644
+index 2a880f4..2cc36f4 100644
 --- a/rosidl_generator_cpp/resource/msg__struct.hpp.em
 +++ b/rosidl_generator_cpp/resource/msg__struct.hpp.em
-@@ -220,6 +220,10 @@ def generate_zero_string(membset, fill_args):
+@@ -258,6 +258,10 @@ non_defaulted_zero_initialized_members = [
    }
  @[end for]@
  
@@ -11,5 +20,8 @@ index 83a0496..d8438b2 100644
 +#endif
 +
    // constant declarations
- @[for constant in spec.constants]@
- @[if constant.type == 'string']
+ @[for constant in message.constants]@
+ @[ if isinstance(constant.type, AbstractString)]@
+-- 
+2.17.1
+

@@ -1,0 +1,25 @@
+From e3bbe845daec0da7ceaec9ba33d02acab0b920a7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Fri, 3 Jul 2020 23:24:04 +0200
+Subject: [PATCH] replace getpass.getuser()
+
+---
+ ros2pkg/ros2pkg/verb/create.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ros2pkg/ros2pkg/verb/create.py b/ros2pkg/ros2pkg/verb/create.py
+index 0aaf683..ee94b49 100644
+--- a/ros2pkg/ros2pkg/verb/create.py
++++ b/ros2pkg/ros2pkg/verb/create.py
+@@ -74,7 +74,7 @@ class CreateVerb(VerbExtension):
+             '--maintainer-email',
+             help='email address of the maintainer of this package'),
+         parser.add_argument(
+-            '--maintainer-name', default=getpass.getuser(),
++            '--maintainer-name', default='Andrei Kholodnyi',
+             help='name of the maintainer of this package'),
+         parser.add_argument(
+             '--node-name', '--cpp-node-name',
+-- 
+2.17.1
+

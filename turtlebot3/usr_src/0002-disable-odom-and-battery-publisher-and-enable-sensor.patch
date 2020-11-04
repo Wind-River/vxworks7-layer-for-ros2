@@ -27,32 +27,24 @@ diff --git a/turtlebot3_node/src/turtlebot3.cpp b/turtlebot3_node/src/turtlebot3
 index f714819..a311dac 100644
 --- a/turtlebot3_node/src/turtlebot3.cpp
 +++ b/turtlebot3_node/src/turtlebot3.cpp
-@@ -33,6 +33,7 @@ TurtleBot3::TurtleBot3(const std::string & usb_port)
- 
-   add_motors();
-   add_wheels();
-+
-   add_sensors();
-   add_devices();
- 
 @@ -163,7 +164,7 @@ void TurtleBot3::add_sensors()
    bool is_connected_ir = this->get_parameter("sensors.ir").as_bool();
  
    bool is_connected_sonar = this->get_parameter("sensors.sonar").as_bool();
 -
 +#ifndef __VXWORKS__
-   sensors_.push_back(new sensors::BatteryState(
-     node_handle_,
-     "battery_state"));
-@@ -173,7 +174,7 @@ void TurtleBot3::add_sensors()
-     "imu",
-     "magnetic_field",
-     "imu_link"));
+   sensors_.push_back(
+     new sensors::BatteryState(
+       node_handle_
+@@ -171,7 +171,7 @@ void TurtleBot3::add_sensors()
+       "imu",
+       "magnetic_field",
+       "imu_link"));
 -
 +#endif
-   sensors_.push_back(new sensors::SensorState(
-     node_handle_,
-     "sensor_state",
+   sensors_.push_back(
+     new sensors::SensorState(
+       node_handle_,
 -- 
 2.17.1
 

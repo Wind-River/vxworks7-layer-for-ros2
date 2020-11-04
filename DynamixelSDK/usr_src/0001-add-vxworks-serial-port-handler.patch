@@ -235,13 +235,6 @@ index bcea755..9901964 100644
  #elif defined(__APPLE__)
  #include "group_bulk_read.h"
  #elif defined(_WIN32) || defined(_WIN64)
-@@ -242,4 +244,4 @@ bool GroupBulkRead::getError(uint8_t id, uint8_t* error)
-   {
-     return false;
-   }
--}
-\ No newline at end of file
-+}
 diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp
 index 665378f..4c33bd8 100644
 --- a/dynamixel_sdk/src/dynamixel_sdk/group_bulk_write.cpp
@@ -268,13 +261,6 @@ index f392943..e8c0dfb 100644
  #elif defined(__APPLE__)
  #include "group_sync_read.h"
  #elif defined(_WIN32) || defined(_WIN64)
-@@ -211,4 +213,4 @@ bool GroupSyncRead::getError(uint8_t id, uint8_t* error)
-   {
-     return false;
-   }
--}
-\ No newline at end of file
-+}
 diff --git a/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp b/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp
 index 1202d47..3620706 100644
 --- a/dynamixel_sdk/src/dynamixel_sdk/group_sync_write.cpp

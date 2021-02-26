@@ -1,25 +1,34 @@
-From e5b101aff7ac04c79240f2c9023f58f83315c8af Mon Sep 17 00:00:00 2001
+From 6cfb14112c453a974d1603573ff8507f1fb66413 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Thu, 9 Apr 2020 22:15:01 +0200
+Date: Wed, 24 Feb 2021 21:11:43 +0100
 Subject: [PATCH 2/2] use getprogname
 
 ---
- src/process.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/process.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/process.c b/src/process.c
-index a6fcb33..d490859 100644
+index 78eb97d..806c287 100644
 --- a/src/process.c
 +++ b/src/process.c
-@@ -47,7 +47,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
+@@ -57,7 +57,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
    RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
      &allocator, "invalid allocator", return NULL);
  
--#if defined __APPLE__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
-+#if defined __APPLE__ || defined __VXWORKS__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
+-#if defined __APPLE__ || defined __FreeBSD__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
++#if defined __APPLE__ || defined __FreeBSD__ || defined __VXWORKS__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
    const char * appname = getprogname();
- #elif defined __GNUC__
+ #elif defined __GNUC__ && !defined(__QNXNTO__)
    const char * appname = program_invocation_name;
+@@ -84,7 +84,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
+   }
+ 
+   // Get just the executable name (Unix may return the absolute path)
+-#if defined __APPLE__ || defined __FreeBSD__ || defined __GNUC__
++#if defined __APPLE__ || defined __FreeBSD__ || defined __VXWORKS__ || defined __GNUC__
+   // We need an intermediate copy because basename may modify its arguments
+   char * intermediate = allocator.allocate(applen + 1, allocator.state);
+   if (NULL == intermediate) {
 -- 
-2.17.1
+2.25.1
 

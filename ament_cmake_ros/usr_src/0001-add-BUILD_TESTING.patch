@@ -1,0 +1,37 @@
+From bc9aacf63fbac59e3d5e2a624dccf538b144d235 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sat, 3 Jul 2021 10:56:48 +0200
+Subject: [PATCH] add BUILD_TESTING
+
+---
+ ament_cmake_ros/ament_cmake_ros-extras.cmake.in | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/ament_cmake_ros/ament_cmake_ros-extras.cmake.in b/ament_cmake_ros/ament_cmake_ros-extras.cmake.in
+index 15d7706..e1da7af 100644
+--- a/ament_cmake_ros/ament_cmake_ros-extras.cmake.in
++++ b/ament_cmake_ros/ament_cmake_ros-extras.cmake.in
+@@ -14,12 +14,14 @@
+ 
+ # generated from ament_cmake_ros/ament_cmake_ros-extras.cmake.in
+ 
+-find_package(ament_cmake_gmock QUIET REQUIRED)
+-find_package(ament_cmake_gtest QUIET REQUIRED)
+-find_package(ament_cmake_pytest QUIET REQUIRED)
+-include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_gmock.cmake")
+-include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_gtest.cmake")
+-include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_pytest.cmake")
++if(BUILD_TESTING)
++  find_package(ament_cmake_gmock QUIET REQUIRED)
++  find_package(ament_cmake_gtest QUIET REQUIRED)
++  find_package(ament_cmake_pytest QUIET REQUIRED)
++  include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_gmock.cmake")
++  include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_gtest.cmake")
++  include("${ament_cmake_ros_DIR}/ament_add_ros_isolated_pytest.cmake")
++endif(BUILD_TESTING)
+ 
+ include("${ament_cmake_ros_DIR}/build_shared_libs.cmake")
+ add_definitions(-DROS_PACKAGE_NAME=\"${PROJECT_NAME}\")
+-- 
+2.25.1
+

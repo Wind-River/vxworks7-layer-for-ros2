@@ -1,0 +1,25 @@
+From ec4ea5ad25d6b935af6218d255dbfde35c069c20 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Mon, 13 Dec 2021 15:24:23 +0100
+Subject: [PATCH] disable tracing
+
+---
+ tracetools/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tracetools/CMakeLists.txt b/tracetools/CMakeLists.txt
+index 4b85b76..7b5bb35 100644
+--- a/tracetools/CMakeLists.txt
++++ b/tracetools/CMakeLists.txt
+@@ -14,7 +14,7 @@ endif()
+ 
+ find_package(ament_cmake_ros REQUIRED)
+ 
+-if(WIN32)
++if(WIN32 OR VXWORKS)
+   set(DISABLED_DEFAULT ON)
+   set(STATUS_CHECKING_TOOL_DEFAULT OFF)
+ else()
+-- 
+2.25.1
+

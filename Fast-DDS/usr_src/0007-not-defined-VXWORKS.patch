@@ -1,0 +1,25 @@
+From 0f519641d8e4174ea92b0e3b1f510cdcd3a57618 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Mon, 13 Dec 2021 14:08:20 +0100
+Subject: [PATCH 7/8] not defined VXWORKS
+
+---
+ .../boost/include/boost/interprocess/shared_memory_object.hpp   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp b/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
+index 96fdb6ca9..244c50bf6 100644
+--- a/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
++++ b/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
+@@ -396,7 +396,7 @@ inline void shared_memory_object::truncate(offset_t length)
+ {
+    
+    // QNX correctly checks available size on ftruncate, so the patch is not necessary
+-#if defined(BOOST_FASTDDS_PATCHES) && !defined(__QNXNTO__)
++#if defined(BOOST_FASTDDS_PATCHES) && !defined(__QNXNTO__) && !defined(__VXWORKS__)
+ 
+    if (0 != posix_fallocate(m_handle, 0, length))
+    {
+-- 
+2.25.1
+

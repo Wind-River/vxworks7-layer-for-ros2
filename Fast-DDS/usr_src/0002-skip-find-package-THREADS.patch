@@ -1,17 +1,17 @@
-From 7dc1ffa909fbe83c6103f176b0da544593333c54 Mon Sep 17 00:00:00 2001
+From 28cdb9472f8a308455fdf1b13de6ce9e2ed42a1e Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Wed, 8 Apr 2020 21:06:19 +0200
-Subject: [PATCH 5/7] skip find package THREADS
+Date: Mon, 13 Dec 2021 14:03:02 +0100
+Subject: [PATCH 2/8] skip find package THREADS
 
 ---
  src/cpp/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index 90c177a1b..6ad73aa3e 100644
+index d26915242..278a8befd 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
-@@ -241,7 +241,7 @@ endif()
+@@ -372,7 +372,7 @@ endif()
  configure_file(${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h.in
      ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/config.h)
  
@@ -21,5 +21,5 @@ index 90c177a1b..6ad73aa3e 100644
  endif()
  
 -- 
-2.17.1
+2.25.1
 

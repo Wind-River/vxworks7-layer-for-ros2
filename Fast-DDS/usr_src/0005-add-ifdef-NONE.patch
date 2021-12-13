@@ -1,0 +1,56 @@
+From 10be4a0fd2d72b868e814716eb4fd2282809a5b7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Mon, 13 Dec 2021 14:07:16 +0100
+Subject: [PATCH 5/8] add ifdef NONE
+
+---
+ include/fastdds/rtps/attributes/RTPSParticipantAttributes.h | 3 +++
+ include/fastdds/rtps/transport/TCPTransportDescriptor.h     | 3 +++
+ include/fastrtps/xmlparser/XMLParserCommon.h                | 3 +++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
+index 516d0fd65..1ca32d13f 100644
+--- a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
++++ b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
+@@ -43,6 +43,9 @@ namespace rtps {
+  * Struct to define participant types to set participant type parameter property
+  *@ingroup DISCOVERY_MODULE
+  */
++#ifdef NONE
++#undef NONE
++#endif
+ struct ParticipantType
+ {
+     static constexpr const char* SIMPLE = "SIMPLE";
+diff --git a/include/fastdds/rtps/transport/TCPTransportDescriptor.h b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
+index 70682c85a..51f08d608 100644
+--- a/include/fastdds/rtps/transport/TCPTransportDescriptor.h
++++ b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
+@@ -102,6 +102,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
+          *
+          * - SINGLE_DH_USE: always create a new key using Diffie-Hellman parameters.
+          */
++#ifdef NONE
++#undef NONE
++#endif
+         enum TLSOptions : uint32_t
+         {
+             NONE                    = 0,      // 0000 0000 0000
+diff --git a/include/fastrtps/xmlparser/XMLParserCommon.h b/include/fastrtps/xmlparser/XMLParserCommon.h
+index b92923042..bff9efba9 100644
+--- a/include/fastrtps/xmlparser/XMLParserCommon.h
++++ b/include/fastrtps/xmlparser/XMLParserCommon.h
+@@ -260,6 +260,9 @@ extern const char* OFFSETD1;
+ extern const char* OFFSETD2;
+ extern const char* OFFSETD3;
+ extern const char* RTPS_PDP_TYPE;
++#ifdef NONE
++#undef NONE
++#endif
+ extern const char* NONE;
+ extern const char* CLIENT;
+ extern const char* SERVER;
+-- 
+2.25.1
+

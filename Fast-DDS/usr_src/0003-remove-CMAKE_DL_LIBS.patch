@@ -1,27 +1,24 @@
-From ccbc67215d5b2fda0f05959e9b69ee78089e4452 Mon Sep 17 00:00:00 2001
+From 7af2e1a1c99688526caf4eb0e2577f2677fb6e93 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Wed, 17 Feb 2021 21:38:35 +0100
-Subject: [PATCH] remove CMAKE_DL_LIBS
+Date: Mon, 13 Dec 2021 14:03:48 +0100
+Subject: [PATCH 3/8] remove CMAKE_DL_LIBS
 
 ---
- src/cpp/CMakeLists.txt | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ src/cpp/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index bb4769345..8218c099d 100644
+index 278a8befd..493ab040b 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
-@@ -426,7 +426,10 @@ elseif(NOT EPROSIMA_INSTALLER)
+@@ -455,7 +455,7 @@ elseif(NOT EPROSIMA_INSTALLER)
  
      # Link library to external libraries.
      target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory
 -        ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS}
-+        ${CMAKE_THREAD_LIBS_INIT}
-+if(NOT VXWORKS)
-+        ${CMAKE_DL_LIBS}
-+endif()
++        ${CMAKE_THREAD_LIBS_INIT} $<$<NOT:$<BOOL:${VXWORKS}>>:${CMAKE_DL_LIBS}>
          ${TINYXML2_LIBRARY}
-         $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto>
+         $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto$<$<BOOL:${WIN32}>:$<SEMICOLON>crypt32.lib>>
          $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
 -- 
 2.25.1

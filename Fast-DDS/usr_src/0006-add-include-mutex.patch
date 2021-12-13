@@ -1,0 +1,33 @@
+From 43bea5a88fb5f502814e7df51c659655309c9931 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Mon, 13 Dec 2021 14:07:47 +0100
+Subject: [PATCH 6/8] add include mutex
+
+---
+ include/fastrtps/utils/TimedMutex.hpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/include/fastrtps/utils/TimedMutex.hpp b/include/fastrtps/utils/TimedMutex.hpp
+index 6331f3025..61c976f7d 100644
+--- a/include/fastrtps/utils/TimedMutex.hpp
++++ b/include/fastrtps/utils/TimedMutex.hpp
+@@ -27,7 +27,7 @@
+ extern int clock_gettime(
+         int,
+         struct timespec* tv);
+-#elif _GTHREAD_USE_MUTEX_TIMEDLOCK
++#elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__linux__)
+ #include <mutex>
+ #else
+ #include <pthread.h>
+@@ -178,6 +178,7 @@ private:
+     _Mtx_t mutex_;
+ };
+ #elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__linux__)
++#include <mutex>
+ using TimedMutex = std::timed_mutex;
+ using RecursiveTimedMutex = std::recursive_timed_mutex;
+ #else
+-- 
+2.25.1
+

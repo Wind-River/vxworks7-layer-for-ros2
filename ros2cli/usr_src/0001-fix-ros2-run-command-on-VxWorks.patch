@@ -1,0 +1,43 @@
+From 8bc8d7a840298c403bf17cc803711bc713c249e4 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 21 Jul 2022 00:29:40 +0200
+Subject: [PATCH] fix ros2 run command on VxWorks
+
+---
+ ros2run/ros2run/api/__init__.py | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/ros2run/ros2run/api/__init__.py b/ros2run/ros2run/api/__init__.py
+index f1f9ed4..e640b33 100644
+--- a/ros2run/ros2run/api/__init__.py
++++ b/ros2run/ros2run/api/__init__.py
+@@ -15,6 +15,7 @@
+ import os
+ import subprocess
+ import sys
++from elftools.elf.elffile import ELFFile
+ 
+ from ros2pkg.api import get_executable_paths
+ from ros2pkg.api import PackageNotFound
+@@ -55,6 +56,18 @@ def run_executable(*, path, argv, prefix=None):
+     if os.name == 'nt' and path.endswith('.py'):
+         cmd.insert(0, sys.executable)
+ 
++    # on VxWorks Python scripts are invokable through the interpreter
++    if sys.platform == 'vxworks':
++        pyfmt = False
++        f = open(path, 'rb')
++        try:
++            elf = ELFFile(f)
++        except Exception as e:
++            pyfmt = True
++
++        if pyfmt:
++            cmd.insert(0, sys.executable)
++
+     if prefix is not None:
+         cmd = prefix + cmd
+ 
+-- 
+2.34.1
+

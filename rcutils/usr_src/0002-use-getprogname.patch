@@ -1,6 +1,6 @@
-From 6cfb14112c453a974d1603573ff8507f1fb66413 Mon Sep 17 00:00:00 2001
+From 78946c933e078ce3a41d8ad325d576805ce037b6 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Wed, 24 Feb 2021 21:11:43 +0100
+Date: Fri, 26 Aug 2022 23:35:49 +0200
 Subject: [PATCH 2/2] use getprogname
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 2/2] use getprogname
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/process.c b/src/process.c
-index 78eb97d..806c287 100644
+index 2b43842..f5f5658 100644
 --- a/src/process.c
 +++ b/src/process.c
-@@ -57,7 +57,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
+@@ -58,7 +58,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
    RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
      &allocator, "invalid allocator", return NULL);
  
@@ -20,15 +20,15 @@ index 78eb97d..806c287 100644
    const char * appname = getprogname();
  #elif defined __GNUC__ && !defined(__QNXNTO__)
    const char * appname = program_invocation_name;
-@@ -84,7 +84,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
+@@ -85,7 +85,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
    }
  
    // Get just the executable name (Unix may return the absolute path)
 -#if defined __APPLE__ || defined __FreeBSD__ || defined __GNUC__
 +#if defined __APPLE__ || defined __FreeBSD__ || defined __VXWORKS__ || defined __GNUC__
    // We need an intermediate copy because basename may modify its arguments
-   char * intermediate = allocator.allocate(applen + 1, allocator.state);
+   char * intermediate = rcutils_strdup(appname, allocator);
    if (NULL == intermediate) {
 -- 
-2.25.1
+2.34.1
 

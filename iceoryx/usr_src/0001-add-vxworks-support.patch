@@ -1,0 +1,137 @@
+From 7aaa0e8452aae43e04961badaa58d9aef8ef97de Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Fri, 26 Aug 2022 22:31:59 +0200
+Subject: [PATCH 1/2] add vxworks support
+
+---
+ iceoryx_binding_c/CMakeLists.txt                      | 11 ++++++++++-
+ iceoryx_hoofs/cmake/IceoryxPlatform.cmake             |  4 ++++
+ .../internal/concurrent/periodic_task.inl             |  2 +-
+ .../include/iceoryx_hoofs/posix_wrapper/timer.hpp     |  2 +-
+ iceoryx_hoofs/platform/CMakeLists.txt                 |  3 +++
+ iceoryx_posh/source/roudi/roudi.cpp                   |  4 ++--
+ 6 files changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/iceoryx_binding_c/CMakeLists.txt b/iceoryx_binding_c/CMakeLists.txt
+index 774d424e5..656f9ff0b 100644
+--- a/iceoryx_binding_c/CMakeLists.txt
++++ b/iceoryx_binding_c/CMakeLists.txt
+@@ -108,7 +108,7 @@ target_include_directories(${PROJECT_NAME}
+     $<INSTALL_INTERFACE:include/${PREFIX}>
+ )
+ 
+-if(NOT (WIN32 OR QNX))
++if(NOT (WIN32 OR QNX OR VXWORKS))
+     target_link_libraries(${PROJECT_NAME}
+       PUBLIC
+         stdc++
+@@ -117,6 +117,15 @@ if(NOT (WIN32 OR QNX))
+         iceoryx_posh::iceoryx_posh
+         iceoryx_hoofs::iceoryx_hoofs
+     )
++elseif(VXWORKS)
++    target_link_libraries(${PROJECT_NAME}
++      PUBLIC
++        cplusplus
++        llvmcplus
++      PRIVATE
++        iceoryx_posh::iceoryx_posh
++        iceoryx_hoofs::iceoryx_hoofs
++    )
+ else()
+     target_link_libraries(${PROJECT_NAME}
+       PRIVATE
+diff --git a/iceoryx_hoofs/cmake/IceoryxPlatform.cmake b/iceoryx_hoofs/cmake/IceoryxPlatform.cmake
+index 0a3b0e8cd..3bd73bbf9 100644
+--- a/iceoryx_hoofs/cmake/IceoryxPlatform.cmake
++++ b/iceoryx_hoofs/cmake/IceoryxPlatform.cmake
+@@ -20,6 +20,8 @@ if(UNIX AND NOT APPLE)
+         set(LINUX true)
+     elseif(CMAKE_SYSTEM_NAME MATCHES QNX)
+         set(QNX true)
++elseif(CMAKE_SYSTEM_NAME MATCHES VxWorks)
++	set(VXWORKS true)
+     endif()
+ endif()
+ 
+@@ -27,6 +29,8 @@ if(LINUX)
+     set(ICEORYX_CXX_STANDARD 14)
+ elseif(QNX)
+     set(ICEORYX_CXX_STANDARD 14)
++elseif(VXWORKS)
++    set(ICEORYX_CXX_STANDARD 17)
+ elseif(WIN32)
+     set(ICEORYX_CXX_STANDARD 17)
+ elseif(APPLE)
+diff --git a/iceoryx_hoofs/include/iceoryx_hoofs/internal/concurrent/periodic_task.inl b/iceoryx_hoofs/include/iceoryx_hoofs/internal/concurrent/periodic_task.inl
+index ac885b55a..4c60387c9 100644
+--- a/iceoryx_hoofs/include/iceoryx_hoofs/internal/concurrent/periodic_task.inl
++++ b/iceoryx_hoofs/include/iceoryx_hoofs/internal/concurrent/periodic_task.inl
+@@ -54,7 +54,7 @@ inline void PeriodicTask<T>::start(const units::Duration interval) noexcept
+     stop();
+     m_interval = interval;
+     m_taskExecutor = std::thread(&PeriodicTask::run, this);
+-    posix::setThreadName(m_taskExecutor.native_handle(), m_taskName);
++    posix::setThreadName((unsigned long)m_taskExecutor.native_handle(), m_taskName);
+ }
+ 
+ template <typename T>
+diff --git a/iceoryx_hoofs/include/iceoryx_hoofs/posix_wrapper/timer.hpp b/iceoryx_hoofs/include/iceoryx_hoofs/posix_wrapper/timer.hpp
+index 6ad02e8ea..eb59ca479 100644
+--- a/iceoryx_hoofs/include/iceoryx_hoofs/posix_wrapper/timer.hpp
++++ b/iceoryx_hoofs/include/iceoryx_hoofs/posix_wrapper/timer.hpp
+@@ -137,7 +137,7 @@ class Timer
+     /// This class will be DEPRECATED in the near future.
+     class OsTimer
+     {
+-#ifdef __QNX__
++#if defined(__QNX__) || defined(__VXWORKS__)
+         static constexpr timer_t INVALID_TIMER_ID = 0;
+ #else
+         static constexpr timer_t INVALID_TIMER_ID = nullptr;
+diff --git a/iceoryx_hoofs/platform/CMakeLists.txt b/iceoryx_hoofs/platform/CMakeLists.txt
+index 78bad09f8..0c2c3aee3 100644
+--- a/iceoryx_hoofs/platform/CMakeLists.txt
++++ b/iceoryx_hoofs/platform/CMakeLists.txt
+@@ -21,6 +21,8 @@ if(LINUX)
+     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/linux/)
+ elseif(QNX)
+     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/qnx/)
++elseif(VXWORKS)
++    set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/vxworks/)
+ elseif(APPLE)
+     set(ICEORYX_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/mac/)
+ elseif(WIN32)
+@@ -65,6 +67,7 @@ elseif(QNX)
+         PRIVATE
+         socket
+     )
++elseif(VXWORKS)
+ elseif(APPLE)
+ elseif(WIN32)
+ elseif(UNIX)
+diff --git a/iceoryx_posh/source/roudi/roudi.cpp b/iceoryx_posh/source/roudi/roudi.cpp
+index f5e088f38..465621e27 100644
+--- a/iceoryx_posh/source/roudi/roudi.cpp
++++ b/iceoryx_posh/source/roudi/roudi.cpp
+@@ -66,7 +66,7 @@ RouDi::RouDi(RouDiMemoryInterface& roudiMemoryInterface,
+ 
+     // run the threads
+     m_monitoringAndDiscoveryThread = std::thread(&RouDi::monitorAndDiscoveryUpdate, this);
+-    posix::setThreadName(m_monitoringAndDiscoveryThread.native_handle(), "Mon+Discover");
++    posix::setThreadName((unsigned long)m_monitoringAndDiscoveryThread.native_handle(), "Mon+Discover");
+ 
+     if (roudiStartupParameters.m_runtimesMessagesThreadStart == RuntimeMessagesThreadStart::IMMEDIATE)
+     {
+@@ -82,7 +82,7 @@ RouDi::~RouDi() noexcept
+ void RouDi::startProcessRuntimeMessagesThread() noexcept
+ {
+     m_handleRuntimeMessageThread = std::thread(&RouDi::processRuntimeMessages, this);
+-    posix::setThreadName(m_handleRuntimeMessageThread.native_handle(), "IPC-msg-process");
++    posix::setThreadName((unsigned long)m_handleRuntimeMessageThread.native_handle(), "IPC-msg-process");
+ }
+ 
+ void RouDi::shutdown() noexcept
+-- 
+2.34.1
+

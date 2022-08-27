@@ -1,19 +1,19 @@
-From ccffeee77448865cda35daa184952812fa60a00d Mon Sep 17 00:00:00 2001
+From d414699958b45322126e67a3f95f43679b34f694 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Wed, 29 Apr 2020 17:53:04 +0200
-Subject: [PATCH] add #if __VXWORKS__
+Date: Sat, 27 Aug 2022 16:02:05 +0200
+Subject: [PATCH] add if __VXWORKS__
 
 ---
- rclpy/src/rclpy/_rclpy_signal_handler.c | 2 +-
+ rclpy/src/rclpy/signal_handler.cpp | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/rclpy/src/rclpy/_rclpy_signal_handler.c b/rclpy/src/rclpy/_rclpy_signal_handler.c
-index 2c21949..c9d0ef3 100644
---- a/rclpy/src/rclpy/_rclpy_signal_handler.c
-+++ b/rclpy/src/rclpy/_rclpy_signal_handler.c
-@@ -21,7 +21,7 @@
+diff --git a/rclpy/src/rclpy/signal_handler.cpp b/rclpy/src/rclpy/signal_handler.cpp
+index 62dfffd..0bf1e65 100644
+--- a/rclpy/src/rclpy/signal_handler.cpp
++++ b/rclpy/src/rclpy/signal_handler.cpp
+@@ -180,7 +180,7 @@ CleanupdeferredSignalHandler cleanup_deferred_signal_handler;
  
- #include <signal.h>
+ }  // namespace
  
 -#if __APPLE__ || _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
 +#if __APPLE__ || __VXWORKS__ || _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
@@ -21,5 +21,5 @@ index 2c21949..c9d0ef3 100644
  #define SIGNAL_HANDLER_T struct sigaction
  
 -- 
-2.17.1
+2.34.1
 

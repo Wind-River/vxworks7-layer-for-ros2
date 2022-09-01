@@ -1,7 +1,7 @@
-From b771bb748880fffddc93bcb65e1e27748d45d5bc Mon Sep 17 00:00:00 2001
+From 7e34e35714152fd16e4553a99b9de8be4c4bcc8e Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:04:56 +0100
-Subject: [PATCH 4/8] set munmap to 0
+Subject: [PATCH 04/10] set munmap to 0
 
 ---
  src/cpp/rtps/persistence/sqlite3.c | 2 +-
@@ -21,5 +21,5 @@ index 89faea5b2..f0d7e2e83 100644
    { "munmap",       (sqlite3_syscall_ptr)0,               0 },
  #endif
 -- 
-2.25.1
+2.34.1
 

@@ -1,0 +1,27 @@
+From a8a5375e74fc5c5cf90b00cec20a6df7cfbc770f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Thu, 1 Sep 2022 23:59:53 +0200
+Subject: [PATCH 09/10] add ifdef NONE
+
+---
+ src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp b/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
+index da75c7372..da9bd0200 100644
+--- a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
++++ b/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
+@@ -210,7 +210,9 @@ protected:
+     void value_has_changed();
+ 
+ private:
+-
++#ifdef NONE
++#undef NONE
++#endif
+     enum class RegExpKind
+     {
+         NONE, LIKE, MATCH
+-- 
+2.34.1
+

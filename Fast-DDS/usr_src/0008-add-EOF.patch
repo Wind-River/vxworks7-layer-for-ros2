@@ -1,7 +1,7 @@
-From 784a59b4a9977e69246a4d6c870aa316781f01cc Mon Sep 17 00:00:00 2001
+From 9923917dc330b29856d490743d6b4150156fde6d Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:08:55 +0100
-Subject: [PATCH 8/8] add EOF
+Subject: [PATCH 08/10] add EOF
 
 ---
  thirdparty/nlohmann-json/json.hpp | 8 ++++----
@@ -48,5 +48,5 @@ index e821c79a3..0d5ec1e31 100644
  
              // error
 -- 
-2.25.1
+2.34.1
 

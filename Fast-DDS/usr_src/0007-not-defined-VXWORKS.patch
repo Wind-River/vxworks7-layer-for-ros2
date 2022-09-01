@@ -1,7 +1,7 @@
-From 0f519641d8e4174ea92b0e3b1f510cdcd3a57618 Mon Sep 17 00:00:00 2001
+From e62a1e82fdd1b911471b1a5543d558a48f65f57f Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:08:20 +0100
-Subject: [PATCH 7/8] not defined VXWORKS
+Subject: [PATCH 07/10] not defined VXWORKS
 
 ---
  .../boost/include/boost/interprocess/shared_memory_object.hpp   | 2 +-
@@ -21,5 +21,5 @@ index 96fdb6ca9..244c50bf6 100644
     if (0 != posix_fallocate(m_handle, 0, length))
     {
 -- 
-2.25.1
+2.34.1
 

@@ -1,7 +1,7 @@
-From 10be4a0fd2d72b868e814716eb4fd2282809a5b7 Mon Sep 17 00:00:00 2001
+From 0d9eeff08050b95834b86d04022c153426f5af6e Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:07:16 +0100
-Subject: [PATCH 5/8] add ifdef NONE
+Subject: [PATCH 05/10] add ifdef NONE
 
 ---
  include/fastdds/rtps/attributes/RTPSParticipantAttributes.h | 3 +++
@@ -10,10 +10,10 @@ Subject: [PATCH 5/8] add ifdef NONE
  3 files changed, 9 insertions(+)
 
 diff --git a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-index 516d0fd65..1ca32d13f 100644
+index 2f26997dd..b345d0f93 100644
 --- a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
 +++ b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-@@ -43,6 +43,9 @@ namespace rtps {
+@@ -44,6 +44,9 @@ namespace rtps {
   * Struct to define participant types to set participant type parameter property
   *@ingroup DISCOVERY_MODULE
   */
@@ -24,7 +24,7 @@ index 516d0fd65..1ca32d13f 100644
  {
      static constexpr const char* SIMPLE = "SIMPLE";
 diff --git a/include/fastdds/rtps/transport/TCPTransportDescriptor.h b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
-index 70682c85a..51f08d608 100644
+index 9ceeff847..13f0e8699 100644
 --- a/include/fastdds/rtps/transport/TCPTransportDescriptor.h
 +++ b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
 @@ -102,6 +102,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
@@ -38,10 +38,10 @@ index 70682c85a..51f08d608 100644
          {
              NONE                    = 0,      // 0000 0000 0000
 diff --git a/include/fastrtps/xmlparser/XMLParserCommon.h b/include/fastrtps/xmlparser/XMLParserCommon.h
-index b92923042..bff9efba9 100644
+index 759aa0099..2ae3def7c 100644
 --- a/include/fastrtps/xmlparser/XMLParserCommon.h
 +++ b/include/fastrtps/xmlparser/XMLParserCommon.h
-@@ -260,6 +260,9 @@ extern const char* OFFSETD1;
+@@ -259,6 +259,9 @@ extern const char* OFFSETD1;
  extern const char* OFFSETD2;
  extern const char* OFFSETD3;
  extern const char* RTPS_PDP_TYPE;
@@ -52,5 +52,5 @@ index b92923042..bff9efba9 100644
  extern const char* CLIENT;
  extern const char* SERVER;
 -- 
-2.25.1
+2.34.1
 

@@ -1,14 +1,14 @@
-From 7af2e1a1c99688526caf4eb0e2577f2677fb6e93 Mon Sep 17 00:00:00 2001
+From 9270ab4a0854b593452156c60432577180a663ef Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:03:48 +0100
-Subject: [PATCH 3/8] remove CMAKE_DL_LIBS
+Subject: [PATCH 03/10] remove CMAKE_DL_LIBS
 
 ---
  src/cpp/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index 278a8befd..493ab040b 100644
+index feaf3f3ce..ad358aeb8 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
 @@ -427,7 +427,7 @@ find_package(Atomic MODULE)
@@ -21,5 +21,5 @@ index 278a8befd..493ab040b 100644
      $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto$<$<BOOL:${WIN32}>:$<SEMICOLON>crypt32.lib>>
      $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
 -- 
-2.25.1
+2.34.1
 

@@ -20,10 +20,10 @@ index 6331f3025..61c976f7d 100644
  #include <mutex>
  #else
  #include <pthread.h>
-@@ -178,6 +178,7 @@ private:
+@@ -183,6 +183,7 @@ private:
      _Mtx_t mutex_;
  };
- #elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__linux__)
+ #elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__unix__)
 +#include <mutex>
  using TimedMutex = std::timed_mutex;
  using RecursiveTimedMutex = std::recursive_timed_mutex;

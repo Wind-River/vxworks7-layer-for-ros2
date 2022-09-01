@@ -11,15 +11,15 @@ diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
 index 278a8befd..493ab040b 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
-@@ -455,7 +455,7 @@ elseif(NOT EPROSIMA_INSTALLER)
+@@ -427,7 +427,7 @@ find_package(Atomic MODULE)
  
-     # Link library to external libraries.
-     target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory
--        ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS}
-+        ${CMAKE_THREAD_LIBS_INIT} $<$<NOT:$<BOOL:${VXWORKS}>>:${CMAKE_DL_LIBS}>
-         ${TINYXML2_LIBRARY}
-         $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto$<$<BOOL:${WIN32}>:$<SEMICOLON>crypt32.lib>>
-         $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
+ # Link library to external libraries.
+ target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory
+-    ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS}
++    ${CMAKE_THREAD_LIBS_INIT} $<$<NOT:$<BOOL:${VXWORKS}>>:${CMAKE_DL_LIBS}>
+     ${TINYXML2_LIBRARY}
+     $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto$<$<BOOL:${WIN32}>:$<SEMICOLON>crypt32.lib>>
+     $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
 -- 
 2.25.1
 

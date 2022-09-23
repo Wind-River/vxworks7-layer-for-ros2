@@ -1,0 +1,24 @@
+From f70da1609ba2c772d32c1b2836fe5d40a3776c24 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sun, 28 Aug 2022 15:28:51 +0200
+Subject: [PATCH] add rmw_iceoryx_cpp
+
+---
+ rmw_iceoryx_cpp/package.xml | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/rmw_iceoryx_cpp/package.xml b/rmw_iceoryx_cpp/package.xml
+index e4f256e..9d4759c 100644
+--- a/rmw_iceoryx_cpp/package.xml
++++ b/rmw_iceoryx_cpp/package.xml
+@@ -13,7 +13,6 @@
+   <depend>rcpputils</depend>
+   <depend>rcutils</depend>
+   <depend>rmw</depend>
+-  <depend>rmw_implementation</depend>
+   <depend>rosidl_runtime_c</depend>
+   <depend>rosidl_runtime_cpp</depend>
+   <depend>rosidl_typesupport_cpp</depend>
+-- 
+2.34.1
+

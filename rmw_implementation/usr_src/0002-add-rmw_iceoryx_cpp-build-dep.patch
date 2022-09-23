@@ -1,0 +1,24 @@
+From 633e2e74ca6ea9f2de7e1fb136cd70068cc3e66f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sun, 28 Aug 2022 16:00:14 +0200
+Subject: [PATCH 2/2] add rmw_iceoryx_cpp build dep
+
+---
+ rmw_implementation/package.xml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/rmw_implementation/package.xml b/rmw_implementation/package.xml
+index a9df58f..7116c60 100644
+--- a/rmw_implementation/package.xml
++++ b/rmw_implementation/package.xml
+@@ -28,6 +28,7 @@
+   <build_depend>rmw_cyclonedds_cpp</build_depend>
+   <build_depend>rmw_fastrtps_cpp</build_depend>
+   <build_depend>rmw_fastrtps_dynamic_cpp</build_depend>
++  <build_depend>rmw_iceoryx_cpp</build_depend>
+   <!-- end of group dependencies added for bloom -->
+ 
+   <depend>rmw_implementation_cmake</depend>
+-- 
+2.34.1
+

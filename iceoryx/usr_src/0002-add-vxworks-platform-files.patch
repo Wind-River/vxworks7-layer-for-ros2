@@ -1,0 +1,1192 @@
+From 5b6b9fcf2393997446f0b300e04fd4d5f03ba333 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Fri, 26 Aug 2022 22:32:41 +0200
+Subject: [PATCH 2/2] add vxworks platform files
+
+---
+ .../include/iceoryx_hoofs/platform/acl.hpp    | 101 ++++++++++++++++++
+ .../include/iceoryx_hoofs/platform/dlfcn.hpp  |  21 ++++
+ .../include/iceoryx_hoofs/platform/errno.hpp  |  21 ++++
+ .../include/iceoryx_hoofs/platform/fcntl.hpp  |  23 ++++
+ .../include/iceoryx_hoofs/platform/file.hpp   |  23 ++++
+ .../include/iceoryx_hoofs/platform/getopt.hpp |  21 ++++
+ .../include/iceoryx_hoofs/platform/grp.hpp    |  28 +++++
+ .../include/iceoryx_hoofs/platform/inet.hpp   |  21 ++++
+ .../include/iceoryx_hoofs/platform/mman.hpp   |  24 +++++
+ .../include/iceoryx_hoofs/platform/mqueue.hpp |  24 +++++
+ .../platform/platform_correction.hpp          |  28 +++++
+ .../platform/platform_settings.hpp            |  48 +++++++++
+ .../iceoryx_hoofs/platform/pthread.hpp        |  64 +++++++++++
+ .../include/iceoryx_hoofs/platform/pwd.hpp    |  21 ++++
+ .../iceoryx_hoofs/platform/resource.hpp       |  21 ++++
+ .../iceoryx_hoofs/platform/semaphore.hpp      |  78 ++++++++++++++
+ .../include/iceoryx_hoofs/platform/signal.hpp |  21 ++++
+ .../include/iceoryx_hoofs/platform/socket.hpp |  31 ++++++
+ .../include/iceoryx_hoofs/platform/stat.hpp   |  21 ++++
+ .../include/iceoryx_hoofs/platform/time.hpp   |  21 ++++
+ .../include/iceoryx_hoofs/platform/types.hpp  |  21 ++++
+ .../include/iceoryx_hoofs/platform/un.hpp     |  21 ++++
+ .../include/iceoryx_hoofs/platform/unistd.hpp |  23 ++++
+ .../include/iceoryx_hoofs/platform/wait.hpp   |  21 ++++
+ .../platform/vxworks/source/file.cpp          |  22 ++++
+ .../platform/vxworks/source/fnctl.cpp         |  24 +++++
+ .../platform/vxworks/source/mman.cpp          |  27 +++++
+ .../platform/vxworks/source/mqueue.cpp        |  27 +++++
+ .../platform/vxworks/source/socket.cpp        |  72 +++++++++++++
+ .../platform/vxworks/source/unistd.cpp        |  22 ++++
+ 30 files changed, 941 insertions(+)
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/acl.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/dlfcn.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/errno.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/fcntl.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/file.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/getopt.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/grp.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/inet.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mman.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mqueue.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_correction.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_settings.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pthread.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pwd.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/resource.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/semaphore.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/signal.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/socket.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/stat.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/time.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/types.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/un.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/unistd.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/wait.hpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/file.cpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/fnctl.cpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/mman.cpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/mqueue.cpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/socket.cpp
+ create mode 100644 iceoryx_hoofs/platform/vxworks/source/unistd.cpp
+
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/acl.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/acl.hpp
+new file mode 100644
+index 000000000..152f790b4
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/acl.hpp
+@@ -0,0 +1,101 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_ACL_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_ACL_HPP
++
++#include "iceoryx_hoofs/platform/types.hpp"
++
++#define ACL_USER_OBJ 0
++#define ACL_USER 1
++#define ACL_GROUP_OBJ 2
++#define ACL_GROUP 3
++#define ACL_OTHER 4
++#define ACL_READ 5
++#define ACL_WRITE 6
++#define ACL_MASK 7
++
++struct __acl_ext
++{
++};
++
++using acl_t = struct __acl_ext*;
++using acl_permset_t = int;
++using acl_perm_t = int;
++using acl_entry_t = int;
++using acl_tag_t = int;
++
++inline int acl_valid(acl_t acl)
++{
++    return 0;
++}
++
++inline int acl_set_fd(int fd, acl_t acl)
++{
++    return 0;
++}
++
++inline acl_t acl_init(int count)
++{
++    static struct __acl_ext stub;
++    return &stub;
++}
++
++inline int acl_free(void*)
++{
++    return 0;
++}
++
++inline int acl_create_entry(acl_t* acl_p, acl_entry_t* entry_p)
++{
++    return 0;
++}
++
++inline int acl_set_tag_type(acl_entry_t entry_d, acl_tag_t tag_type)
++{
++    return 0;
++}
++
++inline int acl_set_qualifier(acl_entry_t entry_d, const void* qualifier_p)
++{
++    return 0;
++}
++
++inline int acl_get_permset(acl_entry_t entry_d, acl_permset_t* permset_p)
++{
++    return 0;
++}
++
++inline int acl_add_perm(acl_permset_t permset_d, acl_perm_t perm)
++{
++    return 0;
++}
++
++inline char* acl_to_text(acl_t acl, ssize_t* len_p)
++{
++    return nullptr;
++}
++
++inline acl_t acl_from_text(const char* buf_p)
++{
++    return acl_t();
++}
++
++inline acl_t acl_get_fd(int fd)
++{
++    return acl_t();
++}
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_ACL_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/dlfcn.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/dlfcn.hpp
+new file mode 100644
+index 000000000..d2847e31e
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/dlfcn.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_DLFCN_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_DLFCN_HPP
++
++#include <dlfcn.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_DLFCN_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/errno.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/errno.hpp
+new file mode 100644
+index 000000000..c123c9a73
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/errno.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_ERRNO_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_ERRNO_HPP
++
++#include <errno.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_ERRNO_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/fcntl.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/fcntl.hpp
+new file mode 100644
+index 000000000..93e53ecab
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/fcntl.hpp
+@@ -0,0 +1,23 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_FCNTL_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_FCNTL_HPP
++
++#include <fcntl.h>
++
++int iox_open(const char* pathname, int flags, mode_t mode);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_FCNTL_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/file.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/file.hpp
+new file mode 100644
+index 000000000..472d0658d
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/file.hpp
+@@ -0,0 +1,23 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_FILE_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_FILE_HPP
++
++#include <sys/file.h>
++
++int iox_flock(int fd, int op);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_FILE_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/getopt.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/getopt.hpp
+new file mode 100644
+index 000000000..5ab5421e7
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/getopt.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_GETOPT_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_GETOPT_HPP
++
++#include <getopt.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_GETOPT_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/grp.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/grp.hpp
+new file mode 100644
+index 000000000..8a1b8ab5b
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/grp.hpp
+@@ -0,0 +1,28 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_GRP_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_GRP_HPP
++
++#include <grp.h>
++
++inline int iox_getgrouplist(const char* user, gid_t group, gid_t* groups, int* ngroups)
++{
++    groups[0] = 0;
++    *ngroups = 1;
++    return 0;
++}
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_GRP_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/inet.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/inet.hpp
+new file mode 100644
+index 000000000..a591cdb7a
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/inet.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_INET_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_INET_HPP
++
++#include <arpa/inet.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_INET_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mman.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mman.hpp
+new file mode 100644
+index 000000000..693498500
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mman.hpp
+@@ -0,0 +1,24 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_MMAN_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_MMAN_HPP
++
++#include <sys/mman.h>
++
++int iox_shm_open(const char* name, int oflag, mode_t mode);
++int iox_shm_unlink(const char* name);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_MMAN_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mqueue.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mqueue.hpp
+new file mode 100644
+index 000000000..530a5d721
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/mqueue.hpp
+@@ -0,0 +1,24 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_MQUEUE_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_MQUEUE_HPP
++
++#include <mqueue.h>
++
++mqd_t iox_mq_open2(const char* name, int oflag);
++mqd_t iox_mq_open4(const char* name, int oflag, mode_t mode, struct mq_attr* attr);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_MQUEUE_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_correction.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_correction.hpp
+new file mode 100644
+index 000000000..7adb96e75
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_correction.hpp
+@@ -0,0 +1,28 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_CORRECTION_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_CORRECTION_HPP
++
++#include <types/vxTypesOld.h>
++#include <vxWorksCommon.h>
++
++#undef ERROR
++#undef LOCAL
++#undef NONE
++#undef READ
++#undef WRITE
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_CORRECTION_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_settings.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_settings.hpp
+new file mode 100644
+index 000000000..23f11871e
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_settings.hpp
+@@ -0,0 +1,48 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_SETTINGS_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_SETTINGS_HPP
++
++#include <cstdint>
++#include <limits.h>
++#include <base/b_pthread_shared.h>
++
++namespace iox
++{
++namespace posix
++{
++	class UnixDomainSocket;
++}
++
++namespace platform
++{
++/// defined so that it is consistent to linux
++constexpr uint64_t IOX_MAX_SEMAPHORE_NAME_LENGTH = _PTHREAD_SHARED_SEM_NAME_MAX;
++constexpr bool IOX_SUPPORT_NAMED_SEMAPHORE_OVERFLOW_DETECTION = true;
++
++constexpr uint64_t IOX_MAX_FILENAME_LENGTH = NAME_MAX;
++constexpr uint64_t IOX_MAX_PATH_LENGTH = PATH_MAX;
++constexpr bool IOX_SHM_WRITE_ZEROS_ON_CREATION = true;
++constexpr uint64_t IOX_MAX_SHM_NAME_LENGTH = NAME_MAX;
++constexpr const char IOX_PATH_SEPARATORS[] = "/";
++constexpr uint64_t IOX_UDS_SOCKET_MAX_MESSAGE_SIZE = 2048;
++constexpr const char IOX_UDS_SOCKET_PATH_PREFIX[] = "/comp/socket/";
++constexpr const char IOX_LOCK_FILE_PATH_PREFIX[] = "/tmp";
++using IoxIpcChannelType = iox::posix::UnixDomainSocket;
++} // namespace platform
++} // namespace iox
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_PLATFORM_SETTINGS_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pthread.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pthread.hpp
+new file mode 100644
+index 000000000..53c7afa86
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pthread.hpp
+@@ -0,0 +1,64 @@
++// Copyright (c) 2020 by Robert Bosch GmbH. All rights reserved.
++// Copyright (c) 2021 by Apex.AI Inc. All rights reserved.
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_PTHREAD_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_PTHREAD_HPP
++
++#include <pthread.h>
++#include <string.h>
++#include <taskLib.h>
++#include <private/taskLibP.h>
++#include <private/pthreadLibP.h>
++
++#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
++#define PTHREAD_MUTEX_FAST_NP PTHREAD_MUTEX_DEFAULT
++
++#define PTHREAD_TO_NATIVE_TASK(thId)     (((pthreadCB *)(thId))->vxTaskId)
++
++using iox_pthread_t = pthread_t;
++using iox_pthread_attr_t = pthread_attr_t;
++
++inline int iox_pthread_setname_np(iox_pthread_t thread, const char* name)
++{
++    WIND_TCB *pTcb;
++
++    taskTcbGet(PTHREAD_TO_NATIVE_TASK (thread), &pTcb);
++    strncpy(pTcb->user.pName, name, strlen(name)<16?strlen(name)+1:15);
++    return 0;
++}
++
++inline int iox_pthread_getname_np(iox_pthread_t thread, char* name, size_t len)
++{
++    char * tn;
++
++    tn = taskName(PTHREAD_TO_NATIVE_TASK (thread));
++    strncpy(name, tn, len);
++    return 0;
++}
++
++inline int
++iox_pthread_create(iox_pthread_t* thread, const iox_pthread_attr_t* attr, void* (*start_routine)(void*), void* arg)
++{
++    return pthread_create(thread, attr, start_routine, arg);
++}
++
++inline int iox_pthread_join(iox_pthread_t thread, void** retval)
++{
++    return pthread_join(thread, retval);
++}
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_PTHREAD_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pwd.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pwd.hpp
+new file mode 100644
+index 000000000..050381962
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/pwd.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_PWD_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_PWD_HPP
++
++#include <pwd.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_PWD_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/resource.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/resource.hpp
+new file mode 100644
+index 000000000..22f23e954
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/resource.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_RESOURCE_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_RESOURCE_HPP
++
++#include <sys/resource.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_RESOURCE_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/semaphore.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/semaphore.hpp
+new file mode 100644
+index 000000000..dc28ad126
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/semaphore.hpp
+@@ -0,0 +1,78 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_SEMAPHORE_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_SEMAPHORE_HPP
++
++#include <limits.h>
++#include <semaphore.h>
++
++using iox_sem_t = sem_t;
++
++#define IOX_SEM_FAILED SEM_FAILED
++constexpr uint32_t IOX_SEM_VALUE_MAX = SEM_VALUE_MAX;
++
++inline int iox_sem_getvalue(iox_sem_t* sem, int* sval)
++{
++    return sem_getvalue(sem, sval);
++}
++
++inline int iox_sem_post(iox_sem_t* sem)
++{
++    return sem_post(sem);
++}
++
++inline int iox_sem_wait(iox_sem_t* sem)
++{
++    return sem_wait(sem);
++}
++
++inline int iox_sem_trywait(iox_sem_t* sem)
++{
++    return sem_trywait(sem);
++}
++
++inline int iox_sem_timedwait(iox_sem_t* sem, const struct timespec* abs_timeout)
++{
++    return sem_timedwait(sem, abs_timeout);
++}
++
++inline int iox_sem_close(iox_sem_t* sem)
++{
++    return sem_close(sem);
++}
++
++inline int iox_sem_destroy(iox_sem_t* sem)
++{
++    return sem_destroy(sem);
++}
++
++inline int iox_sem_init(iox_sem_t* sem, int pshared, unsigned int value)
++{
++    return sem_init(sem, pshared, value);
++}
++
++template <typename... Targs>
++inline iox_sem_t* iox_sem_open(const char* name, int oflag, Targs... args)
++{
++    return sem_open(name, oflag, args...);
++}
++
++inline int iox_sem_unlink(const char* name)
++{
++    return sem_unlink(name);
++}
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_SEMAPHORE_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/signal.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/signal.hpp
+new file mode 100644
+index 000000000..769f931fc
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/signal.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_SIGNAL_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_SIGNAL_HPP
++
++#include <signal.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_SIGNAL_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/socket.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/socket.hpp
+new file mode 100644
+index 000000000..d785a4ed3
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/socket.hpp
+@@ -0,0 +1,31 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_SOCKET_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_SOCKET_HPP
++
++#include <cstdint>
++#include <sys/socket.h>
++
++int iox_bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen);
++int iox_socket(int domain, int type, int protocol);
++int iox_setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen);
++ssize_t
++iox_sendto(int sockfd, const void* buf, size_t len, int flags, const struct sockaddr* dest_addr, socklen_t addrlen);
++ssize_t iox_recvfrom(int sockfd, void* buf, size_t len, int flags, struct sockaddr* src_addr, socklen_t* addrlen);
++int iox_connect(int sockfd, const struct sockaddr* addr, socklen_t addrlen);
++int iox_closesocket(int sockfd);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_SOCKET_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/stat.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/stat.hpp
+new file mode 100644
+index 000000000..684134dee
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/stat.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_STAT_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_STAT_HPP
++
++#include <sys/stat.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_STAT_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/time.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/time.hpp
+new file mode 100644
+index 000000000..1e3f6051d
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/time.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_TIME_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_TIME_HPP
++
++#include <sys/time.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_TIME_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/types.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/types.hpp
+new file mode 100644
+index 000000000..27add7666
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/types.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_TYPES_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_TYPES_HPP
++
++#include <sys/types.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_TYPES_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/un.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/un.hpp
+new file mode 100644
+index 000000000..d8dd8a643
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/un.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_UN_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_UN_HPP
++
++#include <sys/un.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_UN_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/unistd.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/unistd.hpp
+new file mode 100644
+index 000000000..ad294c9e7
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/unistd.hpp
+@@ -0,0 +1,23 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_UNISTD_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_UNISTD_HPP
++
++#include <unistd.h>
++
++int iox_close(int fd);
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_UNISTD_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/wait.hpp b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/wait.hpp
+new file mode 100644
+index 000000000..077b3445c
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/wait.hpp
+@@ -0,0 +1,21 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++#ifndef IOX_HOOFS_VXWORKS_PLATFORM_WAIT_HPP
++#define IOX_HOOFS_VXWORKS_PLATFORM_WAIT_HPP
++
++#include <sys/wait.h>
++
++#endif // IOX_HOOFS_VXWORKS_PLATFORM_WAIT_HPP
+diff --git a/iceoryx_hoofs/platform/vxworks/source/file.cpp b/iceoryx_hoofs/platform/vxworks/source/file.cpp
+new file mode 100644
+index 000000000..b42469341
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/file.cpp
+@@ -0,0 +1,22 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/file.hpp"
++
++int iox_flock(int fd, int op)
++{
++    return flock(fd, op);
++}
+diff --git a/iceoryx_hoofs/platform/vxworks/source/fnctl.cpp b/iceoryx_hoofs/platform/vxworks/source/fnctl.cpp
+new file mode 100644
+index 000000000..3ffc15d64
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/fnctl.cpp
+@@ -0,0 +1,24 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/fcntl.hpp"
++
++int iox_open(const char* pathname, int flags, mode_t mode)
++{
++    /* open is done as O_CREAT | O_RDONLY, but later on a flock as executed as LOCK_EX | LOCK_NB, 
++     * and an advisory locking tries to acquire a write lock (F_WRLCK) and fails */
++    return open(pathname, flags|O_RDWR, mode);
++}
+diff --git a/iceoryx_hoofs/platform/vxworks/source/mman.cpp b/iceoryx_hoofs/platform/vxworks/source/mman.cpp
+new file mode 100644
+index 000000000..41ba2c169
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/mman.cpp
+@@ -0,0 +1,27 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/mman.hpp"
++
++int iox_shm_open(const char* name, int oflag, mode_t mode)
++{
++    return shm_open(name, oflag, mode);
++}
++
++int iox_shm_unlink(const char* name)
++{
++    return shm_unlink(name);
++}
+diff --git a/iceoryx_hoofs/platform/vxworks/source/mqueue.cpp b/iceoryx_hoofs/platform/vxworks/source/mqueue.cpp
+new file mode 100644
+index 000000000..0a5dc067a
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/mqueue.cpp
+@@ -0,0 +1,27 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/mqueue.hpp"
++
++mqd_t iox_mq_open2(const char* name, int oflag)
++{
++    return mq_open(name, oflag);
++}
++
++mqd_t iox_mq_open4(const char* name, int oflag, mode_t mode, struct mq_attr* attr)
++{
++    return mq_open(name, oflag, mode, attr);
++}
+diff --git a/iceoryx_hoofs/platform/vxworks/source/socket.cpp b/iceoryx_hoofs/platform/vxworks/source/socket.cpp
+new file mode 100644
+index 000000000..6a34c62ba
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/socket.cpp
+@@ -0,0 +1,72 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/socket.hpp"
++#include "iceoryx_hoofs/platform/platform_settings.hpp"
++#include <unistd.h>
++#include <sys/un.h>
++#include <string.h>
++#include <strings.h>
++#include <stdio.h>
++
++int iox_bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen)
++{
++    /* /comp/socket/0x1234 is a hardcoded path in VxWorks, convert basename to the 0x1234 format  */
++    int i, sum = 0;
++    char *basename = &((struct sockaddr_un*)addr)->sun_path[strlen(iox::platform::IOX_UDS_SOCKET_PATH_PREFIX)];
++
++    /* calculate a sum from the name to make it consistent for unlinking */
++    for (i = 0; i < (int)strlen(basename); i++)
++        sum += basename[i];
++
++    sprintf(&((struct sockaddr_un*)addr)->sun_path[0], "%s0x%04x", iox::platform::IOX_UDS_SOCKET_PATH_PREFIX, sum % 0xffff);
++    unlink(&(((struct sockaddr_un*)addr)->sun_path[0]));
++
++    return bind(sockfd, addr, addrlen);
++}
++
++int iox_socket(int domain, int type, int protocol)
++{
++    /* there is no SOCK_DGRAM in VxWorks */
++    type = SOCK_SEQPACKET;
++    return socket(domain, type, protocol);
++}
++
++int iox_setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen)
++{
++    return setsockopt(sockfd, level, optname, optval, optlen);
++}
++
++ssize_t
++iox_sendto(int sockfd, const void* buf, size_t len, int flags, const struct sockaddr* dest_addr, socklen_t addrlen)
++{
++    return sendto(sockfd, buf, len, flags, dest_addr, addrlen);
++}
++
++ssize_t iox_recvfrom(int sockfd, void* buf, size_t len, int flags, struct sockaddr* src_addr, socklen_t* addrlen)
++{
++    return recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
++}
++
++int iox_connect(int sockfd, const struct sockaddr* addr, socklen_t addrlen)
++{
++    return connect(sockfd, addr, addrlen);
++}
++
++int iox_closesocket(int sockfd)
++{
++    return close(sockfd);
++}
+diff --git a/iceoryx_hoofs/platform/vxworks/source/unistd.cpp b/iceoryx_hoofs/platform/vxworks/source/unistd.cpp
+new file mode 100644
+index 000000000..b74802069
+--- /dev/null
++++ b/iceoryx_hoofs/platform/vxworks/source/unistd.cpp
+@@ -0,0 +1,22 @@
++// Copyright (c) 2022 by Wind River Inc. All rights reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++//
++// SPDX-License-Identifier: Apache-2.0
++
++#include "iceoryx_hoofs/platform/unistd.hpp"
++
++int iox_close(int fd)
++{
++    return close(fd);
++}
+-- 
+2.34.1
+

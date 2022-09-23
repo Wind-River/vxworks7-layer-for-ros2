@@ -1,18 +1,18 @@
-From 2962baf8f86173cfbf439b10c603d04215b72614 Mon Sep 17 00:00:00 2001
+From 55a28c66bc8b3824e577b38797fae0a5c11ba9dd Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Thu, 9 Apr 2020 22:14:34 +0200
+Date: Fri, 26 Aug 2022 23:35:03 +0200
 Subject: [PATCH 1/2] rcutils
 
 ---
  src/error_handling.c         | 2 +-
- src/error_handling_helpers.h | 4 ++--
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ src/error_handling_helpers.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/error_handling.c b/src/error_handling.c
-index 01f3458..2cceee2 100644
+index a060537..fc97da7 100644
 --- a/src/error_handling.c
 +++ b/src/error_handling.c
-@@ -194,7 +194,7 @@ rcutils_set_error_state(
+@@ -198,7 +198,7 @@ rcutils_set_error_state(
    error_state.line_number = line_number;
  #if RCUTILS_REPORT_ERROR_HANDLING_ERRORS
    // Only warn of overwritting if the new error is different from the old ones.
@@ -22,18 +22,9 @@ index 01f3458..2cceee2 100644
    static_assert(
      sizeof(gtls_rcutils_error_state.message) <= sizeof(gtls_rcutils_error_string.str),
 diff --git a/src/error_handling_helpers.h b/src/error_handling_helpers.h
-index a0e898f..e0eee08 100644
+index 4914c4f..9b01529 100644
 --- a/src/error_handling_helpers.h
 +++ b/src/error_handling_helpers.h
-@@ -54,7 +54,7 @@ __rcutils_copy_string(char * dst, size_t dst_size, const char * src)
-   assert(dst_size > 0);
-   assert(src != NULL);
-   // doesn't matter how long src actually is if it is longer than dst, so limit to dst + 1
--  size_t src_length = strnlen(src, dst_size);
-+  size_t src_length = strnlen_s(src, dst_size);
-   size_t size_to_copy = src_length;
-   // the destination must be one byte bigger to store the NULL terminating character
-   if (src_length >= dst_size) {
 @@ -130,7 +130,7 @@ __rcutils_convert_uint64_t_into_c_str(uint64_t number, char * buffer, size_t buf
    buffer[i] = '\0';
  
@@ -44,5 +35,5 @@ index a0e898f..e0eee08 100644
  
  // do not use externally, internal function which is only to be used by error_handling.c
 -- 
-2.17.1
+2.34.1
 

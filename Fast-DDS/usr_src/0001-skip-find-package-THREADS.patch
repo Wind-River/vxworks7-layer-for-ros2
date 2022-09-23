@@ -1,0 +1,30 @@
+From 7c65ededf6e80616808b2de7a19c343f89909589 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Mon, 13 Dec 2021 14:00:37 +0100
+Subject: [PATCH 01/10] skip find package THREADS
+
+---
+ cmake/modules/FindThirdpartyBoost.cmake | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/modules/FindThirdpartyBoost.cmake b/cmake/modules/FindThirdpartyBoost.cmake
+index 151457a55..416558a40 100644
+--- a/cmake/modules/FindThirdpartyBoost.cmake
++++ b/cmake/modules/FindThirdpartyBoost.cmake
+@@ -11,9 +11,11 @@ set(THIRDPARTY_BOOST_INCLUDE_DIR
+     "Path to thirdparty/boost"
+ )
+ 
+-find_package(Threads REQUIRED)
++if(NOT VXWORKS)
++    find_package(Threads REQUIRED)
++endif()
+ 
+-if(WIN32 OR APPLE OR ANDROID OR QNXNTO)
++if(WIN32 OR APPLE OR ANDROID OR QNXNTO OR VXWORKS)
+     set(THIRDPARTY_BOOST_LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+ else() # Posix
+     set(THIRDPARTY_BOOST_LINK_LIBS ${CMAKE_THREAD_LIBS_INIT} rt)
+-- 
+2.34.1
+

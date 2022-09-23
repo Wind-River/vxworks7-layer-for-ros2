@@ -4,15 +4,15 @@ Date: Sat, 11 Apr 2020 18:59:40 +0200
 Subject: [PATCH] remove lambda
 
 ---
- .../include/minimal_composition/subscriber_node.hpp  |  4 ++++
- rclcpp/minimal_composition/src/subscriber_node.cpp   |  7 ++++---
- rclcpp/minimal_subscriber/lambda.cpp                 | 12 +++++++++---
+ rclcpp/composition/include/minimal_composition/subscriber_node.hpp  |  4 ++++
+ rclcpp/composition/minimal_composition/src/subscriber_node.cpp   |  7 ++++---
+ rclcpp/topics/minimal_subscriber/lambda.cpp                 | 12 +++++++++---
  3 files changed, 17 insertions(+), 6 deletions(-)
 
-diff --git a/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp b/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
+diff --git a/rclcpp/composition/minimal_composition/include/minimal_composition/subscriber_node.hpp b/rclcpp/composition/minimal_composition/include/minimal_composition/subscriber_node.hpp
 index e521529..9a5c781 100644
---- a/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
-+++ b/rclcpp/minimal_composition/include/minimal_composition/subscriber_node.hpp
+--- a/rclcpp/composition/minimal_composition/include/minimal_composition/subscriber_node.hpp
++++ b/rclcpp/composition/minimal_composition/include/minimal_composition/subscriber_node.hpp
 @@ -25,6 +25,10 @@ public:
    MINIMAL_COMPOSITION_PUBLIC SubscriberNode(rclcpp::NodeOptions options);
  
@@ -24,10 +24,10 @@ index e521529..9a5c781 100644
    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
  };
  
-diff --git a/rclcpp/minimal_composition/src/subscriber_node.cpp b/rclcpp/minimal_composition/src/subscriber_node.cpp
+diff --git a/rclcpp/composition/minimal_composition/src/subscriber_node.cpp b/rclcpp/composition/minimal_composition/src/subscriber_node.cpp
 index 0f5e32c..87069f4 100644
---- a/rclcpp/minimal_composition/src/subscriber_node.cpp
-+++ b/rclcpp/minimal_composition/src/subscriber_node.cpp
+--- a/rclcpp/composition/minimal_composition/src/subscriber_node.cpp
++++ b/rclcpp/composition/minimal_composition/src/subscriber_node.cpp
 @@ -16,15 +16,16 @@
  #include "rclcpp/rclcpp.hpp"
  #include "std_msgs/msg/string.hpp"
@@ -48,10 +48,10 @@ index 0f5e32c..87069f4 100644
  }
  
  #include "rclcpp_components/register_node_macro.hpp"
-diff --git a/rclcpp/minimal_subscriber/lambda.cpp b/rclcpp/minimal_subscriber/lambda.cpp
+diff --git a/rclcpp/topics//minimal_subscriber/lambda.cpp b/rclcpp/topics/minimal_subscriber/lambda.cpp
 index c63ca43..61639cc 100644
---- a/rclcpp/minimal_subscriber/lambda.cpp
-+++ b/rclcpp/minimal_subscriber/lambda.cpp
+--- a/rclcpp/topics/minimal_subscriber/lambda.cpp
++++ b/rclcpp/topics/minimal_subscriber/lambda.cpp
 @@ -18,24 +18,30 @@
  #include "rclcpp/rclcpp.hpp"
  #include "std_msgs/msg/string.hpp"

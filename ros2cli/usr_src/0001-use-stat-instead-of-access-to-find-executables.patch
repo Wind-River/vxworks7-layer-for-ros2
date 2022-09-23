@@ -1,0 +1,34 @@
+From 9b5eb4403a5df6946613fff9ac5e814c34b4d788 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Tue, 19 Jul 2022 23:31:25 +0200
+Subject: [PATCH] use stat instead of access to find executables
+
+---
+ ros2pkg/ros2pkg/api/__init__.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/ros2pkg/ros2pkg/api/__init__.py b/ros2pkg/ros2pkg/api/__init__.py
+index dbc5bd4..405ca38 100644
+--- a/ros2pkg/ros2pkg/api/__init__.py
++++ b/ros2pkg/ros2pkg/api/__init__.py
+@@ -13,6 +13,7 @@
+ # limitations under the License.
+ 
+ import os
++import stat
+ 
+ from ament_index_python import get_package_prefix
+ from ament_index_python import get_packages_with_prefixes
+@@ -50,7 +51,8 @@ def get_executable_paths(*, package_name):
+         # select executable files
+         for filename in sorted(filenames):
+             path = os.path.join(dirpath, filename)
+-            if os.access(path, os.X_OK):
++            st = os.stat(path)
++            if (st[stat.ST_MODE]&stat.S_IXUSR) != 0:
+                 executable_paths.append(path)
+     return executable_paths
+ 
+-- 
+2.34.1
+

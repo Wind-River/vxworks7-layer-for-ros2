@@ -1,0 +1,27 @@
+From ab86c50a0e6d5156fcb64f1eb1502098582cb27c Mon Sep 17 00:00:00 2001
+From: Mihai Dragusu <mihai.dragusu@windriver.com>
+Date: Fri, 19 Feb 2021 14:50:06 +0200
+Subject: [PATCH] SR660 serial read fix
+
+---
+ dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+index edeca8f..1462a7e 100644
+--- a/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
++++ b/dynamixel_sdk/src/dynamixel_sdk/port_handler_vxworks.cpp
+@@ -164,7 +164,9 @@ int PortHandlerVxworks::readPort(uint8_t *packet, int length)
+     fprintf(stderr,"\n");
+   }
+ #endif
+-
++  //small error check for read after SR660
++  if (val == -1)
++    val = 0;
+   return val;
+ }
+ 
+-- 
+2.30.1
+

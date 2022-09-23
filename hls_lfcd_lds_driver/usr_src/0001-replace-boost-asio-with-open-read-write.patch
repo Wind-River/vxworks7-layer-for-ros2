@@ -189,7 +189,7 @@ index 0c83f96..08a9d98 100644
  
      return 0;
 -  }
--  catch (boost::system::system_error ex)
+-  catch (boost::system::system_error& ex)
 -  {
 -    //ROS_ERROR("An exception was thrown: %s", ex.what());
 -    return -1;

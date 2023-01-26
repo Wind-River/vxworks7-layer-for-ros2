@@ -4,7 +4,7 @@ Date: Fri, 2 Sep 2022 00:06:53 +0200
 Subject: [PATCH] cyclonedds
 
 ---
- CMakeLists.txt                              | 12 +++++++-----
+ CMakeLists.txt                              | 10 ++++++----
  src/CMakeLists.txt                          |  2 +-
  src/core/ddsi/src/q_sockwaitset.c           |  4 ++--
  src/core/ddsi/src/q_thread.c                |  3 ++-
@@ -46,13 +46,6 @@ index 06648da8..5eaaed14 100644
  endif()
  
  if(${CMAKE_C_COMPILER_ID} STREQUAL "SunPro")
-@@ -346,4 +348,4 @@ if(DEFINED ENV{LIB_FUZZING_ENGINE})
-   add_subdirectory(fuzz)
- endif()
- 
--include(CMakeCPack.cmake)
-\ No newline at end of file
-+include(CMakeCPack.cmake)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index ac30414c..73df34a0 100644
 --- a/src/CMakeLists.txt

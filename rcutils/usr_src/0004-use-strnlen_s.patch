@@ -1,7 +1,7 @@
-From 55a28c66bc8b3824e577b38797fae0a5c11ba9dd Mon Sep 17 00:00:00 2001
+From a885fc51ba9191fcb5333be620c56ed413c70925 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Fri, 26 Aug 2022 23:35:03 +0200
-Subject: [PATCH 1/2] rcutils
+Date: Sat, 11 Feb 2023 15:01:02 +0100
+Subject: [PATCH 4/5] use strnlen_s
 
 ---
  src/error_handling.c         | 2 +-

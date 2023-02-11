@@ -1,7 +1,7 @@
-From 26b156d1de661ad05b409cc45ebc12ec6b80b455 Mon Sep 17 00:00:00 2001
+From d98650b209b600bb616fc19af9449d22fd87c407 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Fri, 27 Jan 2023 14:28:26 +0100
-Subject: [PATCH 2/2] add __VXWORKS__ to strerror
+Date: Sat, 11 Feb 2023 14:55:31 +0100
+Subject: [PATCH 2/5] add __VXWORKS__ to strerror
 
 ---
  src/strerror.c | 2 +-

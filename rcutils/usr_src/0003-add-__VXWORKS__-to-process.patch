@@ -1,14 +1,14 @@
-From 78946c933e078ce3a41d8ad325d576805ce037b6 Mon Sep 17 00:00:00 2001
+From 94e1f92b6d4ed68c47751e00641053975f1fdff9 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Fri, 26 Aug 2022 23:35:49 +0200
-Subject: [PATCH 2/2] use getprogname
+Date: Sat, 11 Feb 2023 14:57:32 +0100
+Subject: [PATCH 3/5] add __VXWORKS__ to process
 
 ---
  src/process.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/process.c b/src/process.c
-index 2b43842..f5f5658 100644
+index 9f21bbf..0cb1618 100644
 --- a/src/process.c
 +++ b/src/process.c
 @@ -58,7 +58,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
@@ -18,7 +18,7 @@ index 2b43842..f5f5658 100644
 -#if defined __APPLE__ || defined __FreeBSD__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
 +#if defined __APPLE__ || defined __FreeBSD__ || defined __VXWORKS__ || (defined __ANDROID__ && __ANDROID_API__ >= 21)
    const char * appname = getprogname();
- #elif defined __GNUC__ && !defined(__QNXNTO__)
+ #elif defined __GNUC__ && !defined(__QNXNTO__) && !defined(__OHOS__)
    const char * appname = program_invocation_name;
 @@ -85,7 +85,7 @@ char * rcutils_get_executable_name(rcutils_allocator_t allocator)
    }

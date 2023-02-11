@@ -1,0 +1,39 @@
+From 2ae0232baaca5e0058ecfe2eb0a4c7309abc2627 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sat, 11 Feb 2023 14:15:31 +0100
+Subject: [PATCH] add VXWORKS
+
+---
+ googlemock/CMakeLists.txt.install | 2 +-
+ googletest/CMakeLists.txt.install | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/googlemock/CMakeLists.txt.install b/googlemock/CMakeLists.txt.install
+index 3ad61360..a7aca0fd 100644
+--- a/googlemock/CMakeLists.txt.install
++++ b/googlemock/CMakeLists.txt.install
+@@ -21,7 +21,7 @@ target_compile_features(gmock PUBLIC cxx_std_11)  # Require C++11
+ # (see https://wiki.gentoo.org/wiki/AddressSanitizer/Problems#pthread_linking_issues
+ # for some additional information).  To work around that, we unconditionally
+ # add the -pthread flag for Linux machines so it will always work
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   target_link_libraries(gmock "-pthread")
+ endif()
+ 
+diff --git a/googletest/CMakeLists.txt.install b/googletest/CMakeLists.txt.install
+index 0e975c1d..ed6fff9e 100644
+--- a/googletest/CMakeLists.txt.install
++++ b/googletest/CMakeLists.txt.install
+@@ -15,7 +15,7 @@ target_compile_features(gtest PUBLIC cxx_std_11)  # Require C++11
+ # (see https://wiki.gentoo.org/wiki/AddressSanitizer/Problems#pthread_linking_issues
+ # for some additional information).  To work around that, we unconditionally
+ # add the -pthread flag for Linux machines so it will always work
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   target_link_libraries(gtest "-pthread")
+ endif()
+ 
+-- 
+2.34.1
+

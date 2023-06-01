@@ -1,0 +1,39 @@
+From dc833919621d18983d66dfead1d744e814fb369e Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 1 Jun 2023 16:44:37 +0200
+Subject: [PATCH] rclpy patch
+
+---
+ rclpy/CMakeLists.txt               | 2 +-
+ rclpy/src/rclpy/signal_handler.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/rclpy/CMakeLists.txt b/rclpy/CMakeLists.txt
+index 88d17d8..48bd3a3 100644
+--- a/rclpy/CMakeLists.txt
++++ b/rclpy/CMakeLists.txt
+@@ -106,7 +106,7 @@ pybind11_add_module(_rclpy_pybind11 SHARED
+   src/rclpy/wait_set.cpp
+ )
+ 
+-if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT APPLE)
++if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT (APPLE OR VXWORKS))
+   target_link_libraries(_rclpy_pybind11 PRIVATE atomic)
+ endif()
+ 
+diff --git a/rclpy/src/rclpy/signal_handler.cpp b/rclpy/src/rclpy/signal_handler.cpp
+index 62dfffd..0bf1e65 100644
+--- a/rclpy/src/rclpy/signal_handler.cpp
++++ b/rclpy/src/rclpy/signal_handler.cpp
+@@ -180,7 +180,7 @@ CleanupdeferredSignalHandler cleanup_deferred_signal_handler;
+ 
+ }  // namespace
+ 
+-#if __APPLE__ || _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
++#if __APPLE__ || __VXWORKS__ || _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _POSIX_SOURCE
+ 
+ #define SIGNAL_HANDLER_T struct sigaction
+ 
+-- 
+2.34.1
+

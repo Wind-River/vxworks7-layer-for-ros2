@@ -1,6 +1,6 @@
-From 89e466c154202d8e778486dfe0a44e946bcf3fec Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Fri, 27 Jan 2023 14:19:28 +0100
+From bc449d0643140a23fecf05fb39e20d9ba58133ee Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 1 Jun 2023 14:55:27 +0200
 Subject: [PATCH] cyclonedds
 
 ---
@@ -17,10 +17,10 @@ Subject: [PATCH] cyclonedds
  10 files changed, 57 insertions(+), 17 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f046b631..eb42320b 100644
+index 837d982c..519046fb 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -30,7 +30,7 @@ endif()
+@@ -26,7 +26,7 @@ endif()
  if(CMAKE_CROSSCOMPILING)
    set(not_crosscompiling OFF)
  else()
@@ -29,7 +29,7 @@ index f046b631..eb42320b 100644
  endif()
  
  # By default don't treat warnings as errors, else anyone building it with a different compiler that
-@@ -40,12 +40,14 @@ option(WERROR "Treat compiler warnings as errors" OFF)
+@@ -36,12 +36,14 @@ option(WERROR "Treat compiler warnings as errors" OFF)
  
  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
  
@@ -48,10 +48,10 @@ index f046b631..eb42320b 100644
  
  if(${CMAKE_C_COMPILER_ID} STREQUAL "SunPro")
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 8c0049c7..95b78f2b 100644
+index fa08094a..33252e0e 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -69,7 +69,7 @@ endif()
+@@ -73,7 +73,7 @@ endif()
  #
  # Historically the option was DDSC_ENABLE_OPENSSL so make some allowance for those who are
  # currently relying on it.
@@ -61,7 +61,7 @@ index 8c0049c7..95b78f2b 100644
  if(ENABLE_SSL)
    if(NOT ENABLE_SSL STREQUAL "AUTO")
 diff --git a/src/core/ddsi/src/q_sockwaitset.c b/src/core/ddsi/src/q_sockwaitset.c
-index 5cfb437b..78b3193e 100644
+index b5e4c221..b93e1231 100644
 --- a/src/core/ddsi/src/q_sockwaitset.c
 +++ b/src/core/ddsi/src/q_sockwaitset.c
 @@ -12,6 +12,9 @@
@@ -88,7 +88,7 @@ index 5cfb437b..78b3193e 100644
      goto fail_pipedev;
    if ((pfd[0] = open ((char*)&pipename, O_RDWR, 0644)) == -1)
 diff --git a/src/core/ddsi/src/q_thread.c b/src/core/ddsi/src/q_thread.c
-index 6de01fa1..6159f607 100644
+index 331ae70e..7b36f606 100644
 --- a/src/core/ddsi/src/q_thread.c
 +++ b/src/core/ddsi/src/q_thread.c
 @@ -27,6 +27,7 @@
@@ -98,18 +98,18 @@ index 6de01fa1..6159f607 100644
 +#include "dds/ddsrt/threads/posix.h"
  
  struct thread_states thread_states;
- ddsrt_thread_local struct thread_state1 *tsd_thread_state;
-@@ -232,7 +233,7 @@ static uint32_t create_thread_wrapper (void *ptr)
-   struct thread_state1 * const ts1 = ptr;
-   struct ddsi_domaingv const * const gv = ddsrt_atomic_ldvoidp (&ts1->gv);
+ ddsrt_thread_local struct thread_state *tsd_thread_state;
+@@ -248,7 +249,7 @@ static uint32_t create_thread_wrapper (void *ptr)
+   struct thread_state * const thrst = ptr;
+   struct ddsi_domaingv const * const gv = ddsrt_atomic_ldvoidp (&thrst->gv);
    if (gv)
--    GVTRACE ("started new thread %"PRIdTID": %s\n", ddsrt_gettid (), ts1->name);
-+    GVTRACE ("started new thread %u: %s\n", ddsrt_gettid (), ts1->name);
-   assert (ts1->state == THREAD_STATE_INIT);
-   tsd_thread_state = ts1;
+-    GVTRACE ("started new thread %"PRIdTID": %s\n", ddsrt_gettid (), thrst->name);
++    GVTRACE ("started new thread %u: %s\n", ddsrt_gettid (), thrst->name);
+   assert (thrst->state == THREAD_STATE_INIT);
+   tsd_thread_state = thrst;
    ddsrt_mutex_lock (&thread_states.lock);
 diff --git a/src/ddsrt/include/dds/ddsrt/threads/posix.h b/src/ddsrt/include/dds/ddsrt/threads/posix.h
-index a33d63f6..29884ab5 100644
+index af3b7f66..70f19b0e 100644
 --- a/src/ddsrt/include/dds/ddsrt/threads/posix.h
 +++ b/src/ddsrt/include/dds/ddsrt/threads/posix.h
 @@ -16,6 +16,7 @@
@@ -130,7 +130,7 @@ index a33d63f6..29884ab5 100644
  #   define PRIdPID "d" /* typedef int TASK_ID */
  # endif
 diff --git a/src/ddsrt/include/dds/ddsrt/time.h b/src/ddsrt/include/dds/ddsrt/time.h
-index 70952ff8..5e0c94a0 100644
+index f64ed503..620a6f05 100644
 --- a/src/ddsrt/include/dds/ddsrt/time.h
 +++ b/src/ddsrt/include/dds/ddsrt/time.h
 @@ -21,6 +21,7 @@
@@ -142,7 +142,7 @@ index 70952ff8..5e0c94a0 100644
  
  #include "dds/export.h"
 diff --git a/src/ddsrt/src/sockets/posix/gethostname.c b/src/ddsrt/src/sockets/posix/gethostname.c
-index 5aba1b48..772ba2a0 100644
+index 907942c5..48d36dc2 100644
 --- a/src/ddsrt/src/sockets/posix/gethostname.c
 +++ b/src/ddsrt/src/sockets/posix/gethostname.c
 @@ -12,6 +12,7 @@
@@ -154,7 +154,7 @@ index 5aba1b48..772ba2a0 100644
  #include "dds/ddsrt/sockets.h"
  #include "dds/ddsrt/string.h"
 diff --git a/src/ddsrt/src/threads/posix/threads.c b/src/ddsrt/src/threads/posix/threads.c
-index 218421dc..69045545 100644
+index 0191ec46..a98fee92 100644
 --- a/src/ddsrt/src/threads/posix/threads.c
 +++ b/src/ddsrt/src/threads/posix/threads.c
 @@ -121,7 +121,7 @@ ddsrt_thread_getname(char *str, size_t size)
@@ -182,10 +182,10 @@ index 218421dc..69045545 100644
  
    /* return the result of the user routine */
 diff --git a/src/idl/src/string.c b/src/idl/src/string.c
-index 336c16c9..3c5a2960 100644
+index 26e8e4cb..be18db30 100644
 --- a/src/idl/src/string.c
 +++ b/src/idl/src/string.c
-@@ -51,7 +51,7 @@ typedef _locale_t locale_t;
+@@ -55,7 +55,7 @@ typedef _locale_t locale_t;
  
  #include "idl/stream.h"
  #include "idl/string.h"
@@ -194,7 +194,7 @@ index 336c16c9..3c5a2960 100644
  static locale_t posix_locale(void);
  
  #if _WIN32
-@@ -67,6 +67,19 @@ int idl_isspace(int c) { return _isspace_l(c, posix_locale()); }
+@@ -71,6 +71,19 @@ int idl_isspace(int c) { return _isspace_l(c, posix_locale()); }
  int idl_isupper(int c) { return _isupper_l(c, posix_locale()); }
  int idl_toupper(int c) { return _toupper_l(c, posix_locale()); }
  int idl_tolower(int c) { return _tolower_l(c, posix_locale()); }
@@ -214,7 +214,7 @@ index 336c16c9..3c5a2960 100644
  #else
  int idl_isalnum(int c) { return isalnum_l(c, posix_locale()); }
  int idl_isalpha(int c) { return isalpha_l(c, posix_locale()); }
-@@ -101,6 +114,8 @@ int idl_strcasecmp(const char *s1, const char *s2)
+@@ -105,6 +118,8 @@ int idl_strcasecmp(const char *s1, const char *s2)
    assert(s2);
  #if _WIN32
    return _stricmp_l(s1, s2, posix_locale());
@@ -223,7 +223,7 @@ index 336c16c9..3c5a2960 100644
  #else
    return strcasecmp_l(s1, s2, posix_locale());
  #endif
-@@ -112,6 +127,8 @@ int idl_strncasecmp(const char *s1, const char *s2, size_t n)
+@@ -116,6 +131,8 @@ int idl_strncasecmp(const char *s1, const char *s2, size_t n)
    assert(s2);
  #if _WIN32
    return _strnicmp_l(s1, s2, n, posix_locale());
@@ -232,7 +232,7 @@ index 336c16c9..3c5a2960 100644
  #else
    return strncasecmp_l(s1, s2, n, posix_locale());
  #endif
-@@ -121,6 +138,8 @@ char *idl_strdup(const char *str)
+@@ -125,6 +142,8 @@ char *idl_strdup(const char *str)
  {
  #if _WIN32
    return _strdup(str);
@@ -241,7 +241,7 @@ index 336c16c9..3c5a2960 100644
  #else
    return strdup(str);
  #endif
-@@ -180,6 +199,8 @@ __pragma(warning(pop))
+@@ -184,6 +203,8 @@ __pragma(warning(pop))
  #endif
  #elif __APPLE__ || __FreeBSD__
    return vsnprintf_l(str, size, posix_locale(), fmt, ap);
@@ -250,7 +250,7 @@ index 336c16c9..3c5a2960 100644
  #else
    int ret;
    locale_t loc, posixloc = posix_locale();
-@@ -274,6 +295,8 @@ unsigned long long idl_strtoull(const char *str, char **endptr, int base)
+@@ -280,6 +301,8 @@ unsigned long long idl_strtoull(const char *str, char **endptr, int base)
  #else
    return _strtoull_l(str, endptr, base, posix_locale());
  #endif
@@ -259,7 +259,7 @@ index 336c16c9..3c5a2960 100644
  #else
    return strtoull_l(str, endptr, base, posix_locale());
  #endif
-@@ -288,6 +311,8 @@ long double idl_strtold(const char *str, char **endptr)
+@@ -294,6 +317,8 @@ long double idl_strtold(const char *str, char **endptr)
  #else
    return _strtold_l(str, endptr, posix_locale());
  #endif
@@ -268,7 +268,7 @@ index 336c16c9..3c5a2960 100644
  #else
    return strtold_l(str, endptr, posix_locale());
  #endif
-@@ -313,6 +338,8 @@ int idl_vfprintf(FILE *fp, const char *fmt, va_list ap)
+@@ -319,6 +344,8 @@ int idl_vfprintf(FILE *fp, const char *fmt, va_list ap)
    return _vfprintf_p_l(fp, fmt, posix_locale(), ap);
  #elif __APPLE__ || __FreeBSD__
    return vfprintf_l(fp, posix_locale(), fmt, ap);
@@ -277,7 +277,7 @@ index 336c16c9..3c5a2960 100644
  #else
    int ret;
    locale_t loc, posixloc = posix_locale();
-@@ -438,7 +465,10 @@ static pthread_once_t once = PTHREAD_ONCE_INIT;
+@@ -444,7 +471,10 @@ static pthread_once_t once = PTHREAD_ONCE_INIT;
  
  static void free_locale(void *ptr)
  {
@@ -288,7 +288,7 @@ index 336c16c9..3c5a2960 100644
  }
  
  static void make_key(void)
-@@ -450,14 +480,15 @@ static locale_t posix_locale(void)
+@@ -456,14 +486,15 @@ static locale_t posix_locale(void)
  {
    locale_t locale;
    (void)pthread_once(&once, make_key);
@@ -307,12 +307,12 @@ index 336c16c9..3c5a2960 100644
  }
  #endif /* _WIN32 */
 diff --git a/src/tools/CMakeLists.txt b/src/tools/CMakeLists.txt
-index 3a4d5941..c36d4ab7 100644
+index 547515e0..99441603 100644
 --- a/src/tools/CMakeLists.txt
 +++ b/src/tools/CMakeLists.txt
-@@ -15,7 +15,7 @@ set(CMAKE_INSTALL_TOOLSDIR "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/tools")
+@@ -14,7 +14,7 @@ set(CMAKE_INSTALL_TOOLSDIR "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/tools")
+ 
  add_subdirectory(_confgen)
- add_subdirectory(pubsub)
  if(BUILD_IDLC)
 -  add_subdirectory(idlpp)
 -  add_subdirectory(idlc)

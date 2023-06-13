@@ -1,6 +1,6 @@
-From 726c849a5c2e5a0c000407137d18a13a07228848 Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Wed, 23 Sep 2020 12:57:22 +0200
+From 38e242f17c0cfd59d4506ae7992c2b93fe7eb79a Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 13 Jun 2023 11:20:08 +0200
 Subject: [PATCH] added support for Dinkum C library
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH] added support for Dinkum C library
  1 file changed, 6 insertions(+)
 
 diff --git a/rclcpp/include/rclcpp/function_traits.hpp b/rclcpp/include/rclcpp/function_traits.hpp
-index f5c56b0..2ef7d64 100644
+index b6af0aeb..ff626a2b 100644
 --- a/rclcpp/include/rclcpp/function_traits.hpp
 +++ b/rclcpp/include/rclcpp/function_traits.hpp
-@@ -89,6 +89,8 @@ struct function_traits<std::_Bind<std::_Mem_fn<ReturnTypeT (ClassT::*)(Args ...)
+@@ -91,6 +91,8 @@ struct function_traits<std::_Bind<std::_Mem_fn<ReturnTypeT (ClassT::*)(Args ...)
  #elif defined _MSC_VER  // MS Visual Studio
  struct function_traits<
    std::_Binder<std::_Unforced, ReturnTypeT (ClassT::*)(Args ...), FArgs ...>>
@@ -20,7 +20,7 @@ index f5c56b0..2ef7d64 100644
  #else
  #error "Unsupported C++ compiler / standard library"
  #endif
-@@ -106,6 +108,8 @@ struct function_traits<std::_Bind<std::_Mem_fn<ReturnTypeT (ClassT::*)(Args ...)
+@@ -110,6 +112,8 @@ struct function_traits<std::_Bind<std::_Mem_fn<ReturnTypeT (ClassT::*)(Args ...)
  #elif defined _MSC_VER  // MS Visual Studio
  struct function_traits<
    std::_Binder<std::_Unforced, ReturnTypeT (ClassT::*)(Args ...) const, FArgs ...>>
@@ -29,7 +29,7 @@ index f5c56b0..2ef7d64 100644
  #else
  #error "Unsupported C++ compiler / standard library"
  #endif
-@@ -120,6 +124,8 @@ struct function_traits<std::__bind<ReturnTypeT( &)(Args ...), FArgs ...>>
+@@ -126,6 +130,8 @@ struct function_traits<std::__bind<ReturnTypeT( &)(Args ...), FArgs ...>>
  struct function_traits<std::_Bind<ReturnTypeT(*(FArgs ...))(Args ...)>>
  #elif defined _MSC_VER  // MS Visual Studio
  struct function_traits<std::_Binder<std::_Unforced, ReturnTypeT( &)(Args ...), FArgs ...>>
@@ -39,5 +39,5 @@ index f5c56b0..2ef7d64 100644
  #error "Unsupported C++ compiler / standard library"
  #endif
 -- 
-2.25.1
+2.34.1
 

@@ -1,12 +1,12 @@
-From a4d3c89b41722f9f9ce1eae3122c81161447bc6b Mon Sep 17 00:00:00 2001
+From 725c0a516e0bf9a2512444c39f2f0bb980067615 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Fri, 30 Jun 2023 05:24:20 +0200
+Date: Sun, 2 Jul 2023 17:27:52 +0200
 Subject: [PATCH] fix exchange
 
 ---
  0001-fix-exchange.patch | 66 +++++++++++++++++++++++++++++++++++++++++
- CMakeLists.txt          |  1 +
- 2 files changed, 67 insertions(+)
+ CMakeLists.txt          |  5 ++++
+ 2 files changed, 71 insertions(+)
  create mode 100644 0001-fix-exchange.patch
 
 diff --git a/0001-fix-exchange.patch b/0001-fix-exchange.patch
@@ -82,17 +82,21 @@ index 0000000..92b3f70
 +2.34.1
 +
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dffac71..6856f2d 100644
+index dffac71..4632e2f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -67,6 +67,7 @@ if(NOT foonathan_memory_FOUND)
-   if(INSTALLER_PLATFORM)
-     set(PATCH_COMMAND_STR PATCH_COMMAND
-       git apply ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.patch &&
-+      git apply ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-exchange.patch &&
+@@ -70,6 +70,11 @@ if(NOT foonathan_memory_FOUND)
        sed -i -e "s/INSTALLER_PLATFORM/${INSTALLER_PLATFORM}/g" CMakeLists.txt)
    endif()
  
++  if(VXWORKS)
++    set(PATCH_COMMAND_STR PATCH_COMMAND
++      git apply ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-exchange.patch)
++  endif()
++
+   externalproject_add(foo_mem-ext
+   GIT_REPOSITORY https://github.com/foonathan/memory.git
+   GIT_TAG v0.7-1
 -- 
 2.34.1
 

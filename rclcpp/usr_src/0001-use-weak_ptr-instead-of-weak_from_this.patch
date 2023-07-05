@@ -1,0 +1,25 @@
+From b7241b926fd7dbff1b43a3d37e0336cf660d38df Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 1 Jun 2023 19:39:08 +0200
+Subject: [PATCH] use weak_ptr instead of weak_from_this
+
+---
+ rclcpp/src/rclcpp/node_interfaces/node_base.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rclcpp/src/rclcpp/node_interfaces/node_base.cpp b/rclcpp/src/rclcpp/node_interfaces/node_base.cpp
+index 6544d692..883241c9 100644
+--- a/rclcpp/src/rclcpp/node_interfaces/node_base.cpp
++++ b/rclcpp/src/rclcpp/node_interfaces/node_base.cpp
+@@ -204,7 +204,7 @@ NodeBase::create_callback_group(
+   rclcpp::CallbackGroupType group_type,
+   bool automatically_add_to_executor_with_node)
+ {
+-  auto weak_context = this->get_context()->weak_from_this();
++  auto weak_context = std::weak_ptr<rclcpp::Context>(this->get_context()->shared_from_this());
+   auto get_node_context = [weak_context]() -> rclcpp::Context::SharedPtr {
+       return weak_context.lock();
+     };
+-- 
+2.34.1
+

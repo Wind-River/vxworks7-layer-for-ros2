@@ -1,14 +1,14 @@
-From c8ff776b16bc6d7f3b763694e91844885a861d94 Mon Sep 17 00:00:00 2001
+From 83b7541f3325268ceed98f9bb71c59d5d7be5414 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Thu, 1 Sep 2022 23:11:03 +0200
-Subject: [PATCH] add __VXWORKS__ to shared
+Date: Sat, 11 Feb 2023 14:54:05 +0100
+Subject: [PATCH 1/5] add __VXWORKS__ to shared
 
 ---
  src/shared_library.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/shared_library.c b/src/shared_library.c
-index 0190afc..84b2777 100644
+index f26d6b1..e1d01d6 100644
 --- a/src/shared_library.c
 +++ b/src/shared_library.c
 @@ -294,7 +294,7 @@ rcutils_get_platform_library_name(

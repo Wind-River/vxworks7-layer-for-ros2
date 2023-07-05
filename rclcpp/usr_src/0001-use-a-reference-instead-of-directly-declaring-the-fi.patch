@@ -1,0 +1,26 @@
+From 465712bc8020846587be92538769501704857ca3 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 1 Jun 2023 21:04:24 +0200
+Subject: [PATCH] use a reference instead of directly declaring the field with
+ the incomplete type
+
+---
+ rclcpp/include/rclcpp/service.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rclcpp/include/rclcpp/service.hpp b/rclcpp/include/rclcpp/service.hpp
+index 3cfc11e9..c1202f26 100644
+--- a/rclcpp/include/rclcpp/service.hpp
++++ b/rclcpp/include/rclcpp/service.hpp
+@@ -517,7 +517,7 @@ public:
+ private:
+   RCLCPP_DISABLE_COPY(Service)
+ 
+-  AnyServiceCallback<ServiceT> any_callback_;
++  AnyServiceCallback<ServiceT>& any_callback_;
+ 
+   const rosidl_service_type_support_t * srv_type_support_handle_;
+ };
+-- 
+2.34.1
+

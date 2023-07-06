@@ -1,6 +1,6 @@
-From 633e2e74ca6ea9f2de7e1fb136cd70068cc3e66f Mon Sep 17 00:00:00 2001
+From c9fb5dab5db490b39de41b6ac811a82e937a6218 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Sun, 28 Aug 2022 16:00:14 +0200
+Date: Sat, 11 Feb 2023 15:23:44 +0100
 Subject: [PATCH 2/2] add rmw_iceoryx_cpp build dep
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH 2/2] add rmw_iceoryx_cpp build dep
  1 file changed, 1 insertion(+)
 
 diff --git a/rmw_implementation/package.xml b/rmw_implementation/package.xml
-index a9df58f..7116c60 100644
+index be96fe0..3ae6ab1 100644
 --- a/rmw_implementation/package.xml
 +++ b/rmw_implementation/package.xml
-@@ -28,6 +28,7 @@
+@@ -29,6 +29,7 @@
    <build_depend>rmw_cyclonedds_cpp</build_depend>
    <build_depend>rmw_fastrtps_cpp</build_depend>
    <build_depend>rmw_fastrtps_dynamic_cpp</build_depend>

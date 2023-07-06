@@ -1,0 +1,131 @@
+From 1cf8e37a0fc88799925cc1321b75b7b039f93bb0 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sat, 11 Feb 2023 14:32:45 +0100
+Subject: [PATCH] mimick_vendor VxWorks is an unsupported platform, an error
+ message is replaced with the warning for the compilation purposes
+
+---
+ 0001-add-ElfW.patch           | 27 +++++++++++++++++++++++++++
+ 0001-add-VxWorks.patch        | 26 ++++++++++++++++++++++++++
+ 0001-set-warning-on-aux.patch | 25 +++++++++++++++++++++++++
+ CMakeLists.txt                |  5 +++++
+ 4 files changed, 83 insertions(+)
+ create mode 100644 0001-add-ElfW.patch
+ create mode 100644 0001-add-VxWorks.patch
+ create mode 100644 0001-set-warning-on-aux.patch
+
+diff --git a/0001-add-ElfW.patch b/0001-add-ElfW.patch
+new file mode 100644
+index 0000000..c7c94d5
+--- /dev/null
++++ b/0001-add-ElfW.patch
+@@ -0,0 +1,27 @@
++From c7d309081d7046f9182e2fba1715068499e62f18 Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
++Date: Tue, 31 Jan 2023 00:53:29 +0100
++Subject: [PATCH] add ElfW
++
++---
++ src/plt-elf.h | 4 ++++
++ 1 file changed, 4 insertions(+)
++
++diff --git a/src/plt-elf.h b/src/plt-elf.h
++index 1cedd22..533897b 100644
++--- a/src/plt-elf.h
+++++ b/src/plt-elf.h
++@@ -33,6 +33,10 @@
++ #  define ElfW__(e,t)   e##t
++ # endif
++ 
+++# ifdef __VXWORKS__
+++#  define ElfAddr ElfW(Addr)
+++#  define ElfOff ElfW(Off)
+++# endif
++ typedef struct link_map *plt_lib;
++ typedef struct r_debug *plt_ctx;
++ typedef void *plt_got;
++-- 
++2.34.1
++
+diff --git a/0001-add-VxWorks.patch b/0001-add-VxWorks.patch
+new file mode 100644
+index 0000000..bdaadf9
+--- /dev/null
++++ b/0001-add-VxWorks.patch
+@@ -0,0 +1,26 @@
++From 04a70ae04bdb21de6377498674ed5408fc9f4eb4 Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
++Date: Mon, 30 Jan 2023 23:54:08 +0100
++Subject: [PATCH] add VxWorks
++
++---
++ CMakeLists.txt | 3 +++
++ 1 file changed, 3 insertions(+)
++
++diff --git a/CMakeLists.txt b/CMakeLists.txt
++index a0ff848..dd6fc11 100644
++--- a/CMakeLists.txt
+++++ b/CMakeLists.txt
++@@ -114,6 +114,9 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "(Free|Net|Open)BSD")
++ elseif (CMAKE_SYSTEM_NAME MATCHES "Solaris|SunOS")
++   set (MMK_EXE_FORMAT elf)
++   set (MMK_EXE_FMT_ELF 1)
+++elseif (CMAKE_SYSTEM_NAME MATCHES "VxWorks")
+++  set (MMK_EXE_FORMAT elf)
+++  set (MMK_EXE_FMT_ELF 1)
++ elseif (CMAKE_SYSTEM_NAME MATCHES "Generic")
++   option (EXE_FORMAT "The executable format" "")
++   if (NOT EXE_FORMAT)
++-- 
++2.34.1
++
+diff --git a/0001-set-warning-on-aux.patch b/0001-set-warning-on-aux.patch
+new file mode 100644
+index 0000000..86b26bb
+--- /dev/null
++++ b/0001-set-warning-on-aux.patch
+@@ -0,0 +1,25 @@
++From 01a6eeef658686bc782a31633dbbedc34b64738a Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
++Date: Tue, 31 Jan 2023 00:12:49 +0100
++Subject: [PATCH] set warning on aux
++
++---
++ src/plt-elf.c | 2 +-
++ 1 file changed, 1 insertion(+), 1 deletion(-)
++
++diff --git a/src/plt-elf.c b/src/plt-elf.c
++index d2501aa..809ba24 100644
++--- a/src/plt-elf.c
+++++ b/src/plt-elf.c
++@@ -55,7 +55,7 @@ typedef ElfW(auxv_t) ElfAux;
++ #elif defined HAVE_ELF_AUXINFO
++ typedef ElfW(Auxinfo) ElfAux;
++ #else
++-# error Unsupported platform
+++# warning Unsupported platform
++ #endif
++ 
++ # if defined __clang__
++-- 
++2.34.1
++
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e0632bc..7ee5c20 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,6 +69,11 @@ macro(build_mimick)
+     ${cmake_commands}
+     CMAKE_ARGS
+       ${cmake_configure_args}
++    PATCH_COMMAND
++      ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git apply -p1 --ignore-space-change --whitespace=nowarn
++        ${CMAKE_CURRENT_SOURCE_DIR}/0001-add-VxWorks.patch
++        ${CMAKE_CURRENT_SOURCE_DIR}/0001-set-warning-on-aux.patch
++        ${CMAKE_CURRENT_SOURCE_DIR}/0001-add-ElfW.patch
+   )
+ 
+   # The external project will install to the build folder, but we'll install that on make install.
+-- 
+2.34.1
+

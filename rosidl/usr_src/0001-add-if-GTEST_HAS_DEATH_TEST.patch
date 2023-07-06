@@ -1,0 +1,53 @@
+From 512fcd10e654a2795b765df52b621202d0ac840c Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sun, 19 Feb 2023 23:32:22 +0100
+Subject: [PATCH] add if GTEST_HAS_DEATH_TEST
+
+---
+ rosidl_runtime_c/test/test_string_functions.cpp    | 2 ++
+ rosidl_runtime_c/test/test_u16string_functions.cpp | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/rosidl_runtime_c/test/test_string_functions.cpp b/rosidl_runtime_c/test/test_string_functions.cpp
+index f3da91c..609d2a7 100644
+--- a/rosidl_runtime_c/test/test_string_functions.cpp
++++ b/rosidl_runtime_c/test/test_string_functions.cpp
+@@ -49,6 +49,7 @@ TEST(string_functions, init_fini_bad_data) {
+   // See Note: in https://pubs.opengroup.org/onlinepubs/009695399/functions/exit.html
+   expected_error_code &= 255;
+ #endif
++#if GTEST_HAS_DEATH_TEST
+   EXPECT_EXIT(
+     rosidl_runtime_c__String__fini(&bad_string),
+     ::testing::ExitedWithCode(expected_error_code),
+@@ -68,6 +69,7 @@ TEST(string_functions, init_fini_bad_data) {
+     rosidl_runtime_c__String__fini(&bad_string),
+     ::testing::ExitedWithCode(expected_error_code),
+     "Unexpected condition: string capacity was zero for allocated data! Exiting.");
++#endif
+ }
+ 
+ TEST(string_functions, resize_assignn) {
+diff --git a/rosidl_runtime_c/test/test_u16string_functions.cpp b/rosidl_runtime_c/test/test_u16string_functions.cpp
+index f440880..289ebf3 100644
+--- a/rosidl_runtime_c/test/test_u16string_functions.cpp
++++ b/rosidl_runtime_c/test/test_u16string_functions.cpp
+@@ -34,6 +34,7 @@ TEST(u16string_functions, init_fini_empty_string) {
+   EXPECT_EQ(empty_string.capacity, 0u);
+ }
+ 
++#if GTEST_HAS_DEATH_TEST
+ TEST(u16string_functions, init_fini_bad_data) {
+   EXPECT_FALSE(rosidl_runtime_c__U16String__init(nullptr));
+ 
+@@ -69,6 +70,7 @@ TEST(u16string_functions, init_fini_bad_data) {
+     ::testing::ExitedWithCode(expected_error_code),
+     "Unexpected condition: string capacity was zero for allocated data! Exiting.");
+ }
++#endif
+ 
+ TEST(u16string_functions, resize_assignn) {
+   rosidl_runtime_c__U16String s, t;
+-- 
+2.34.1
+

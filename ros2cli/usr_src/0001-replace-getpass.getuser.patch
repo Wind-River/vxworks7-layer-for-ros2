@@ -1,6 +1,6 @@
-From e3bbe845daec0da7ceaec9ba33d02acab0b920a7 Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Fri, 3 Jul 2020 23:24:04 +0200
+From a56ca99e64923d6933e316898eab000c53698670 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sun, 4 Jun 2023 15:43:28 +0200
 Subject: [PATCH] replace getpass.getuser()
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH] replace getpass.getuser()
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/ros2pkg/ros2pkg/verb/create.py b/ros2pkg/ros2pkg/verb/create.py
-index 0aaf683..ee94b49 100644
+index 911dee6..cd9cf9f 100644
 --- a/ros2pkg/ros2pkg/verb/create.py
 +++ b/ros2pkg/ros2pkg/verb/create.py
-@@ -74,7 +74,7 @@ class CreateVerb(VerbExtension):
+@@ -79,7 +79,7 @@ class CreateVerb(VerbExtension):
              '--maintainer-email',
              help='email address of the maintainer of this package'),
          parser.add_argument(
@@ -19,7 +19,7 @@ index 0aaf683..ee94b49 100644
 +            '--maintainer-name', default='Andrei Kholodnyi',
              help='name of the maintainer of this package'),
          parser.add_argument(
-             '--node-name', '--cpp-node-name',
+             '--node-name',
 -- 
-2.17.1
+2.34.1
 

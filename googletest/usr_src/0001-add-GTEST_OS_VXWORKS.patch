@@ -1,0 +1,47 @@
+From dd26378f33c74881dfdc22b189bf7d7b80416c1d Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sun, 19 Feb 2023 23:26:34 +0100
+Subject: [PATCH] add GTEST_OS_VXWORKS
+
+---
+ googletest/include/gtest/internal/gtest-port-arch.h | 2 ++
+ googletest/include/gtest/internal/gtest-port.h      | 3 ++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/googletest/include/gtest/internal/gtest-port-arch.h b/googletest/include/gtest/internal/gtest-port-arch.h
+index cece93db..e0018bbc 100644
+--- a/googletest/include/gtest/internal/gtest-port-arch.h
++++ b/googletest/include/gtest/internal/gtest-port-arch.h
+@@ -100,6 +100,8 @@
+ # define GTEST_OS_OPENBSD 1
+ #elif defined __QNX__
+ # define GTEST_OS_QNX 1
++#elif defined __VXWORKS__
++# define GTEST_OS_VXWORKS 1
+ #elif defined(__HAIKU__)
+ #define GTEST_OS_HAIKU 1
+ #endif  // __CYGWIN__
+diff --git a/googletest/include/gtest/internal/gtest-port.h b/googletest/include/gtest/internal/gtest-port.h
+index 063fcb10..d1ca5537 100644
+--- a/googletest/include/gtest/internal/gtest-port.h
++++ b/googletest/include/gtest/internal/gtest-port.h
+@@ -128,6 +128,7 @@
+ //   GTEST_OS_OPENBSD  - OpenBSD
+ //   GTEST_OS_OS2      - OS/2
+ //   GTEST_OS_QNX      - QNX
++//   GTEST_OS_VXWORKS  - VxWorks
+ //   GTEST_OS_SOLARIS  - Sun Solaris
+ //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
+ //     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+@@ -537,7 +538,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+   (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
+    GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA || \
+    GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_OPENBSD ||          \
+-   GTEST_OS_HAIKU)
++   GTEST_OS_HAIKU || GTEST_OS_VXWORKS)
+ #endif  // GTEST_HAS_PTHREAD
+ 
+ #if GTEST_HAS_PTHREAD
+-- 
+2.34.1
+

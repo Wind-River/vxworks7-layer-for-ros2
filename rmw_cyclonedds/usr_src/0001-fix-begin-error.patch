@@ -1,0 +1,54 @@
+From 8d4e7b4996375f8d160a74262b555b2402d26388 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 9 Jun 2023 21:12:48 +0200
+Subject: [PATCH] fix begin error
+
+---
+ rmw_cyclonedds_cpp/src/TypeSupport2.hpp | 6 +++---
+ rmw_cyclonedds_cpp/src/rmw_node.cpp     | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/rmw_cyclonedds_cpp/src/TypeSupport2.hpp b/rmw_cyclonedds_cpp/src/TypeSupport2.hpp
+index b4b890d..259e302 100644
+--- a/rmw_cyclonedds_cpp/src/TypeSupport2.hpp
++++ b/rmw_cyclonedds_cpp/src/TypeSupport2.hpp
+@@ -447,7 +447,7 @@ public:
+   TypedSpan<char_traits::char_type> data(void * ptr) const override
+   {
+     auto str = static_cast<type *>(ptr);
+-    return {str->data(), str->size()};
++    return {const_cast<char*>(&(*str->begin())), str->size()};
+   }
+   size_t sizeof_type() const override {return sizeof(type);}
+ };
+@@ -460,12 +460,12 @@ public:
+   TypedSpan<const char_traits::char_type> data(const void * ptr) const override
+   {
+     auto str = static_cast<const type *>(ptr);
+-    return {str->data(), str->size()};
++    return {const_cast<char16_t *>(&(*str->begin())), str->size()};
+   }
+   TypedSpan<char_traits::char_type> data(void * ptr) const override
+   {
+     auto str = static_cast<type *>(ptr);
+-    return {str->data(), str->size()};
++    return {const_cast<char16_t *>(&(*str->begin())), str->size()};
+   }
+   size_t sizeof_type() const override {return sizeof(type);}
+ };
+diff --git a/rmw_cyclonedds_cpp/src/rmw_node.cpp b/rmw_cyclonedds_cpp/src/rmw_node.cpp
+index 1ccec34..052a901 100644
+--- a/rmw_cyclonedds_cpp/src/rmw_node.cpp
++++ b/rmw_cyclonedds_cpp/src/rmw_node.cpp
+@@ -2295,7 +2295,7 @@ static dds_qos_t * create_readwrite_qos(
+     typehash_str.clear();
+   }
+   std::string user_data = extra_user_data + typehash_str;
+-  dds_qset_userdata(qos, user_data.data(), user_data.size());
++  dds_qset_userdata(qos, &user_data[0], user_data.size());
+ 
+   return qos;
+ }
+-- 
+2.34.1
+

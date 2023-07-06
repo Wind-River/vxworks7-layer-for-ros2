@@ -1,0 +1,25 @@
+From 3d9d819f1a7f5515b3df73efe8d30a67b22e00cf Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 6 Jul 2023 21:49:31 +0200
+Subject: [PATCH] fix hardcoded opt
+
+---
+ ament_cmake_vendor_package/cmake/ament_vendor.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ament_cmake_vendor_package/cmake/ament_vendor.cmake b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
+index 4910e9d..0eb420b 100644
+--- a/ament_cmake_vendor_package/cmake/ament_vendor.cmake
++++ b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
+@@ -301,7 +301,7 @@ function(_ament_vendor TARGET_NAME VCS_TYPE VCS_URL VCS_VERSION PATCHES CMAKE_AR
+   if(NOT SKIP_INSTALL)
+     install(
+       DIRECTORY "${INSTALL_DIR}/"
+-      DESTINATION "opt/${PROJECT_NAME}"
++      DESTINATION "."
+       USE_SOURCE_PERMISSIONS
+     )
+   endif()
+-- 
+2.34.1
+

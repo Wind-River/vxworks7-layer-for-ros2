@@ -1,0 +1,25 @@
+From ba71b6b78aaa0f0483cf040f5c5fa2456fd1b61b Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
+Date: Sat, 11 Feb 2023 15:02:46 +0100
+Subject: [PATCH 5/5] do not use _GNU_SOURCE
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 35d4df0..b04f6b6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
+ 
+ ament_python_install_package(${PROJECT_NAME})
+ 
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   include(cmake/check_c_compiler_uses_glibc.cmake)
+   check_c_compiler_uses_glibc(USES_GLIBC)
+   if(USES_GLIBC)
+-- 
+2.34.1
+

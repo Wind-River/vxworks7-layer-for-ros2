@@ -1,0 +1,85 @@
+From 6b682313dd2d72d22d44aeae7d5fef345711c8d8 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sat, 19 Aug 2023 23:13:27 +0200
+Subject: [PATCH] fix PYTHON_MODULE_EXTENSION
+
+---
+ 0001-fix-pybind11-extension.patch | 43 +++++++++++++++++++++++++++++++
+ CMakeLists.txt                    |  4 ++-
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+ create mode 100644 0001-fix-pybind11-extension.patch
+
+diff --git a/0001-fix-pybind11-extension.patch b/0001-fix-pybind11-extension.patch
+new file mode 100644
+index 0000000..02ab3d6
+--- /dev/null
++++ b/0001-fix-pybind11-extension.patch
+@@ -0,0 +1,43 @@
++--- a/tools/pybind11Tools.cmake	2023-08-12 21:55:42.149092321 +0200
+++++ b/tools/pybind11Tools.cmake	2023-08-12 21:56:32.347184093 +0200
++@@ -137,7 +137,7 @@
++ function(pybind11_extension name)
++   # The prefix and extension are provided by FindPythonLibsNew.cmake
++   set_target_properties(${name} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
++-                                           SUFFIX "${PYTHON_MODULE_EXTENSION}")
+++                                           SUFFIX ".cpython-39-vxworks.so")
++ endfunction()
++ 
++ # Build a Python extension module:
++--- a/tools/pybind11NewTools.cmake	2023-08-19 18:21:25.531226318 +0200
+++++ b/tools/pybind11NewTools.cmake	2023-08-19 18:22:13.741059134 +0200
++@@ -273,6 +273,6 @@
++ 
++ function(pybind11_extension name)
++   # The extension is precomputed
++-  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX "${PYTHON_MODULE_EXTENSION}")
+++  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX ".cpython-39-vxworks.so")
++ 
++ endfunction()
++--- a/tools/pybind11NewTools.cmake	2023-08-19 18:22:13.741059134 +0200
+++++ b/tools/pybind11NewTools.cmake	2023-08-19 19:34:34.139076072 +0200
++@@ -106,7 +106,7 @@
++ 
++ # Get the suffix - SO is deprecated, should use EXT_SUFFIX, but this is
++ # required for PyPy3 (as of 7.3.1)
++-if(NOT DEFINED PYTHON_MODULE_EXTENSION)
+++if(NOT DEFINED PYTHON_MODULE_EXTENSION AND NOT VXWORKS)
++   execute_process(
++     COMMAND
++       "${${_Python}_EXECUTABLE}" "-c"
++@@ -125,6 +125,10 @@
++   set(PYTHON_MODULE_EXTENSION
++       "${_PYTHON_MODULE_EXTENSION}"
++       CACHE INTERNAL "")
+++else()
+++  set(PYTHON_MODULE_EXTENSION
+++      ".cpython-39-vxworks.so"
+++      CACHE INTERNAL "")
++ endif()
++ 
++ # Python debug libraries expose slightly different objects before 3.8
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 309a628..12d9708 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,6 +51,8 @@ macro(build_pybind11)
+     list(APPEND extra_cmake_args "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+   endif()
+   list(APPEND extra_cmake_args "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
++  list(APPEND extra_cmake_args -DPYTHON_SOABI=${PYTHON_SOABI})
++  list(APPEND extra_cmake_args -DPYTHON_MODULE_EXTENSION=.${PYTHON_SOABI}.so)
+ 
+   include(ExternalProject)
+   ExternalProject_Add(pybind11-2.9.1
+@@ -74,7 +76,7 @@ macro(build_pybind11)
+     # the issue.
+     PATCH_COMMAND
+       ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git apply -p1 --ignore-space-change --whitespace=nowarn
+-        ${CMAKE_CURRENT_SOURCE_DIR}/pybind11-2.9.1-fix-windows-debug.patch
++        ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-pybind11-extension.patch
+   )
+ 
+   # The external project will install to the build folder, but we'll install that on make install.
+-- 
+2.34.1
+

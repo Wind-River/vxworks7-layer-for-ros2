@@ -1,0 +1,24 @@
+From a4dce033e12edb5ac19ff218d341d3824ea848e7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sat, 12 Aug 2023 13:00:22 +0200
+Subject: [PATCH] add eigen3 include
+
+---
+ orocos_kdl_vendor/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/orocos_kdl_vendor/CMakeLists.txt b/orocos_kdl_vendor/CMakeLists.txt
+index 655e562..4d9ff03 100644
+--- a/orocos_kdl_vendor/CMakeLists.txt
++++ b/orocos_kdl_vendor/CMakeLists.txt
+@@ -49,6 +49,7 @@ macro(build_orocos_kdl)
+   list(APPEND extra_cmake_args "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
+   list(APPEND extra_cmake_args "-DENABLE_TESTS=OFF")
+   list(APPEND extra_cmake_args "-DENABLE_EXAMPLES=OFF")
++  list(APPEND extra_cmake_args "-DEIGEN3_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include/eigen3")
+ 
+   include(ExternalProject)
+ 
+-- 
+2.34.1
+

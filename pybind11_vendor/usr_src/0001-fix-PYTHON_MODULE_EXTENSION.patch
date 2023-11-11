@@ -1,20 +1,20 @@
-From 6b682313dd2d72d22d44aeae7d5fef345711c8d8 Mon Sep 17 00:00:00 2001
+From a859584c31ac28aaca73179b7dd40897ca69aef1 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Sat, 19 Aug 2023 23:13:27 +0200
+Date: Sat, 11 Nov 2023 18:16:28 +0100
 Subject: [PATCH] fix PYTHON_MODULE_EXTENSION
 
 ---
- 0001-fix-pybind11-extension.patch | 43 +++++++++++++++++++++++++++++++
+ 0001-fix-pybind11-extension.patch | 55 +++++++++++++++++++++++++++++++
  CMakeLists.txt                    |  4 ++-
- 2 files changed, 46 insertions(+), 1 deletion(-)
+ 2 files changed, 58 insertions(+), 1 deletion(-)
  create mode 100644 0001-fix-pybind11-extension.patch
 
 diff --git a/0001-fix-pybind11-extension.patch b/0001-fix-pybind11-extension.patch
 new file mode 100644
-index 0000000..02ab3d6
+index 0000000..da2070e
 --- /dev/null
 +++ b/0001-fix-pybind11-extension.patch
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,55 @@
 +--- a/tools/pybind11Tools.cmake	2023-08-12 21:55:42.149092321 +0200
 ++++ b/tools/pybind11Tools.cmake	2023-08-12 21:56:32.347184093 +0200
 +@@ -137,7 +137,7 @@
@@ -58,6 +58,18 @@ index 0000000..02ab3d6
 + endif()
 + 
 + # Python debug libraries expose slightly different objects before 3.8
++--- a/tools/FindPythonLibsNew.cmake	2023-11-11 18:03:19.612709160 +0100
+++++ b/tools/FindPythonLibsNew.cmake	2023-11-11 18:02:56.123838067 +0100
++@@ -156,7 +156,8 @@
++ 
++ # Make sure the Python has the same pointer-size as the chosen compiler
++ # Skip if CMAKE_SIZEOF_VOID_P is not defined
++-if(CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZEOF_VOID_P}"))
+++if(NOT CMAKE_CROSSCOMPILING
+++  AND CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZEOF_VOID_P}"))
++   if(PythonLibsNew_FIND_REQUIRED)
++     math(EXPR _PYTHON_BITS "${PYTHON_SIZEOF_VOID_P} * 8")
++     math(EXPR _CMAKE_BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 309a628..12d9708 100644
 --- a/CMakeLists.txt

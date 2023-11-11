@@ -1,0 +1,25 @@
+From 3dc09f819aa04b68c61752235c05d23ac53f3463 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sat, 11 Nov 2023 18:22:13 +0100
+Subject: [PATCH 2/2] fix 32bit compilation
+
+---
+ rclpy/src/rclpy/_rclpy_logging.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rclpy/src/rclpy/_rclpy_logging.cpp b/rclpy/src/rclpy/_rclpy_logging.cpp
+index c510b0a..80e6774 100644
+--- a/rclpy/src/rclpy/_rclpy_logging.cpp
++++ b/rclpy/src/rclpy/_rclpy_logging.cpp
+@@ -129,7 +129,7 @@ rclpy_logging_rcutils_log(
+   uint64_t line_number)
+ {
+   RCUTILS_LOGGING_AUTOINIT;
+-  rcutils_log_location_t logging_location = {function_name, file_name, line_number};
++  rcutils_log_location_t logging_location = {function_name, file_name, (size_t)line_number};
+   rcutils_log(&logging_location, severity, name, "%s", message);
+ }
+ 
+-- 
+2.34.1
+

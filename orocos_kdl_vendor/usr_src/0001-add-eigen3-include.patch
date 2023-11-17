@@ -1,6 +1,6 @@
-From a4dce033e12edb5ac19ff218d341d3824ea848e7 Mon Sep 17 00:00:00 2001
+From b062a76e6e745d779047d090ae25f2053275c6b7 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Sat, 12 Aug 2023 13:00:22 +0200
+Date: Fri, 17 Nov 2023 19:58:23 +0100
 Subject: [PATCH] add eigen3 include
 
 ---
@@ -8,17 +8,17 @@ Subject: [PATCH] add eigen3 include
  1 file changed, 1 insertion(+)
 
 diff --git a/orocos_kdl_vendor/CMakeLists.txt b/orocos_kdl_vendor/CMakeLists.txt
-index 655e562..4d9ff03 100644
+index a0bd0f9..e1e47ad 100644
 --- a/orocos_kdl_vendor/CMakeLists.txt
 +++ b/orocos_kdl_vendor/CMakeLists.txt
-@@ -49,6 +49,7 @@ macro(build_orocos_kdl)
-   list(APPEND extra_cmake_args "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
-   list(APPEND extra_cmake_args "-DENABLE_TESTS=OFF")
-   list(APPEND extra_cmake_args "-DENABLE_EXAMPLES=OFF")
-+  list(APPEND extra_cmake_args "-DEIGEN3_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include/eigen3")
+@@ -16,6 +16,7 @@ ament_vendor(orocos_kdl_vendor
+   CMAKE_ARGS
+     -DENABLE_TESTS:BOOL=OFF
+     -DENABLE_EXAMPLES:BOOL=OFF
++    -DEIGEN3_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include/eigen3
+ )
  
-   include(ExternalProject)
- 
+ if(BUILD_TESTING)
 -- 
 2.34.1
 

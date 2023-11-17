@@ -1,0 +1,43 @@
+From ff9d6523f4b5871d6eb3c235afede52b865849b1 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 17 Nov 2023 22:04:25 +0100
+Subject: [PATCH] remove hardcoded opt
+
+---
+ ament_cmake_vendor_package/cmake/ament_vendor.cmake | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ament_cmake_vendor_package/cmake/ament_vendor.cmake b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
+index 631b540..10ff60d 100644
+--- a/ament_cmake_vendor_package/cmake/ament_vendor.cmake
++++ b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
+@@ -138,7 +138,7 @@ macro(ament_vendor TARGET_NAME)
+       ament_environment_hooks(${ament_cmake_vendor_package_DIR}/templates/vendor_package.sh.in)
+ 
+       # Resource index marker
+-      ament_index_register_resource("vendor_packages" CONTENT "opt/${PROJECT_NAME}")
++      ament_index_register_resource("vendor_packages" CONTENT ".")
+ 
+       set(_ament_vendor_called TRUE)
+     endif()
+@@ -174,7 +174,7 @@ function(_ament_vendor TARGET_NAME VCS_TYPE VCS_URL VCS_VERSION PATCHES CMAKE_AR
+ 
+   list(PREPEND CMAKE_ARGS
+     -DCMAKE_STAGING_PREFIX=<INSTALL_DIR>
+-    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/opt/${PROJECT_NAME}"
++    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/."
+     -Wno-dev
+   )
+ 
+@@ -301,7 +301,7 @@ function(_ament_vendor TARGET_NAME VCS_TYPE VCS_URL VCS_VERSION PATCHES CMAKE_AR
+   if(NOT SKIP_INSTALL)
+     install(
+       DIRECTORY "${INSTALL_DIR}/"
+-      DESTINATION "opt/${PROJECT_NAME}"
++      DESTINATION "."
+       USE_SOURCE_PERMISSIONS
+     )
+   endif()
+-- 
+2.34.1
+

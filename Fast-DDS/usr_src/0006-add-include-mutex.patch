@@ -1,6 +1,6 @@
-From 849859157bb14475db0123a163eb50142687fee0 Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:07:47 +0100
+From 76dce30d1580e5b336242ce5acf960e34de7abd3 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 17 Nov 2023 15:31:55 +0100
 Subject: [PATCH 06/10] add include mutex
 
 ---
@@ -8,21 +8,21 @@ Subject: [PATCH 06/10] add include mutex
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/include/fastrtps/utils/TimedMutex.hpp b/include/fastrtps/utils/TimedMutex.hpp
-index b1982f56e..647948deb 100644
+index d20fae9cb..ac304a514 100644
 --- a/include/fastrtps/utils/TimedMutex.hpp
 +++ b/include/fastrtps/utils/TimedMutex.hpp
-@@ -27,7 +27,7 @@
- extern int clock_gettime(
-         int,
+@@ -33,7 +33,7 @@ extern int clock_gettime(
          struct timespec* tv);
+ #endif // if defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 193632528
+ 
 -#elif _GTHREAD_USE_MUTEX_TIMEDLOCK
 +#elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__linux__)
  #include <mutex>
  #else
  #include <pthread.h>
-@@ -183,6 +183,7 @@ private:
-     _Mtx_t mutex_;
- };
+@@ -197,6 +197,7 @@ private:
+ #endif // if defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 193632528
+ 
  #elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__unix__)
 +#include <mutex>
  using TimedMutex = std::timed_mutex;

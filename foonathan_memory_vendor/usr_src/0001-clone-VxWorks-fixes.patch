@@ -1,6 +1,6 @@
-From 8fa2ed1718678de42f574a91963a20988c007ec3 Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Thu, 28 Jan 2021 23:39:33 +0100
+From 3e3e2fa177e05d9b97740c385ad9342bd054d3e9 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 5 Jul 2023 22:47:37 +0200
 Subject: [PATCH] clone VxWorks fixes
 
 ---
@@ -8,18 +8,18 @@ Subject: [PATCH] clone VxWorks fixes
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c6df67b..cd2cba4 100644
+index 466d659..1d47d98 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -56,7 +56,7 @@ if(NOT foonathan_memory_FOUND)
+@@ -75,7 +75,7 @@ if(NOT foonathan_memory_FOUND)
  
    externalproject_add(foo_mem-ext
    GIT_REPOSITORY https://github.com/foonathan/memory.git
--  GIT_TAG c619113
-+  GIT_TAG 7b39ea6
+-  GIT_TAG v0.7-3
++  GIT_TAG v0.7-1
    TIMEOUT 600
    # Avoid the update (git pull) and so the recompilation of foonathan_memory library each time.
    UPDATE_COMMAND ""
 -- 
-2.25.1
+2.34.1
 

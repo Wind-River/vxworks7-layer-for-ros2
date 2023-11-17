@@ -1,0 +1,102 @@
+From 725c0a516e0bf9a2512444c39f2f0bb980067615 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sun, 2 Jul 2023 17:27:52 +0200
+Subject: [PATCH] fix exchange
+
+---
+ 0001-fix-exchange.patch | 66 +++++++++++++++++++++++++++++++++++++++++
+ CMakeLists.txt          |  5 ++++
+ 2 files changed, 71 insertions(+)
+ create mode 100644 0001-fix-exchange.patch
+
+diff --git a/0001-fix-exchange.patch b/0001-fix-exchange.patch
+new file mode 100644
+index 0000000..92b3f70
+--- /dev/null
++++ b/0001-fix-exchange.patch
+@@ -0,0 +1,66 @@
++From f238b015495cd000d78e480df5f8b23d439a806c Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
++Date: Fri, 30 Jun 2023 04:26:32 +0200
++Subject: [PATCH] fix exchange
++
++---
++ src/debugging.cpp | 6 +++---
++ src/error.cpp     | 4 ++--
++ 2 files changed, 5 insertions(+), 5 deletions(-)
++
++diff --git a/src/debugging.cpp b/src/debugging.cpp
++index e44109a..9a112d9 100644
++--- a/src/debugging.cpp
+++++ b/src/debugging.cpp
++@@ -42,7 +42,7 @@ namespace
++ 
++ leak_handler foonathan::memory::set_leak_handler(leak_handler h)
++ {
++-    return leak_h.exchange(h ? h : default_leak_handler);
+++    return (h ? default_leak_handler : default_leak_handler);
++ }
++ 
++ leak_handler foonathan::memory::get_leak_handler()
++@@ -70,7 +70,7 @@ namespace
++ 
++ invalid_pointer_handler foonathan::memory::set_invalid_pointer_handler(invalid_pointer_handler h)
++ {
++-    return invalid_ptr_h.exchange(h ? h : default_invalid_ptr_handler);
+++    return (h ? default_invalid_ptr_handler : default_invalid_ptr_handler);
++ }
++ 
++ invalid_pointer_handler foonathan::memory::get_invalid_pointer_handler()
++@@ -100,7 +100,7 @@ namespace
++ 
++ buffer_overflow_handler foonathan::memory::set_buffer_overflow_handler(buffer_overflow_handler h)
++ {
++-    return buffer_overflow_h.exchange(h ? h : default_buffer_overflow_handler);
+++    return (h ? default_buffer_overflow_handler : default_buffer_overflow_handler);
++ }
++ 
++ buffer_overflow_handler foonathan::memory::get_buffer_overflow_handler()
++diff --git a/src/error.cpp b/src/error.cpp
++index dfd8add..d69f42c 100644
++--- a/src/error.cpp
+++++ b/src/error.cpp
++@@ -28,7 +28,7 @@ namespace
++ 
++ out_of_memory::handler out_of_memory::set_handler(out_of_memory::handler h)
++ {
++-    return out_of_memory_h.exchange(h ? h : default_out_of_memory_handler);
+++    return (h ? default_out_of_memory_handler : default_out_of_memory_handler);
++ }
++ 
++ out_of_memory::handler out_of_memory::get_handler()
++@@ -70,7 +70,7 @@ namespace
++ 
++ bad_allocation_size::handler bad_allocation_size::set_handler(bad_allocation_size::handler h)
++ {
++-    return bad_alloc_size_h.exchange(h ? h : default_bad_alloc_size_handler);
+++    return (h ? default_bad_alloc_size_handler : default_bad_alloc_size_handler);
++ }
++ 
++ bad_allocation_size::handler bad_allocation_size::get_handler()
++-- 
++2.34.1
++
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dffac71..4632e2f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,6 +70,11 @@ if(NOT foonathan_memory_FOUND)
+       sed -i -e "s/INSTALLER_PLATFORM/${INSTALLER_PLATFORM}/g" CMakeLists.txt)
+   endif()
+ 
++  if(VXWORKS)
++    set(PATCH_COMMAND_STR PATCH_COMMAND
++      git apply ${CMAKE_CURRENT_SOURCE_DIR}/0001-fix-exchange.patch)
++  endif()
++
+   externalproject_add(foo_mem-ext
+   GIT_REPOSITORY https://github.com/foonathan/memory.git
+   GIT_TAG v0.7-1
+-- 
+2.34.1
+

@@ -1,0 +1,46 @@
+From 27b38ec771fb2b4948fe0cc6aa28c3edc9505752 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 4 Dec 2023 21:49:08 +0100
+Subject: [PATCH] replace access with stat
+
+---
+ osrf_pycommon/process_utils/impl.py | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/osrf_pycommon/process_utils/impl.py b/osrf_pycommon/process_utils/impl.py
+index bff835c..3fe6945 100644
+--- a/osrf_pycommon/process_utils/impl.py
++++ b/osrf_pycommon/process_utils/impl.py
+@@ -14,6 +14,7 @@
+ 
+ import os
+ import sys
++import stat
+ 
+ from .execute_process_nopty import _execute_process_nopty
+ try:
+@@ -221,7 +222,8 @@ def _which_backport(cmd, mode=os.F_OK | os.X_OK, path=None):
+     # Additionally check that `file` is not a directory, as on Windows
+     # directories pass the os.access check.
+     def _access_check(fn, mode):
+-        return (os.path.exists(fn) and os.access(fn, mode) and not
++        st = os.stat(fn)
++        return (os.path.exists(fn) and (st[stat.ST_MODE]&stat.S_IXUSR) and not
+                 os.path.isdir(fn))
+ 
+     # If we're given a path with a directory part, look it up directly rather
+@@ -284,7 +286,8 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None, **kwargs):
+     available in Python 3.3.
+     """
+     kwargs.update({'mode': mode, 'path': path})
+-    global _which
+-    if _which is not None:
+-        return _which(cmd, **kwargs)
++    if sys.platform != 'vxworks':
++        global _which
++        if _which is not None:
++            return _which(cmd, **kwargs)
+     return _which_backport(cmd, **kwargs)
+-- 
+2.34.1
+

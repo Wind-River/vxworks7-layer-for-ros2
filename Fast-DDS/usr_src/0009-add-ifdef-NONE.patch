@@ -1,12 +1,27 @@
-From a8a5375e74fc5c5cf90b00cec20a6df7cfbc770f Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Thu, 1 Sep 2022 23:59:53 +0200
+From cb2611b04354cca089afbadbd66616c3a3597008 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 11:21:56 +0100
 Subject: [PATCH 09/10] add ifdef NONE
 
 ---
+ include/fastdds/rtps/attributes/BuiltinTransports.hpp | 3 +++
  src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
+diff --git a/include/fastdds/rtps/attributes/BuiltinTransports.hpp b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+index 6f297d775..0b8659fbc 100644
+--- a/include/fastdds/rtps/attributes/BuiltinTransports.hpp
++++ b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+@@ -29,6 +29,9 @@ namespace rtps {
+ /**
+  * Defines the kind of transports automatically instantiated upon the creation of a participant
+  */
++#ifdef NONE
++#undef NONE
++#endif
+ enum class BuiltinTransports : uint16_t
+ {
+     NONE = 0,      //< No transport will be instantiated
 diff --git a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp b/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
 index da75c7372..da9bd0200 100644
 --- a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp

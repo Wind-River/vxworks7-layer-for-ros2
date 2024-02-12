@@ -1,6 +1,6 @@
-From 0d9eeff08050b95834b86d04022c153426f5af6e Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:07:16 +0100
+From e6451a41569c589c6d0ce5e98c3e55ac96d214d7 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 10:50:16 +0100
 Subject: [PATCH 05/10] add ifdef NONE
 
 ---
@@ -10,12 +10,12 @@ Subject: [PATCH 05/10] add ifdef NONE
  3 files changed, 9 insertions(+)
 
 diff --git a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-index 2f26997dd..b345d0f93 100644
+index fe8415c13..cd0d9696f 100644
 --- a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
 +++ b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-@@ -44,6 +44,9 @@ namespace rtps {
+@@ -47,6 +47,9 @@ namespace rtps {
   * Struct to define participant types to set participant type parameter property
-  *@ingroup DISCOVERY_MODULE
+  * @ingroup DISCOVERY_MODULE
   */
 +#ifdef NONE
 +#undef NONE
@@ -24,10 +24,10 @@ index 2f26997dd..b345d0f93 100644
  {
      static constexpr const char* SIMPLE = "SIMPLE";
 diff --git a/include/fastdds/rtps/transport/TCPTransportDescriptor.h b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
-index 9ceeff847..13f0e8699 100644
+index 013441ef9..48b777a60 100644
 --- a/include/fastdds/rtps/transport/TCPTransportDescriptor.h
 +++ b/include/fastdds/rtps/transport/TCPTransportDescriptor.h
-@@ -102,6 +102,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
+@@ -109,6 +109,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
           *
           * - SINGLE_DH_USE: always create a new key using Diffie-Hellman parameters.
           */
@@ -38,10 +38,10 @@ index 9ceeff847..13f0e8699 100644
          {
              NONE                    = 0,      // 0000 0000 0000
 diff --git a/include/fastrtps/xmlparser/XMLParserCommon.h b/include/fastrtps/xmlparser/XMLParserCommon.h
-index 759aa0099..2ae3def7c 100644
+index 266e818c5..3bc31848d 100644
 --- a/include/fastrtps/xmlparser/XMLParserCommon.h
 +++ b/include/fastrtps/xmlparser/XMLParserCommon.h
-@@ -259,6 +259,9 @@ extern const char* OFFSETD1;
+@@ -294,6 +294,9 @@ extern const char* OFFSETD1;
  extern const char* OFFSETD2;
  extern const char* OFFSETD3;
  extern const char* RTPS_PDP_TYPE;

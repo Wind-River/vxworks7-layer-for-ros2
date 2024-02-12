@@ -1,6 +1,6 @@
-From b6a35e31d79d053b24755bb892e9882502af62ff Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:03:02 +0100
+From 7ae096b6049892e15d3753b5a09bf002dbca32dd Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 10:45:07 +0100
 Subject: [PATCH 02/10] skip find package THREADS
 
 ---
@@ -8,12 +8,12 @@ Subject: [PATCH 02/10] skip find package THREADS
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index 1bba33139..feaf3f3ce 100644
+index c82588394..7cae6b7d1 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
-@@ -363,7 +363,7 @@ endif()
- configure_file(${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h.in
-     ${PROJECT_BINARY_DIR}/include/${PROJECT_NAME}/config.h)
+@@ -383,7 +383,7 @@ else()
+     set(HAVE_STRICT_REALTIME 0)
+ endif()
  
 -if(NOT ANDROID)
 +if(NOT ANDROID AND NOT VXWORKS)

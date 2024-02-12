@@ -1,6 +1,6 @@
-From 7c65ededf6e80616808b2de7a19c343f89909589 Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:00:37 +0100
+From 551e2e5d5dccac47346b953e428531a337122215 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 10:39:25 +0100
 Subject: [PATCH 01/10] skip find package THREADS
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 01/10] skip find package THREADS
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/cmake/modules/FindThirdpartyBoost.cmake b/cmake/modules/FindThirdpartyBoost.cmake
-index 151457a55..416558a40 100644
+index 163a91ade..750b785e9 100644
 --- a/cmake/modules/FindThirdpartyBoost.cmake
 +++ b/cmake/modules/FindThirdpartyBoost.cmake
 @@ -11,9 +11,11 @@ set(THIRDPARTY_BOOST_INCLUDE_DIR

@@ -1,4 +1,4 @@
-From 9270ab4a0854b593452156c60432577180a663ef Mon Sep 17 00:00:00 2001
+From 7a6e58a403a698722055343a8455a3335be0b0ab Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
 Date: Mon, 13 Dec 2021 14:03:48 +0100
 Subject: [PATCH 03/10] remove CMAKE_DL_LIBS
@@ -8,10 +8,10 @@ Subject: [PATCH 03/10] remove CMAKE_DL_LIBS
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index feaf3f3ce..ad358aeb8 100644
+index 7cae6b7d1..0c7f73092 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
-@@ -427,7 +427,7 @@ find_package(Atomic MODULE)
+@@ -503,7 +503,7 @@ endif()
  
  # Link library to external libraries.
  target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory

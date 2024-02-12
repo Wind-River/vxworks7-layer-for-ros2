@@ -1,0 +1,79 @@
+From 51ec94da4fd4aec4f6a7573cb2141072f88d358b Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 11:19:52 +0100
+Subject: [PATCH 08/10] add missing headers
+
+---
+ include/fastdds/dds/log/Log.hpp                      | 1 +
+ include/fastdds/rtps/attributes/ExternalLocators.hpp | 1 +
+ src/cpp/fastdds/log/Log.cpp                          | 1 +
+ src/cpp/rtps/transport/TCPChannelResource.cpp        | 1 +
+ src/cpp/utils/SystemInfo.hpp                         | 3 +++
+ 5 files changed, 7 insertions(+)
+
+diff --git a/include/fastdds/dds/log/Log.hpp b/include/fastdds/dds/log/Log.hpp
+index 3ad9e6552..acdbe0fc4 100644
+--- a/include/fastdds/dds/log/Log.hpp
++++ b/include/fastdds/dds/log/Log.hpp
+@@ -17,6 +17,7 @@
+ 
+ #include <regex>
+ #include <sstream>
++#include <memory>
+ 
+ #include <fastdds/rtps/attributes/ThreadSettings.hpp>
+ #include <fastrtps/fastrtps_dll.h>
+diff --git a/include/fastdds/rtps/attributes/ExternalLocators.hpp b/include/fastdds/rtps/attributes/ExternalLocators.hpp
+index b68384e02..550a38921 100644
+--- a/include/fastdds/rtps/attributes/ExternalLocators.hpp
++++ b/include/fastdds/rtps/attributes/ExternalLocators.hpp
+@@ -21,6 +21,7 @@
+ 
+ #include <map>
+ #include <vector>
++#include <functional>
+ 
+ #include <fastdds/rtps/common/LocatorWithMask.hpp>
+ 
+diff --git a/src/cpp/fastdds/log/Log.cpp b/src/cpp/fastdds/log/Log.cpp
+index 9063fd4ef..88e122767 100644
+--- a/src/cpp/fastdds/log/Log.cpp
++++ b/src/cpp/fastdds/log/Log.cpp
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++#include <atomic>
+ #include <chrono>
+ #include <iomanip>
+ #include <iostream>
+diff --git a/src/cpp/rtps/transport/TCPChannelResource.cpp b/src/cpp/rtps/transport/TCPChannelResource.cpp
+index 7cd4c018b..556ad5449 100644
+--- a/src/cpp/rtps/transport/TCPChannelResource.cpp
++++ b/src/cpp/rtps/transport/TCPChannelResource.cpp
+@@ -16,6 +16,7 @@
+ 
+ #include <chrono>
+ #include <thread>
++#include <sys/ttycom.h>
+ 
+ #include <fastrtps/utils/IPLocator.h>
+ #include <rtps/transport/TCPTransportInterface.h>
+diff --git a/src/cpp/utils/SystemInfo.hpp b/src/cpp/utils/SystemInfo.hpp
+index 418da3d99..c5c169f77 100644
+--- a/src/cpp/utils/SystemInfo.hpp
++++ b/src/cpp/utils/SystemInfo.hpp
+@@ -21,7 +21,10 @@
+ #include <unistd.h>
+ #endif // if defined(_WIN32)
+ 
++#include <chrono>
+ #include <cstdint>
++#include <functional>
++
+ #include <memory>
+ #include <string>
+ 
+-- 
+2.34.1
+

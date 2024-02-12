@@ -1,6 +1,6 @@
-From e62a1e82fdd1b911471b1a5543d558a48f65f57f Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:08:20 +0100
+From daacd0389a76f588ad32408b5d373cecffacc29b Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 10:52:41 +0100
 Subject: [PATCH 07/10] not defined VXWORKS
 
 ---

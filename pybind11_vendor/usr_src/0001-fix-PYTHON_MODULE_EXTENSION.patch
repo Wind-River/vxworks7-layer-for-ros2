@@ -1,0 +1,88 @@
+From 1e1fe6378b544d0ab760c310efc75e9b7ec15ea3 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Feb 2024 11:48:59 +0100
+Subject: [PATCH] fix PYTHON_MODULE_EXTENSION
+
+---
+ CMakeLists.txt                            |  2 +
+ patches/0003-fix-pybind11-extension.patch | 55 +++++++++++++++++++++++
+ 2 files changed, 57 insertions(+)
+ create mode 100644 patches/0003-fix-pybind11-extension.patch
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 55acc61..154cd56 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,8 @@ ament_vendor(pybind11_vendor
+   VCS_VERSION v2.9.1
+   PATCHES patches
+   GLOBAL_HOOK
++  CMAKE_ARGS
++    "-DPYTHON_SOABI=${PYTHON_SOABI} -DPYTHON_MODULE_EXTENSION=.${PYTHON_SOABI}.so"
+ )
+ 
+ ament_package(CONFIG_EXTRAS_POST "${PROJECT_NAME}-extras.cmake")
+diff --git a/patches/0003-fix-pybind11-extension.patch b/patches/0003-fix-pybind11-extension.patch
+new file mode 100644
+index 0000000..da2070e
+--- /dev/null
++++ b/patches/0003-fix-pybind11-extension.patch
+@@ -0,0 +1,55 @@
++--- a/tools/pybind11Tools.cmake	2023-08-12 21:55:42.149092321 +0200
+++++ b/tools/pybind11Tools.cmake	2023-08-12 21:56:32.347184093 +0200
++@@ -137,7 +137,7 @@
++ function(pybind11_extension name)
++   # The prefix and extension are provided by FindPythonLibsNew.cmake
++   set_target_properties(${name} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
++-                                           SUFFIX "${PYTHON_MODULE_EXTENSION}")
+++                                           SUFFIX ".cpython-39-vxworks.so")
++ endfunction()
++ 
++ # Build a Python extension module:
++--- a/tools/pybind11NewTools.cmake	2023-08-19 18:21:25.531226318 +0200
+++++ b/tools/pybind11NewTools.cmake	2023-08-19 18:22:13.741059134 +0200
++@@ -273,6 +273,6 @@
++ 
++ function(pybind11_extension name)
++   # The extension is precomputed
++-  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX "${PYTHON_MODULE_EXTENSION}")
+++  set_target_properties(${name} PROPERTIES PREFIX "" SUFFIX ".cpython-39-vxworks.so")
++ 
++ endfunction()
++--- a/tools/pybind11NewTools.cmake	2023-08-19 18:22:13.741059134 +0200
+++++ b/tools/pybind11NewTools.cmake	2023-08-19 19:34:34.139076072 +0200
++@@ -106,7 +106,7 @@
++ 
++ # Get the suffix - SO is deprecated, should use EXT_SUFFIX, but this is
++ # required for PyPy3 (as of 7.3.1)
++-if(NOT DEFINED PYTHON_MODULE_EXTENSION)
+++if(NOT DEFINED PYTHON_MODULE_EXTENSION AND NOT VXWORKS)
++   execute_process(
++     COMMAND
++       "${${_Python}_EXECUTABLE}" "-c"
++@@ -125,6 +125,10 @@
++   set(PYTHON_MODULE_EXTENSION
++       "${_PYTHON_MODULE_EXTENSION}"
++       CACHE INTERNAL "")
+++else()
+++  set(PYTHON_MODULE_EXTENSION
+++      ".cpython-39-vxworks.so"
+++      CACHE INTERNAL "")
++ endif()
++ 
++ # Python debug libraries expose slightly different objects before 3.8
++--- a/tools/FindPythonLibsNew.cmake	2023-11-11 18:03:19.612709160 +0100
+++++ b/tools/FindPythonLibsNew.cmake	2023-11-11 18:02:56.123838067 +0100
++@@ -156,7 +156,8 @@
++ 
++ # Make sure the Python has the same pointer-size as the chosen compiler
++ # Skip if CMAKE_SIZEOF_VOID_P is not defined
++-if(CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZEOF_VOID_P}"))
+++if(NOT CMAKE_CROSSCOMPILING
+++  AND CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZEOF_VOID_P}"))
++   if(PythonLibsNew_FIND_REQUIRED)
++     math(EXPR _PYTHON_BITS "${PYTHON_SIZEOF_VOID_P} * 8")
++     math(EXPR _CMAKE_BITS "${CMAKE_SIZEOF_VOID_P} * 8")
+-- 
+2.34.1
+

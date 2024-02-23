@@ -1,21 +1,37 @@
-From 0d9eeff08050b95834b86d04022c153426f5af6e Mon Sep 17 00:00:00 2001
-From: Andrei Kholodnyi <andrei.kholodnyi@gmail.com>
-Date: Mon, 13 Dec 2021 14:07:16 +0100
+From 2bb27c4e86c19d69210f9a69bfb497e26fe4e20f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 23 Feb 2024 17:24:23 +0100
 Subject: [PATCH 05/10] add ifdef NONE
 
 ---
+ include/fastdds/rtps/attributes/BuiltinTransports.hpp       | 4 ++++
  include/fastdds/rtps/attributes/RTPSParticipantAttributes.h | 3 +++
  include/fastdds/rtps/transport/TCPTransportDescriptor.h     | 3 +++
  include/fastrtps/xmlparser/XMLParserCommon.h                | 3 +++
- 3 files changed, 9 insertions(+)
+ 4 files changed, 13 insertions(+)
 
+diff --git a/include/fastdds/rtps/attributes/BuiltinTransports.hpp b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+index 6f297d775..f6f3ab1d9 100644
+--- a/include/fastdds/rtps/attributes/BuiltinTransports.hpp
++++ b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+@@ -26,6 +26,10 @@ namespace eprosima {
+ namespace fastdds {
+ namespace rtps {
+ 
++#ifdef NONE
++#undef NONE
++#endif
++
+ /**
+  * Defines the kind of transports automatically instantiated upon the creation of a participant
+  */
 diff --git a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-index 2f26997dd..b345d0f93 100644
+index 7251a8f74..2bcabf1de 100644
 --- a/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
 +++ b/include/fastdds/rtps/attributes/RTPSParticipantAttributes.h
-@@ -44,6 +44,9 @@ namespace rtps {
+@@ -43,6 +43,9 @@ namespace rtps {
   * Struct to define participant types to set participant type parameter property
-  *@ingroup DISCOVERY_MODULE
+  * @ingroup DISCOVERY_MODULE
   */
 +#ifdef NONE
 +#undef NONE
@@ -38,10 +54,10 @@ index 9ceeff847..13f0e8699 100644
          {
              NONE                    = 0,      // 0000 0000 0000
 diff --git a/include/fastrtps/xmlparser/XMLParserCommon.h b/include/fastrtps/xmlparser/XMLParserCommon.h
-index 759aa0099..2ae3def7c 100644
+index 07e8b0747..31b060108 100644
 --- a/include/fastrtps/xmlparser/XMLParserCommon.h
 +++ b/include/fastrtps/xmlparser/XMLParserCommon.h
-@@ -259,6 +259,9 @@ extern const char* OFFSETD1;
+@@ -264,6 +264,9 @@ extern const char* OFFSETD1;
  extern const char* OFFSETD2;
  extern const char* OFFSETD3;
  extern const char* RTPS_PDP_TYPE;

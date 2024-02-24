@@ -1,0 +1,26 @@
+From 85326d95f18aa2e9de6058d308dd785aead3bb4c Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Sat, 24 Feb 2024 15:06:47 +0100
+Subject: [PATCH 08/10] add ifdef NONE
+
+---
+ src/cpp/security/accesscontrol/GovernanceParser.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/cpp/security/accesscontrol/GovernanceParser.h b/src/cpp/security/accesscontrol/GovernanceParser.h
+index d416687b2..1ebef181c 100644
+--- a/src/cpp/security/accesscontrol/GovernanceParser.h
++++ b/src/cpp/security/accesscontrol/GovernanceParser.h
+@@ -24,6 +24,9 @@ namespace fastrtps {
+ namespace rtps {
+ namespace security {
+ 
++#ifdef NONE
++#undef NONE
++#endif
+ enum class ProtectionKind
+ {
+     NONE,
+-- 
+2.34.1
+

@@ -1,0 +1,24 @@
+From 9c252f02310c215eabeeb5bd0f31141266b8a766 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Aug 2024 15:42:14 +0200
+Subject: [PATCH 04/10] fix undefined TIOCOUTQ
+
+---
+ src/cpp/rtps/transport/TCPChannelResource.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/cpp/rtps/transport/TCPChannelResource.cpp b/src/cpp/rtps/transport/TCPChannelResource.cpp
+index 10bc88cc7..440d01a6f 100644
+--- a/src/cpp/rtps/transport/TCPChannelResource.cpp
++++ b/src/cpp/rtps/transport/TCPChannelResource.cpp
+@@ -16,6 +16,7 @@
+ 
+ #include <chrono>
+ #include <thread>
++#include <sys/ttycom.h>
+ 
+ #include <fastrtps/utils/IPLocator.h>
+ #include <rtps/transport/TCPTransportInterface.h>
+-- 
+2.34.1
+

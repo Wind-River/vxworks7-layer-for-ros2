@@ -1,0 +1,25 @@
+From 2da4d184a072b658f0959b1964f7bf5bbcda6ab2 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 23:59:34 +0100
+Subject: [PATCH] add VXWORKS to test CMakeLists
+
+---
+ rmw/test/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rmw/test/CMakeLists.txt b/rmw/test/CMakeLists.txt
+index e7733c9..1395d7d 100644
+--- a/rmw/test/CMakeLists.txt
++++ b/rmw/test/CMakeLists.txt
+@@ -164,7 +164,7 @@ ament_add_gmock(test_validate_namespace
+ )
+ if(TARGET test_validate_namespace)
+   target_link_libraries(test_validate_namespace ${PROJECT_NAME})
+-  if(UNIX AND NOT APPLE AND NOT ANDROID)
++  if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT VXWORKS)
+     target_link_libraries(test_validate_namespace pthread)
+   endif()
+   if(NOT WIN32)
+-- 
+2.34.1
+

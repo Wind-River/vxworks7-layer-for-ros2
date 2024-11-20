@@ -1,0 +1,116 @@
+From 31c599f2243c7f6658d7f2b3082445e0f636358f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 21:00:45 +0100
+Subject: [PATCH] add vxworks
+
+---
+ googlemock/CMakeLists.txt.install                   |  2 +-
+ googletest/CMakeLists.txt.install                   |  2 +-
+ googletest/include/gtest/internal/gtest-port-arch.h |  2 ++
+ googletest/include/gtest/internal/gtest-port.h      |  5 +++--
+ googletest/src/gtest-port.cc                        | 13 +++++++++++++
+ 5 files changed, 20 insertions(+), 4 deletions(-)
+
+diff --git a/googlemock/CMakeLists.txt.install b/googlemock/CMakeLists.txt.install
+index 3ad61360..a7aca0fd 100644
+--- a/googlemock/CMakeLists.txt.install
++++ b/googlemock/CMakeLists.txt.install
+@@ -21,7 +21,7 @@ target_compile_features(gmock PUBLIC cxx_std_11)  # Require C++11
+ # (see https://wiki.gentoo.org/wiki/AddressSanitizer/Problems#pthread_linking_issues
+ # for some additional information).  To work around that, we unconditionally
+ # add the -pthread flag for Linux machines so it will always work
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   target_link_libraries(gmock "-pthread")
+ endif()
+ 
+diff --git a/googletest/CMakeLists.txt.install b/googletest/CMakeLists.txt.install
+index 0e975c1d..ed6fff9e 100644
+--- a/googletest/CMakeLists.txt.install
++++ b/googletest/CMakeLists.txt.install
+@@ -15,7 +15,7 @@ target_compile_features(gtest PUBLIC cxx_std_11)  # Require C++11
+ # (see https://wiki.gentoo.org/wiki/AddressSanitizer/Problems#pthread_linking_issues
+ # for some additional information).  To work around that, we unconditionally
+ # add the -pthread flag for Linux machines so it will always work
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   target_link_libraries(gtest "-pthread")
+ endif()
+ 
+diff --git a/googletest/include/gtest/internal/gtest-port-arch.h b/googletest/include/gtest/internal/gtest-port-arch.h
+index cece93db..e0018bbc 100644
+--- a/googletest/include/gtest/internal/gtest-port-arch.h
++++ b/googletest/include/gtest/internal/gtest-port-arch.h
+@@ -100,6 +100,8 @@
+ # define GTEST_OS_OPENBSD 1
+ #elif defined __QNX__
+ # define GTEST_OS_QNX 1
++#elif defined __VXWORKS__
++# define GTEST_OS_VXWORKS 1
+ #elif defined(__HAIKU__)
+ #define GTEST_OS_HAIKU 1
+ #endif  // __CYGWIN__
+diff --git a/googletest/include/gtest/internal/gtest-port.h b/googletest/include/gtest/internal/gtest-port.h
+index 063fcb10..fd00ae53 100644
+--- a/googletest/include/gtest/internal/gtest-port.h
++++ b/googletest/include/gtest/internal/gtest-port.h
+@@ -128,6 +128,7 @@
+ //   GTEST_OS_OPENBSD  - OpenBSD
+ //   GTEST_OS_OS2      - OS/2
+ //   GTEST_OS_QNX      - QNX
++//   GTEST_OS_VXWORKS  - VxWorks
+ //   GTEST_OS_SOLARIS  - Sun Solaris
+ //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
+ //     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+@@ -534,7 +535,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+ // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
+ // to your compiler flags.
+ #define GTEST_HAS_PTHREAD                                                      \
+-  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
++  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX || GTEST_OS_VXWORKS || \
+    GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA || \
+    GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_OPENBSD ||          \
+    GTEST_OS_HAIKU)
+@@ -594,7 +595,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
+ #if (GTEST_OS_LINUX || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS ||             \
+      (GTEST_OS_MAC && !GTEST_OS_IOS) ||                                   \
+      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER) || GTEST_OS_WINDOWS_MINGW ||  \
+-     GTEST_OS_AIX || GTEST_OS_HPUX || GTEST_OS_OPENBSD || GTEST_OS_QNX || \
++     GTEST_OS_AIX || GTEST_OS_HPUX || GTEST_OS_OPENBSD || GTEST_OS_QNX || GTEST_OS_VXWORKS || \
+      GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA ||           \
+      GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_HAIKU)
+ # define GTEST_HAS_DEATH_TEST 1
+diff --git a/googletest/src/gtest-port.cc b/googletest/src/gtest-port.cc
+index fc5ba6be..ef755f8e 100644
+--- a/googletest/src/gtest-port.cc
++++ b/googletest/src/gtest-port.cc
+@@ -69,6 +69,10 @@
+ # include <sys/procfs.h>
+ #endif  // GTEST_OS_QNX
+ 
++#if GTEST_OS_VXWORKS
++# include <rtpLibCommon.h>
++#endif
++
+ #if GTEST_OS_AIX
+ # include <procinfo.h>
+ # include <sys/types.h>
+@@ -234,6 +238,15 @@ size_t GetThreadCount() {
+   }
+ }
+ 
++#elif GTEST_OS_VXWORKS
++size_t GetThreadCount() {
++  RTP_DESC rtpStruct;
++  if( OK == rtpInfoGet(0, &rtpStruct))
++    return rtpStruct.taskCnt;
++  else
++    return 0;
++}
++
+ #elif GTEST_OS_AIX
+ 
+ size_t GetThreadCount() {
+-- 
+2.34.1
+

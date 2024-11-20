@@ -1,0 +1,25 @@
+From 69e3e680683a6a93107ddeec36c86842b74532f1 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 23:57:32 +0100
+Subject: [PATCH] add VXWORKS to CMakeLists
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d37259d..2c70593 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   # enables building a static library but later link it into a dynamic library
+   add_compile_options(-fPIC)
+ endif()
+-if(NOT WIN32)
++if(NOT WIN32 AND NOT VXWORKS)
+   add_compile_options(-Wall -Wextra -Wpedantic)
+ endif()
+ 
+-- 
+2.34.1
+

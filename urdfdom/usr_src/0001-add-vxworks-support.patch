@@ -1,0 +1,25 @@
+From 16db693211d4dc8c7b4922164ca15729522905ae Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 23:42:52 +0100
+Subject: [PATCH] add vxworks support
+
+---
+ urdf_parser/test/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/urdf_parser/test/CMakeLists.txt b/urdf_parser/test/CMakeLists.txt
+index e845a79..5503b3c 100644
+--- a/urdf_parser/test/CMakeLists.txt
++++ b/urdf_parser/test/CMakeLists.txt
+@@ -31,7 +31,7 @@ foreach(GTEST_SOURCE_file ${tests})
+     gtest
+     urdfdom_model
+   )
+-  if (UNIX)
++  if (UNIX AND NOT VXWORKS)
+     target_link_libraries(${BINARY_NAME} pthread)
+   endif()
+ 
+-- 
+2.34.1
+

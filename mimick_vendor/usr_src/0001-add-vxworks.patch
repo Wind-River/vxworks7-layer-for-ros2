@@ -1,0 +1,131 @@
+From 8fcaa4c8c03c6341157acace80f4e527aa3506a2 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 20:56:12 +0100
+Subject: [PATCH] add vxworks
+
+---
+ CMakeLists.txt       |  3 ++
+ mimick_vxworks.patch | 97 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 100 insertions(+)
+ create mode 100644 mimick_vxworks.patch
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e0632bc..40f4b9d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,6 +69,9 @@ macro(build_mimick)
+     ${cmake_commands}
+     CMAKE_ARGS
+       ${cmake_configure_args}
++    PATCH_COMMAND
++      ${CMAKE_COMMAND} -E chdir <SOURCE_DIR> git apply -p1 --ignore-space-change --whitespace=nowarn
++        ${CMAKE_CURRENT_SOURCE_DIR}/mimick_vxworks.patch
+   )
+ 
+   # The external project will install to the build folder, but we'll install that on make install.
+diff --git a/mimick_vxworks.patch b/mimick_vxworks.patch
+new file mode 100644
+index 0000000..2433dad
+--- /dev/null
++++ b/mimick_vxworks.patch
+@@ -0,0 +1,97 @@
++diff --git a/CMakeLists.txt b/CMakeLists.txt
++index a0ff848..90a0a4a 100644
++--- a/CMakeLists.txt
+++++ b/CMakeLists.txt
++@@ -111,7 +111,7 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
++ elseif (CMAKE_SYSTEM_NAME MATCHES "(Free|Net|Open)BSD")
++   set (MMK_EXE_FORMAT elf)
++   set (MMK_EXE_FMT_ELF 1)
++-elseif (CMAKE_SYSTEM_NAME MATCHES "Solaris|SunOS")
+++elseif (CMAKE_SYSTEM_NAME MATCHES "Solaris|SunOS|VxWorks")
++   set (MMK_EXE_FORMAT elf)
++   set (MMK_EXE_FMT_ELF 1)
++ elseif (CMAKE_SYSTEM_NAME MATCHES "Generic")
++diff --git a/src/plt-elf.c b/src/plt-elf.c
++index d2501aa..b34ec78 100644
++--- a/src/plt-elf.c
+++++ b/src/plt-elf.c
++@@ -55,7 +55,7 @@ typedef ElfW(auxv_t) ElfAux;
++ #elif defined HAVE_ELF_AUXINFO
++ typedef ElfW(Auxinfo) ElfAux;
++ #else
++-# error Unsupported platform
+++# warning Unsupported platform
++ #endif
++ 
++ # if defined __clang__
++@@ -68,6 +68,7 @@ static size_t get_offsets(plt_ctx ctx, plt_lib lib, const char *name, plt_offset
++ 
++ static void *lib_dt_lookup(plt_lib lib, ElfSWord tag)
++ {
+++#if !defined(__VXWORKS__)
++     ElfW(Addr) base =(ElfW(Addr)) lib->l_addr;
++     for (const ElfW(Dyn) *dyn = lib->l_ld; dyn->d_tag != DT_NULL; ++dyn) {
++         if (dyn->d_tag == tag) {
++@@ -78,22 +79,26 @@ static void *lib_dt_lookup(plt_lib lib, ElfSWord tag)
++                 return (char*) base + dyn->d_un.d_ptr;
++         }
++     }
+++#endif
++     return NULL;
++ }
++ 
++ static ElfWord lib_dt_lookup_val(plt_lib lib, ElfSWord tag)
++ {
+++#if !defined(__VXWORKS__)
++     for (const ElfW(Dyn) *dyn = lib->l_ld; dyn->d_tag != DT_NULL; ++dyn) {
++         if (dyn->d_tag == tag) {
++             return dyn->d_un.d_val;
++         }
++     }
+++#endif
++     return 0;
++ }
++ 
++ #if !defined HAVE__R_DEBUG
++ static int find_dynamic(struct dl_phdr_info *info, size_t size, void *data)
++ {
+++#if !defined(__VXWORKS__)
++     ElfAddr *ctx = data;
++ 
++     for (ElfOff i = 0; i < info->dlpi_phnum; ++i) {
++@@ -102,15 +107,18 @@ static int find_dynamic(struct dl_phdr_info *info, size_t size, void *data)
++             return 1;
++         }
++     }
+++#endif
++     return -1;
++ }
++ 
++ static struct r_debug *r_debug_from_dynamic(void *dynamic)
++ {
+++#if !defined(__VXWORKS__)
++     for (const ElfW(Dyn) *dyn = dynamic; dyn->d_tag != DT_NULL; ++dyn) {
++         if (dyn->d_tag == DT_DEBUG)
++             return (struct r_debug *) dyn->d_un.d_ptr;
++     }
+++#endif
++     return NULL;
++ }
++ #endif
++@@ -120,6 +128,7 @@ static struct r_debug *get_r_debug(void)
++     // Find our own r_debug
++     struct r_debug *dbg = NULL;
++ 
+++#if !defined(__VXWORKS__)
++     // First use some known shortcuts
++ #if defined HAVE__R_DEBUG
++     dbg = &_r_debug;
++@@ -139,7 +148,7 @@ static struct r_debug *get_r_debug(void)
++     }
++ # endif
++ #endif
++-
+++#endif
++     return dbg;
++ }
++ 
+-- 
+2.34.1
+

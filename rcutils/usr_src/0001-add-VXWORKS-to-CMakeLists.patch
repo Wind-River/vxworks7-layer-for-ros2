@@ -1,0 +1,25 @@
+From 31d504866774779731ee683c11116b6330eb0a7f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 23:55:49 +0100
+Subject: [PATCH] add VXWORKS to CMakeLists
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8d3e87b..d42fbf0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
+ 
+ ament_python_install_package(${PROJECT_NAME})
+ 
+-if(UNIX AND NOT APPLE)
++if(UNIX AND NOT APPLE AND NOT VXWORKS)
+   include(cmake/check_c_compiler_uses_glibc.cmake)
+   check_c_compiler_uses_glibc(USES_GLIBC)
+   if(USES_GLIBC)
+-- 
+2.34.1
+

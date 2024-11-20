@@ -1,0 +1,48 @@
+From a8cf72da5c5d0a70b9cbc5e66f8399c9545aefe9 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 20 Nov 2024 23:46:06 +0100
+Subject: [PATCH] vxworks support
+
+---
+ test/CMakeLists.txt                 | 4 ++--
+ test/fviz_case_study/CMakeLists.txt | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index 50f0b67..2874513 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -61,7 +61,7 @@ if(TARGET ${PROJECT_NAME}_utest)
+     target_link_libraries(${PROJECT_NAME}_utest)
+   endif()
+   target_link_libraries(${PROJECT_NAME}_utest ${PROJECT_NAME})
+-  if(NOT WIN32)
++  if(NOT WIN32 AND NOT VXWORKS)
+     target_link_libraries(${PROJECT_NAME}_utest pthread)
+   endif()
+   add_dependencies(${PROJECT_NAME}_utest
+@@ -84,7 +84,7 @@ if(TARGET ${PROJECT_NAME}_unique_ptr_test)
+     target_link_libraries(${PROJECT_NAME}_unique_ptr_test)
+   endif()
+   target_link_libraries(${PROJECT_NAME}_unique_ptr_test ${PROJECT_NAME})
+-  if(NOT WIN32)
++  if(NOT WIN32 AND NOT VXWORKS)
+     target_link_libraries(${PROJECT_NAME}_unique_ptr_test pthread)
+   endif()
+   add_dependencies(${PROJECT_NAME}_unique_ptr_test
+diff --git a/test/fviz_case_study/CMakeLists.txt b/test/fviz_case_study/CMakeLists.txt
+index 191aeb2..50257fc 100644
+--- a/test/fviz_case_study/CMakeLists.txt
++++ b/test/fviz_case_study/CMakeLists.txt
+@@ -47,7 +47,7 @@ if(TARGET ${PROJECT_NAME}_fviz_test)
+   endif()
+   target_link_libraries(${PROJECT_NAME}_fviz_test
+     ${PROJECT_NAME} ${PROJECT_NAME}_Test_Fviz)
+-  if(NOT WIN32)
++  if(NOT WIN32 AND NOT VXWORKS)
+     target_link_libraries(${PROJECT_NAME}_fviz_test pthread)
+   endif()
+   add_dependencies(${PROJECT_NAME}_fviz_test
+-- 
+2.34.1
+

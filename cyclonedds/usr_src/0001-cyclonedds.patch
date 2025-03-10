@@ -1,6 +1,6 @@
-From 2537f33248b6ddb7228e2f9998ccd5745b0f5fd4 Mon Sep 17 00:00:00 2001
+From 39d89847bd1be98da1bf8a6c8e071eda44c1fb93 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Mon, 10 Mar 2025 10:09:21 +0100
+Date: Mon, 10 Mar 2025 13:54:14 +0100
 Subject: [PATCH] cyclonedds
 
 ---
@@ -14,12 +14,13 @@ Subject: [PATCH] cyclonedds
  src/ddsrt/include/dds/ddsrt/time.h          |  1 +
  src/ddsrt/src/sockets/posix/gethostname.c   |  1 +
  src/ddsrt/src/threads/posix/threads.c       |  6 ++--
+ src/ddsrt/tests/CMakeLists.txt              |  5 +++
  src/ddsrt/tests/environ.c                   |  1 +
  src/ddsrt/tests/log.c                       |  4 +++
  src/idl/src/string.c                        | 35 +++++++++++++++++++--
  src/security/core/tests/CMakeLists.txt      |  1 +
  src/tools/CMakeLists.txt                    |  4 +--
- 15 files changed, 65 insertions(+), 19 deletions(-)
+ 16 files changed, 70 insertions(+), 19 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index cbec187f..b3ed5667 100644
@@ -215,6 +216,22 @@ index 0191ec46..a98fee92 100644
  #endif
  
    /* return the result of the user routine */
+diff --git a/src/ddsrt/tests/CMakeLists.txt b/src/ddsrt/tests/CMakeLists.txt
+index a0249f39..9ad625e6 100644
+--- a/src/ddsrt/tests/CMakeLists.txt
++++ b/src/ddsrt/tests/CMakeLists.txt
+@@ -33,6 +33,11 @@ if(WITH_FREERTOS)
+   list(APPEND sources tasklist.c)
+ endif()
+ 
++# A workaround to prevent VxWorks compiler driver from failing on strcmp due to the -I.
++if(VXWORKS)
++  add_definitions(-Wno-implicit-function-declaration)
++endif()
++
+ if(HAVE_DYNLIB)
+   list(APPEND sources dynlib.c)
+   # Create a separate shared library for testing dynamic loading
 diff --git a/src/ddsrt/tests/environ.c b/src/ddsrt/tests/environ.c
 index 46ba738f..bd580192 100644
 --- a/src/ddsrt/tests/environ.c

@@ -1,0 +1,64 @@
+From 5cf81d7e8b9c0e26ef64bba8e53873b1883900c1 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 13 Mar 2025 13:41:46 +0100
+Subject: [PATCH] yaml_cpp_vendor
+
+---
+ CMakeLists.txt                  | 17 +----------------
+ yaml_cpp_vendor-extras.cmake.in |  4 ++--
+ 2 files changed, 3 insertions(+), 18 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index badc1b4..2d4ea7a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,7 +59,7 @@ macro(build_yaml_cpp)
+     DIRECTORY
+       ${CMAKE_CURRENT_BINARY_DIR}/yaml_cpp_install/
+     DESTINATION
+-      ${CMAKE_INSTALL_PREFIX}/opt/yaml_cpp_vendor
++      ${CMAKE_INSTALL_PREFIX}
+     USE_SOURCE_PERMISSIONS
+   )
+ endmacro()
+@@ -70,21 +70,6 @@ endmacro()
+ find_package(yaml-cpp QUIET NO_CMAKE_PACKAGE_REGISTRY)
+ if(FORCE_BUILD_VENDOR_PKG OR NOT yaml-cpp_FOUND)
+   build_yaml_cpp()
+-
+-  if(WIN32)
+-    ament_environment_hooks(env_hook/yaml_cpp_vendor_library_path.bat)
+-    set(ENV_VAR_NAME "PATH")
+-    set(ENV_VAR_VALUE "opt\\yaml_cpp_vendor\\bin")
+-  else()
+-    ament_environment_hooks(env_hook/yaml_cpp_vendor_library_path.sh)
+-    if(APPLE)
+-      set(ENV_VAR_NAME "DYLD_LIBRARY_PATH")
+-    else()
+-      set(ENV_VAR_NAME "LD_LIBRARY_PATH")
+-    endif()
+-    set(ENV_VAR_VALUE "opt/yaml_cpp_vendor/lib")
+-  endif()
+-  ament_environment_hooks(env_hook/yaml_cpp_vendor_library_path.dsv.in)
+ else()
+   message(STATUS "Found yaml-cpp ${yaml-cpp_VERSION} in path ${yaml-cpp_CONFIG}")
+ endif()
+diff --git a/yaml_cpp_vendor-extras.cmake.in b/yaml_cpp_vendor-extras.cmake.in
+index deac98c..0706bc6 100644
+--- a/yaml_cpp_vendor-extras.cmake.in
++++ b/yaml_cpp_vendor-extras.cmake.in
+@@ -3,9 +3,9 @@ find_package(yaml-cpp QUIET)
+ if(NOT yaml-cpp_FOUND)
+   # add the local Modules directory to the modules path
+   if(WIN32)
+-    set(yaml-cpp_DIR "${@PROJECT_NAME@_DIR}/../../../opt/yaml_cpp_vendor/CMake")
++    set(yaml-cpp_DIR "${@PROJECT_NAME@_DIR}/../../../CMake")
+   else()
+-    set(yaml-cpp_DIR "${@PROJECT_NAME@_DIR}/../../../opt/yaml_cpp_vendor/share/cmake/yaml-cpp")
++    set(yaml-cpp_DIR "${@PROJECT_NAME@_DIR}/../../../lib/cmake/yaml-cpp")
+   endif()
+   message(STATUS "Setting yaml-cpp_DIR to: '${yaml-cpp_DIR}'")
+ 
+-- 
+2.34.1
+

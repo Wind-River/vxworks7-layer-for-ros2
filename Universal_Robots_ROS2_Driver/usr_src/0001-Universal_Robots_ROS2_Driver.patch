@@ -1,0 +1,92 @@
+From 862fd4897ea6203c677b6dfc9f9c25be6ab37916 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 13 Mar 2025 22:52:21 +0100
+Subject: [PATCH] Universal_Robots_ROS2_Driver
+
+---
+ ur_calibration/CMakeLists.txt                         |  2 +-
+ .../include/ur_robot_driver/hardware_interface.hpp    |  6 ++++--
+ ur_robot_driver/src/hardware_interface.cpp            | 11 ++++++++---
+ 3 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/ur_calibration/CMakeLists.txt b/ur_calibration/CMakeLists.txt
+index 0b17e4d..b149b1e 100644
+--- a/ur_calibration/CMakeLists.txt
++++ b/ur_calibration/CMakeLists.txt
+@@ -37,7 +37,7 @@ target_include_directories(calibration
+     ${YAML_CPP_INCLUDE_DIRS}
+ )
+ target_link_libraries(calibration
+-  ${YAML_CPP_LIBRARIES}
++  ${YAML_CPP_LIBRARIES} yaml-cpp
+ )
+ ament_target_dependencies(calibration
+   rclcpp
+diff --git a/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp b/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
+index c9f23e4..f9282b8 100644
+--- a/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
++++ b/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
+@@ -71,7 +71,9 @@ enum class PausingState
+   RUNNING,
+   RAMPUP
+ };
+-
++#ifdef NONE
++#undef NONE
++#endif
+ enum StoppingInterface
+ {
+   NONE,
+@@ -292,7 +294,7 @@ protected:
+   double pausing_ramp_up_increment_;
+ 
+   // resources switching aux vars
+-  std::vector<std::vector<uint>> stop_modes_;
++  std::vector<std::vector<unsigned int>> stop_modes_;
+   std::vector<std::vector<std::string>> start_modes_;
+   bool position_controller_running_;
+   bool velocity_controller_running_;
+diff --git a/ur_robot_driver/src/hardware_interface.cpp b/ur_robot_driver/src/hardware_interface.cpp
+index 4efcf06..634212d 100644
+--- a/ur_robot_driver/src/hardware_interface.cpp
++++ b/ur_robot_driver/src/hardware_interface.cpp
+@@ -175,7 +175,7 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
+       const std::vector<std::string> fts_names = {
+         "force.x", "force.y", "force.z", "torque.x", "torque.y", "torque.z"
+       };
+-      for (uint j = 0; j < 6; ++j) {
++      for (unsigned int j = 0; j < 6; ++j) {
+         state_interfaces.emplace_back(
+             hardware_interface::StateInterface(sensor.name, fts_names[j], &urcl_ft_sensor_measurements_[j]));
+       }
+@@ -743,12 +743,17 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
+     }
+ 
+     updateNonDoubleValues();
+-
++#ifdef OK
++#undef OK
++#endif
+     return hardware_interface::return_type::OK;
+   }
+   if (!non_blocking_read_)
+     RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Unable to read from hardware...");
+   // TODO(anyone): could not read from the driver --> return ERROR --> on error will be called
++#ifdef OK
++#undef OK
++#endif
+   return hardware_interface::return_type::OK;
+ }
+ 
+@@ -968,7 +973,7 @@ hardware_interface::return_type URPositionHardwareInterface::prepare_command_mod
+   hardware_interface::return_type ret_val = hardware_interface::return_type::OK;
+ 
+   start_modes_ = std::vector<std::vector<std::string>>(info_.joints.size());
+-  stop_modes_ = std::vector<std::vector<uint>>(info_.joints.size());
++  stop_modes_ = std::vector<std::vector<unsigned int>>(info_.joints.size());
+   std::vector<std::vector<std::string>> control_modes(info_.joints.size());
+   const std::string tf_prefix = info_.hardware_parameters.at("tf_prefix");
+ 
+-- 
+2.34.1
+

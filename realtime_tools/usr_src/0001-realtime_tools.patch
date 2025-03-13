@@ -1,0 +1,104 @@
+From f575f659715233335f5ed3dd75e0da1a6170bb6c Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 13 Mar 2025 22:39:39 +0100
+Subject: [PATCH] realtime_tools
+
+---
+ CMakeLists.txt           |  4 ++--
+ src/realtime_helpers.cpp | 18 +++++++++++++++---
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1167c3c..591718e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,7 +48,7 @@ target_include_directories(realtime_tools PUBLIC
+   $<INSTALL_INTERFACE:include/realtime_tools>
+ )
+ ament_target_dependencies(realtime_tools PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+-if(UNIX)
++if(UNIX AND NOT VXWORKS)
+   target_link_libraries(realtime_tools PUBLIC cap)
+ endif()
+ 
+@@ -62,7 +62,7 @@ target_include_directories(thread_priority PUBLIC
+   $<INSTALL_INTERFACE:include/realtime_tools>
+ )
+ ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+-if(UNIX)
++if(UNIX AND NOT VXWORKS)
+   target_link_libraries(thread_priority PUBLIC cap)
+ endif()
+ 
+diff --git a/src/realtime_helpers.cpp b/src/realtime_helpers.cpp
+index 9dbbfdf..c73007d 100644
+--- a/src/realtime_helpers.cpp
++++ b/src/realtime_helpers.cpp
+@@ -32,7 +32,10 @@
+ #include <windows.h>
+ #else
+ #include <sched.h>
++#ifndef __VXWORKS__
+ #include <sys/capability.h>
++#endif
++#include <pthread.h>
+ #include <sys/mman.h>
+ #include <sys/utsname.h>
+ 
+@@ -50,6 +53,8 @@ bool has_realtime_kernel()
+ #ifdef _WIN32
+   std::cerr << "Realtime kernel detection is not supported on Windows." << std::endl;
+   return false;
++#elif defined (__VXWORKS__)
++  return true;
+ #else
+   std::ifstream realtime_file("/sys/kernel/realtime", std::ios::in);
+   bool has_realtime = false;
+@@ -95,6 +100,7 @@ std::pair<bool, std::string> lock_memory()
+ #ifdef _WIN32
+   return {false, "Memory locking is not supported on Windows."};
+ #else
++#ifndef __VXWORKS__
+   auto is_capable = [](cap_value_t v) -> bool {
+     bool rc = false;
+     cap_t caps;
+@@ -110,12 +116,15 @@ std::pair<bool, std::string> lock_memory()
+     cap_free(caps);
+     return rc;
+   };
+-
++#endif
+   std::string message;
+   if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1) {
++#ifndef __VXWORKS__
+     if (!is_capable(CAP_IPC_LOCK)) {
+       message = "No proper privileges to lock the memory!";
+-    } else if (errno == ENOMEM) {
++    } else
++#endif 
++    if (errno == ENOMEM) {
+       message =
+         "The caller had a nonzero RLIMIT_MEMLOCK soft resource limit, but tried to lock more "
+         "memory than the limit permitted. Try running the application with privileges!";
+@@ -224,7 +233,7 @@ std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core)
+     return std::make_pair(
+       false, "Unable to set the thread affinity, as the thread is not joinable!");
+   }
+-  return set_thread_affinity(thread.native_handle(), core);
++  return set_thread_affinity(reinterpret_cast<NATIVE_THREAD_HANDLE>(thread.native_handle()), core);
+ }
+ 
+ std::pair<bool, std::string> set_current_thread_affinity(int core)
+@@ -251,6 +260,9 @@ int64_t get_number_of_available_processors()
+   SYSTEM_INFO sysinfo;
+   GetSystemInfo(&sysinfo);
+   return static_cast<int64_t>(sysinfo.dwNumberOfProcessors);
++#elif defined __VXWORKS__
++#include <vxCpuLib.h>
++  return vxCpuEnabledGet();
+ #else
+   return sysconf(_SC_NPROCESSORS_ONLN);
+ #endif
+-- 
+2.34.1
+

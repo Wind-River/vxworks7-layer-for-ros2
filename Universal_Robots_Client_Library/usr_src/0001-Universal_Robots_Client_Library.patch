@@ -1,0 +1,226 @@
+From 8b2353018025d9c32162c4e7ff6218fe5e706056 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 13 Mar 2025 22:48:06 +0100
+Subject: [PATCH] Universal_Robots_Client_Library
+
+---
+ include/ur_client_library/comm/pipeline.h         | 7 ++++++-
+ include/ur_client_library/comm/tcp_server.h       | 2 ++
+ include/ur_client_library/comm/tcp_socket.h       | 1 +
+ include/ur_client_library/exceptions.h            | 1 +
+ include/ur_client_library/log.h                   | 2 +-
+ include/ur_client_library/queue/atomicops.h       | 4 ++--
+ include/ur_client_library/ur/tool_communication.h | 3 +++
+ src/comm/tcp_server.cpp                           | 1 +
+ src/comm/tcp_socket.cpp                           | 2 ++
+ src/helpers.cpp                                   | 2 ++
+ src/rtde/rtde_writer.cpp                          | 4 +++-
+ src/ur/dashboard_client.cpp                       | 4 ++--
+ 12 files changed, 26 insertions(+), 7 deletions(-)
+
+diff --git a/include/ur_client_library/comm/pipeline.h b/include/ur_client_library/comm/pipeline.h
+index f18f1741..a9dcfefe 100644
+--- a/include/ur_client_library/comm/pipeline.h
++++ b/include/ur_client_library/comm/pipeline.h
+@@ -20,10 +20,11 @@
+ 
+ #pragma once
+ 
+-#include "ur_client_library/comm/package.h"
+ #include "ur_client_library/log.h"
++#include "ur_client_library/comm/package.h"
+ #include "ur_client_library/helpers.h"
+ #include "ur_client_library/queue/readerwriterqueue.h"
++#include <pthread.h>
+ #include <atomic>
+ #include <chrono>
+ #include <thread>
+@@ -32,6 +33,10 @@
+ #include <mutex>
+ #include <algorithm>
+ 
++#ifdef ERROR
++#undef ERROR
++#endif
++
+ namespace urcl
+ {
+ namespace comm
+diff --git a/include/ur_client_library/comm/tcp_server.h b/include/ur_client_library/comm/tcp_server.h
+index 8cad8dde..f3257377 100644
+--- a/include/ur_client_library/comm/tcp_server.h
++++ b/include/ur_client_library/comm/tcp_server.h
+@@ -30,6 +30,7 @@
+ #define UR_CLIENT_LIBRARY_TCP_SERVER_H_INCLUDED
+ 
+ #include <netdb.h>
++#include <sys/select.h>
+ #include <sys/socket.h>
+ #include <sys/types.h>
+ #include <unistd.h>
+@@ -38,6 +39,7 @@
+ #include <chrono>
+ #include <functional>
+ #include <thread>
++#include <vector>
+ 
+ namespace urcl
+ {
+diff --git a/include/ur_client_library/comm/tcp_socket.h b/include/ur_client_library/comm/tcp_socket.h
+index 51364810..80286b2f 100644
+--- a/include/ur_client_library/comm/tcp_socket.h
++++ b/include/ur_client_library/comm/tcp_socket.h
+@@ -21,6 +21,7 @@
+ #pragma once
+ #include <netdb.h>
+ #include <sys/socket.h>
++#include <sys/time.h>
+ #include <sys/types.h>
+ #include <atomic>
+ #include <chrono>
+diff --git a/include/ur_client_library/exceptions.h b/include/ur_client_library/exceptions.h
+index 5145a75d..d19f8399 100644
+--- a/include/ur_client_library/exceptions.h
++++ b/include/ur_client_library/exceptions.h
+@@ -29,6 +29,7 @@
+ #ifndef UR_CLIENT_LIBRARY_EXCEPTIONS_H_INCLUDED
+ #define UR_CLIENT_LIBRARY_EXCEPTIONS_H_INCLUDED
+ 
++#include <sys/time.h>
+ #include <chrono>
+ #include <stdexcept>
+ #include <sstream>
+diff --git a/include/ur_client_library/log.h b/include/ur_client_library/log.h
+index ed71d397..1dc11847 100644
+--- a/include/ur_client_library/log.h
++++ b/include/ur_client_library/log.h
+@@ -17,13 +17,13 @@
+  */
+ 
+ #pragma once
++#define URCL_LOG_ERROR(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::ERROR, __VA_ARGS__)
+ #include <inttypes.h>
+ #include <memory>
+ 
+ #define URCL_LOG_DEBUG(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::DEBUG, __VA_ARGS__)
+ #define URCL_LOG_WARN(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::WARN, __VA_ARGS__)
+ #define URCL_LOG_INFO(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::INFO, __VA_ARGS__)
+-#define URCL_LOG_ERROR(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::ERROR, __VA_ARGS__)
+ #define URCL_LOG_FATAL(...) urcl::log(__FILE__, __LINE__, urcl::LogLevel::FATAL, __VA_ARGS__)
+ 
+ namespace urcl
+diff --git a/include/ur_client_library/queue/atomicops.h b/include/ur_client_library/queue/atomicops.h
+index e4b24826..4e02a214 100644
+--- a/include/ur_client_library/queue/atomicops.h
++++ b/include/ur_client_library/queue/atomicops.h
+@@ -408,7 +408,7 @@ __declspec(dllimport) int __stdcall ReleaseSemaphore(void* hSemaphore, long lRel
+ }
+ #elif defined(__MACH__)
+ #  include <mach/mach.h>
+-#elif defined(__unix__)
++#elif defined(__unix__) || defined(__VXWORKS__)
+ #  include <semaphore.h>
+ #endif
+ 
+@@ -543,7 +543,7 @@ public:
+     }
+   }
+ };
+-#elif defined(__unix__)
++#elif defined(__unix__) || defined(__VXWORKS__)
+ //---------------------------------------------------------
+ // Semaphore (POSIX, Linux)
+ //---------------------------------------------------------
+diff --git a/include/ur_client_library/ur/tool_communication.h b/include/ur_client_library/ur/tool_communication.h
+index ab5d6546..c591ddce 100644
+--- a/include/ur_client_library/ur/tool_communication.h
++++ b/include/ur_client_library/ur/tool_communication.h
+@@ -48,6 +48,9 @@ enum class ToolVoltage : int
+ /*!
+  * \brief Possible values for th parity flag
+  */
++#ifdef NONE
++#undef NONE
++#endif
+ enum class Parity : int
+ {
+   NONE = 0,
+diff --git a/src/comm/tcp_server.cpp b/src/comm/tcp_server.cpp
+index ea5122c7..bcce7a5a 100644
+--- a/src/comm/tcp_server.cpp
++++ b/src/comm/tcp_server.cpp
+@@ -35,6 +35,7 @@
+ #include <strings.h>
+ #include <cstring>
+ #include <fcntl.h>
++#include <netinet/ip.h>
+ #include <algorithm>
+ #include <system_error>
+ 
+diff --git a/src/comm/tcp_socket.cpp b/src/comm/tcp_socket.cpp
+index 8803664a..43c0f432 100644
+--- a/src/comm/tcp_socket.cpp
++++ b/src/comm/tcp_socket.cpp
+@@ -48,7 +48,9 @@ void TCPSocket::setupOptions()
+ {
+   int flag = 1;
+   setsockopt(socket_fd_, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(int));
++#if defined(TCP_QUICKACK)
+   setsockopt(socket_fd_, IPPROTO_TCP, TCP_QUICKACK, &flag, sizeof(int));
++#endif
+ 
+   if (recv_timeout_ != nullptr)
+   {
+diff --git a/src/helpers.cpp b/src/helpers.cpp
+index 6697be5b..ff2d9176 100644
+--- a/src/helpers.cpp
++++ b/src/helpers.cpp
+@@ -29,6 +29,8 @@
+ #include <ur_client_library/helpers.h>
+ #include <ur_client_library/log.h>
+ 
++#include <pthread.h>
++#include <sched.h>
+ #include <cstring>
+ #include <fstream>
+ #include <iostream>
+diff --git a/src/rtde/rtde_writer.cpp b/src/rtde/rtde_writer.cpp
+index ea543ab8..6aef0d19 100644
+--- a/src/rtde/rtde_writer.cpp
++++ b/src/rtde/rtde_writer.cpp
+@@ -27,7 +27,9 @@
+ //----------------------------------------------------------------------
+ 
+ #include "ur_client_library/rtde/rtde_writer.h"
+-
++#ifdef ERROR
++#undef ERROR
++#endif
+ namespace urcl
+ {
+ namespace rtde_interface
+diff --git a/src/ur/dashboard_client.cpp b/src/ur/dashboard_client.cpp
+index 41a43c94..d7dfa656 100644
+--- a/src/ur/dashboard_client.cpp
++++ b/src/ur/dashboard_client.cpp
+@@ -197,7 +197,7 @@ bool DashboardClient::waitForReply(const std::string& command, const std::string
+     }
+ 
+     // wait 100ms before trying again
+-    std::this_thread::sleep_for(wait_period);
++    std::this_thread::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(wait_period));
+     time_done += wait_period;
+   }
+ 
+@@ -516,7 +516,7 @@ timeval DashboardClient::getConfiguredReceiveTimeout() const
+   }
+   else
+   {
+-    tv.tv_sec = 1;
++    tv.tv_sec = 5;
+     tv.tv_usec = 0;
+   }
+   return tv;
+-- 
+2.34.1
+

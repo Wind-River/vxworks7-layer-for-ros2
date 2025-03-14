@@ -1,13 +1,14 @@
-From 862fd4897ea6203c677b6dfc9f9c25be6ab37916 Mon Sep 17 00:00:00 2001
+From c2bae44a479ccfc946c94a8030bc933e2c4d0f76 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Thu, 13 Mar 2025 22:52:21 +0100
+Date: Fri, 14 Mar 2025 13:28:22 +0100
 Subject: [PATCH] Universal_Robots_ROS2_Driver
 
 ---
  ur_calibration/CMakeLists.txt                         |  2 +-
  .../include/ur_robot_driver/hardware_interface.hpp    |  6 ++++--
  ur_robot_driver/src/hardware_interface.cpp            | 11 ++++++++---
- 3 files changed, 13 insertions(+), 6 deletions(-)
+ ur_robot_driver/src/robot_state_helper.cpp            |  1 +
+ 4 files changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/ur_calibration/CMakeLists.txt b/ur_calibration/CMakeLists.txt
 index 0b17e4d..b149b1e 100644
@@ -87,6 +88,18 @@ index 4efcf06..634212d 100644
    std::vector<std::vector<std::string>> control_modes(info_.joints.size());
    const std::string tf_prefix = info_.hardware_parameters.at("tf_prefix");
  
+diff --git a/ur_robot_driver/src/robot_state_helper.cpp b/ur_robot_driver/src/robot_state_helper.cpp
+index 0f35df6..41a9340 100644
+--- a/ur_robot_driver/src/robot_state_helper.cpp
++++ b/ur_robot_driver/src/robot_state_helper.cpp
+@@ -27,6 +27,7 @@
+ // POSSIBILITY OF SUCH DAMAGE.
+ 
+ #include <mutex>
++#include <unistd.h>
+ #include <ur_robot_driver/robot_state_helper.hpp>
+ 
+ #include "rclcpp/rclcpp.hpp"
 -- 
 2.34.1
 

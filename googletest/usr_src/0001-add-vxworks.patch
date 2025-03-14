@@ -103,7 +103,7 @@ index fc5ba6be..ef755f8e 100644
 +size_t GetThreadCount() {
 +  RTP_DESC rtpStruct;
 +  if( OK == rtpInfoGet(0, &rtpStruct))
-+    return rtpStruct.taskCnt;
++    return static_cast<size_t>(rtpStruct.taskCnt);
 +  else
 +    return 0;
 +}

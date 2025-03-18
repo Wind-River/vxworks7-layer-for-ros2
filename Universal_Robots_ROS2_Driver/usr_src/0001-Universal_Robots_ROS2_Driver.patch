@@ -1,30 +1,16 @@
-From c2bae44a479ccfc946c94a8030bc933e2c4d0f76 Mon Sep 17 00:00:00 2001
+From 69b6419feb4f96e8d17aa0799fce7530edc20b76 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Fri, 14 Mar 2025 13:28:22 +0100
+Date: Tue, 18 Mar 2025 13:08:16 +0100
 Subject: [PATCH] Universal_Robots_ROS2_Driver
 
 ---
- ur_calibration/CMakeLists.txt                         |  2 +-
  .../include/ur_robot_driver/hardware_interface.hpp    |  6 ++++--
  ur_robot_driver/src/hardware_interface.cpp            | 11 ++++++++---
  ur_robot_driver/src/robot_state_helper.cpp            |  1 +
- 4 files changed, 14 insertions(+), 6 deletions(-)
+ 3 files changed, 13 insertions(+), 5 deletions(-)
 
-diff --git a/ur_calibration/CMakeLists.txt b/ur_calibration/CMakeLists.txt
-index 0b17e4d..b149b1e 100644
---- a/ur_calibration/CMakeLists.txt
-+++ b/ur_calibration/CMakeLists.txt
-@@ -37,7 +37,7 @@ target_include_directories(calibration
-     ${YAML_CPP_INCLUDE_DIRS}
- )
- target_link_libraries(calibration
--  ${YAML_CPP_LIBRARIES}
-+  ${YAML_CPP_LIBRARIES} yaml-cpp
- )
- ament_target_dependencies(calibration
-   rclcpp
 diff --git a/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp b/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
-index c9f23e4..f9282b8 100644
+index 845720f..a5f0cc6 100644
 --- a/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
 +++ b/ur_robot_driver/include/ur_robot_driver/hardware_interface.hpp
 @@ -71,7 +71,9 @@ enum class PausingState
@@ -38,7 +24,7 @@ index c9f23e4..f9282b8 100644
  enum StoppingInterface
  {
    NONE,
-@@ -292,7 +294,7 @@ protected:
+@@ -290,7 +292,7 @@ protected:
    double pausing_ramp_up_increment_;
  
    // resources switching aux vars
@@ -48,7 +34,7 @@ index c9f23e4..f9282b8 100644
    bool position_controller_running_;
    bool velocity_controller_running_;
 diff --git a/ur_robot_driver/src/hardware_interface.cpp b/ur_robot_driver/src/hardware_interface.cpp
-index 4efcf06..634212d 100644
+index 20b7896..a00eb40 100644
 --- a/ur_robot_driver/src/hardware_interface.cpp
 +++ b/ur_robot_driver/src/hardware_interface.cpp
 @@ -175,7 +175,7 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
@@ -60,7 +46,7 @@ index 4efcf06..634212d 100644
          state_interfaces.emplace_back(
              hardware_interface::StateInterface(sensor.name, fts_names[j], &urcl_ft_sensor_measurements_[j]));
        }
-@@ -743,12 +743,17 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
+@@ -745,12 +745,17 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
      }
  
      updateNonDoubleValues();
@@ -79,7 +65,7 @@ index 4efcf06..634212d 100644
    return hardware_interface::return_type::OK;
  }
  
-@@ -968,7 +973,7 @@ hardware_interface::return_type URPositionHardwareInterface::prepare_command_mod
+@@ -992,7 +997,7 @@ hardware_interface::return_type URPositionHardwareInterface::prepare_command_mod
    hardware_interface::return_type ret_val = hardware_interface::return_type::OK;
  
    start_modes_ = std::vector<std::vector<std::string>>(info_.joints.size());

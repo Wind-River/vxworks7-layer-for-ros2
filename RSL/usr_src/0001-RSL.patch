@@ -1,0 +1,25 @@
+From ca08658b13f2ee748648b04072974e8ed810b345 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 18 Mar 2025 11:00:58 +0100
+Subject: [PATCH] RSL
+
+---
+ package.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/package.xml b/package.xml
+index d47832e..e93f794 100644
+--- a/package.xml
++++ b/package.xml
+@@ -15,7 +15,7 @@
+   <buildtool_depend>doxygen</buildtool_depend>
+ 
+   <depend>eigen</depend>
+-  <depend>fmt</depend>
++  <depend>fmt_vendor</depend>
+   <depend>rclcpp</depend>
+   <depend>tcb_span</depend>
+   <depend>tl_expected</depend>
+-- 
+2.34.1
+

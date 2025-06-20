@@ -1,0 +1,71 @@
+From e304f5ef580881ee1afa8afa79805cdd8c97c753 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 20 Jun 2025 14:51:56 +0200
+Subject: [PATCH] use shared memory, /tmp and =_RDWR for LOCK_EX
+
+---
+ src/cpp/utils/shared_memory/RobustExclusiveLock.hpp | 12 +++++++++---
+ src/cpp/utils/shared_memory/SharedDir.hpp           |  3 +++
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+index 0dc543ed0..4c03f1842 100644
+--- a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+@@ -24,6 +24,8 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
++#include <cstring>
++#include <cerrno>
+ 
+ #include "SharedDir.hpp"
+ 
+@@ -74,7 +76,11 @@ public:
+ 
+         if ((fd_ = open_and_lock_file(file_path, &was_lock_created)) == -1)
+         {
+-            throw std::runtime_error("open_and_lock_file failed");
++	    throw std::runtime_error(
++                "open_and_lock_file failed for path: " + file_path +
++                " with errno " + std::to_string(errno) +
++                " (" + std::strerror(errno) + ")"
++	    );
+         }
+ 
+         name_ = name;
+@@ -171,7 +177,7 @@ private:
+             const std::string& file_path,
+             bool* was_lock_created)
+     {
+-        auto fd = open(file_path.c_str(), O_RDONLY, 0666);
++        auto fd = open(file_path.c_str(), O_RDWR, 0666);
+ 
+         if (fd != -1)
+         {
+@@ -180,7 +186,7 @@ private:
+         else
+         {
+             *was_lock_created = true;
+-            fd = open(file_path.c_str(), O_CREAT | O_RDONLY, 0666);
++            fd = open(file_path.c_str(), O_CREAT | O_RDWR, 0666);
+         }
+ 
+         if (fd == -1)
+diff --git a/src/cpp/utils/shared_memory/SharedDir.hpp b/src/cpp/utils/shared_memory/SharedDir.hpp
+index 779f10552..c5495040e 100644
+--- a/src/cpp/utils/shared_memory/SharedDir.hpp
++++ b/src/cpp/utils/shared_memory/SharedDir.hpp
+@@ -100,6 +100,9 @@ public:
+             // directory exists do nothing
+         }
+         return (std::string(defaultdir) + "/" + filename);
++#elif defined(__VXWORKS__)
++        static const char defaultdir[] = "/tmp";
++        return (std::string(defaultdir) + "/" + filename);
+ #else
+         return SharedDir::get_file_path(filename);
+ #endif  // __QNXNTO__
+-- 
+2.34.1
+

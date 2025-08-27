@@ -1,6 +1,6 @@
-From 6e4520f29473c21626cabaf319ec9e0cba327265 Mon Sep 17 00:00:00 2001
+From ccf734563a61749b7d0a608fece8cfe49e57a4fc Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Fri, 31 Jan 2025 11:37:38 +0100
+Date: Wed, 27 Aug 2025 15:55:23 +0200
 Subject: [PATCH] disable tracing
 
 ---
@@ -8,15 +8,15 @@ Subject: [PATCH] disable tracing
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tracetools/CMakeLists.txt b/tracetools/CMakeLists.txt
-index be14ebb..9acf70d 100644
+index d9784c6..6358870 100644
 --- a/tracetools/CMakeLists.txt
 +++ b/tracetools/CMakeLists.txt
 @@ -16,7 +16,7 @@ endif()
  find_package(ament_cmake_gen_version_h REQUIRED)
  find_package(ament_cmake_ros REQUIRED)
  
--if(WIN32 OR APPLE OR ANDROID OR BSD)
-+if(WIN32 OR APPLE OR ANDROID OR BSD OR VXWORKS)
+-if(WIN32 OR APPLE OR ANDROID)
++if(WIN32 OR APPLE OR ANDROID OR VXWORKS)
    set(DISABLED_DEFAULT ON)
    set(STATUS_CHECKING_TOOL_DEFAULT OFF)
  else()

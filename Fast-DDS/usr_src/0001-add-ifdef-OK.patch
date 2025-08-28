@@ -1,0 +1,27 @@
+From 46574be59cff34f5ea45936989a1d29dbeaf293f Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 28 Aug 2025 13:37:35 +0200
+Subject: [PATCH] add ifdef OK
+
+---
+ src/cpp/security/accesscontrol/DistinguishedName.h | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/cpp/security/accesscontrol/DistinguishedName.h b/src/cpp/security/accesscontrol/DistinguishedName.h
+index d481eaa4f..e17ae0c09 100644
+--- a/src/cpp/security/accesscontrol/DistinguishedName.h
++++ b/src/cpp/security/accesscontrol/DistinguishedName.h
+@@ -169,7 +169,9 @@ public:
+     static bool compare(
+             const DistinguishedName& name1,
+             const DistinguishedName& name2) noexcept;
+-
++#ifdef OK
++#undef OK
++#endif
+     enum class ErrorCase
+     {
+         OK,
+-- 
+2.34.1
+

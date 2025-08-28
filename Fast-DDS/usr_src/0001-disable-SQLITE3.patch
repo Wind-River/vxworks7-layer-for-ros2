@@ -1,0 +1,25 @@
+From 2e2eecb78ee77325c6d476e32ae8f43fb5a93aab Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 27 Aug 2025 22:03:27 +0200
+Subject: [PATCH] disable SQLITE3
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0f5e5ae78..41e7021f7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -297,7 +297,7 @@ if(SECURITY AND QNX)
+     set(OPENSSL_LIBRARIES ssl crypto)
+ endif()
+ 
+-option(SQLITE3_SUPPORT "Activate SQLITE3 support" ON)
++option(SQLITE3_SUPPORT "Activate SQLITE3 support" OFF)
+ 
+ ###############################################################################
+ # SHM as Default transport
+-- 
+2.34.1
+

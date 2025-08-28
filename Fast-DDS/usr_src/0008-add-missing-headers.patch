@@ -1,15 +1,14 @@
-From 51ec94da4fd4aec4f6a7573cb2141072f88d358b Mon Sep 17 00:00:00 2001
+From 5e27ddcde5aa4749fac43af7701d655ad0280fc2 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Mon, 12 Feb 2024 11:19:52 +0100
+Date: Thu, 28 Aug 2025 13:14:36 +0200
 Subject: [PATCH 08/10] add missing headers
 
 ---
  include/fastdds/dds/log/Log.hpp                      | 1 +
  include/fastdds/rtps/attributes/ExternalLocators.hpp | 1 +
  src/cpp/fastdds/log/Log.cpp                          | 1 +
- src/cpp/rtps/transport/TCPChannelResource.cpp        | 1 +
- src/cpp/utils/SystemInfo.hpp                         | 3 +++
- 5 files changed, 7 insertions(+)
+ src/cpp/utils/SystemInfo.hpp                         | 2 ++
+ 4 files changed, 5 insertions(+)
 
 diff --git a/include/fastdds/dds/log/Log.hpp b/include/fastdds/dds/log/Log.hpp
 index 3ad9e6552..acdbe0fc4 100644
@@ -36,7 +35,7 @@ index b68384e02..550a38921 100644
  #include <fastdds/rtps/common/LocatorWithMask.hpp>
  
 diff --git a/src/cpp/fastdds/log/Log.cpp b/src/cpp/fastdds/log/Log.cpp
-index 9063fd4ef..88e122767 100644
+index b9f61e39c..b5a8f8da5 100644
 --- a/src/cpp/fastdds/log/Log.cpp
 +++ b/src/cpp/fastdds/log/Log.cpp
 @@ -12,6 +12,7 @@
@@ -47,33 +46,20 @@ index 9063fd4ef..88e122767 100644
  #include <chrono>
  #include <iomanip>
  #include <iostream>
-diff --git a/src/cpp/rtps/transport/TCPChannelResource.cpp b/src/cpp/rtps/transport/TCPChannelResource.cpp
-index 7cd4c018b..556ad5449 100644
---- a/src/cpp/rtps/transport/TCPChannelResource.cpp
-+++ b/src/cpp/rtps/transport/TCPChannelResource.cpp
-@@ -16,6 +16,7 @@
- 
- #include <chrono>
- #include <thread>
-+#include <sys/ttycom.h>
- 
- #include <fastrtps/utils/IPLocator.h>
- #include <rtps/transport/TCPTransportInterface.h>
 diff --git a/src/cpp/utils/SystemInfo.hpp b/src/cpp/utils/SystemInfo.hpp
-index 418da3d99..c5c169f77 100644
+index 51f7a5fa5..268757589 100644
 --- a/src/cpp/utils/SystemInfo.hpp
 +++ b/src/cpp/utils/SystemInfo.hpp
-@@ -21,7 +21,10 @@
+@@ -21,7 +21,9 @@
  #include <unistd.h>
  #endif // if defined(_WIN32)
  
 +#include <chrono>
  #include <cstdint>
 +#include <functional>
-+
  #include <memory>
+ #include <mutex>
  #include <string>
- 
 -- 
 2.34.1
 

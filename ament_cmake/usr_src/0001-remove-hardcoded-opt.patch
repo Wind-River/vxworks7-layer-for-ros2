@@ -1,14 +1,15 @@
-From ff9d6523f4b5871d6eb3c235afede52b865849b1 Mon Sep 17 00:00:00 2001
+From ed572e00fe8b3dc1a54467084b3cc6119cd84263 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Fri, 17 Nov 2023 22:04:25 +0100
+Date: Sun, 11 Jan 2026 07:31:59 +0100
 Subject: [PATCH] remove hardcoded opt
 
 ---
- ament_cmake_vendor_package/cmake/ament_vendor.cmake | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ ament_cmake_vendor_package/cmake/ament_vendor.cmake         | 6 +++---
+ .../cmake/templates/vendor_package_cmake_prefix.cmake.in    | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/ament_cmake_vendor_package/cmake/ament_vendor.cmake b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
-index 631b540..10ff60d 100644
+index c9b963c..146ca1f 100644
 --- a/ament_cmake_vendor_package/cmake/ament_vendor.cmake
 +++ b/ament_cmake_vendor_package/cmake/ament_vendor.cmake
 @@ -138,7 +138,7 @@ macro(ament_vendor TARGET_NAME)
@@ -29,7 +30,7 @@ index 631b540..10ff60d 100644
      -Wno-dev
    )
  
-@@ -301,7 +301,7 @@ function(_ament_vendor TARGET_NAME VCS_TYPE VCS_URL VCS_VERSION PATCHES CMAKE_AR
+@@ -311,7 +311,7 @@ function(_ament_vendor TARGET_NAME VCS_TYPE VCS_URL VCS_VERSION PATCHES CMAKE_AR
    if(NOT SKIP_INSTALL)
      install(
        DIRECTORY "${INSTALL_DIR}/"
@@ -38,6 +39,16 @@ index 631b540..10ff60d 100644
        USE_SOURCE_PERMISSIONS
      )
    endif()
+diff --git a/ament_cmake_vendor_package/cmake/templates/vendor_package_cmake_prefix.cmake.in b/ament_cmake_vendor_package/cmake/templates/vendor_package_cmake_prefix.cmake.in
+index 810d981..c40ae3e 100644
+--- a/ament_cmake_vendor_package/cmake/templates/vendor_package_cmake_prefix.cmake.in
++++ b/ament_cmake_vendor_package/cmake/templates/vendor_package_cmake_prefix.cmake.in
+@@ -1,4 +1,4 @@
+ # generated from ament_cmake_vendor_package/cmake/templates/vendor_package_cmake_prefix.cmake.in
+ 
+ # External project installation prefix relative to the installation directory of this file.
+-list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../opt/@PROJECT_NAME@")
++list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../.")
 -- 
 2.34.1
 

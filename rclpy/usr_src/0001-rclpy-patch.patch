@@ -1,18 +1,19 @@
-From dc833919621d18983d66dfead1d744e814fb369e Mon Sep 17 00:00:00 2001
+From 3636a9731446fedc9c9a32d31d17894eeb206cbe Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Thu, 1 Jun 2023 16:44:37 +0200
+Date: Sun, 11 Jan 2026 07:28:55 +0100
 Subject: [PATCH] rclpy patch
 
 ---
- rclpy/CMakeLists.txt               | 2 +-
- rclpy/src/rclpy/signal_handler.cpp | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ rclpy/CMakeLists.txt                                | 2 +-
+ rclpy/src/rclpy/events_executor/events_executor.cpp | 2 +-
+ rclpy/src/rclpy/signal_handler.cpp                  | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/rclpy/CMakeLists.txt b/rclpy/CMakeLists.txt
-index 88d17d8..48bd3a3 100644
+index 06c08de..0074e7b 100644
 --- a/rclpy/CMakeLists.txt
 +++ b/rclpy/CMakeLists.txt
-@@ -106,7 +106,7 @@ pybind11_add_module(_rclpy_pybind11 SHARED
+@@ -112,7 +112,7 @@ pybind11_add_module(_rclpy_pybind11
    src/rclpy/wait_set.cpp
  )
  
@@ -21,11 +22,24 @@ index 88d17d8..48bd3a3 100644
    target_link_libraries(_rclpy_pybind11 PRIVATE atomic)
  endif()
  
+diff --git a/rclpy/src/rclpy/events_executor/events_executor.cpp b/rclpy/src/rclpy/events_executor/events_executor.cpp
+index 7e3dd74..fb23645 100644
+--- a/rclpy/src/rclpy/events_executor/events_executor.cpp
++++ b/rclpy/src/rclpy/events_executor/events_executor.cpp
+@@ -628,7 +628,7 @@ void EventsExecutor::HandleRemovedWaitable(py::handle waitable)
+   if (!nh) {
+     throw std::runtime_error("Couldn't find sub-entities entry for removed Waitable");
+   }
+-  const WaitableSubEntities & sub_entities = nh.mapped();
++  const WaitableSubEntities & sub_entities = nh.value().second;
+   for (const rcl_subscription_t * const rcl_sub : sub_entities.subscriptions) {
+     if (RCL_RET_OK != rcl_subscription_set_on_new_message_callback(rcl_sub, nullptr, nullptr)) {
+       throw std::runtime_error(
 diff --git a/rclpy/src/rclpy/signal_handler.cpp b/rclpy/src/rclpy/signal_handler.cpp
-index 62dfffd..0bf1e65 100644
+index bb72763..177648c 100644
 --- a/rclpy/src/rclpy/signal_handler.cpp
 +++ b/rclpy/src/rclpy/signal_handler.cpp
-@@ -180,7 +180,7 @@ CleanupdeferredSignalHandler cleanup_deferred_signal_handler;
+@@ -188,7 +188,7 @@ CleanupdeferredSignalHandler cleanup_deferred_signal_handler;
  
  }  // namespace
  

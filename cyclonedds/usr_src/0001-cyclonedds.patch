@@ -1,6 +1,6 @@
-From 39d89847bd1be98da1bf8a6c8e071eda44c1fb93 Mon Sep 17 00:00:00 2001
+From ee2c96a1e6143df4f5cfce116e539fd8ef871c5c Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Mon, 10 Mar 2025 13:54:14 +0100
+Date: Sat, 17 Jan 2026 23:40:53 +0100
 Subject: [PATCH] cyclonedds
 
 ---
@@ -17,10 +17,10 @@ Subject: [PATCH] cyclonedds
  src/ddsrt/tests/CMakeLists.txt              |  5 +++
  src/ddsrt/tests/environ.c                   |  1 +
  src/ddsrt/tests/log.c                       |  4 +++
- src/idl/src/string.c                        | 35 +++++++++++++++++++--
+ src/idl/src/string.c                        | 37 +++++++++++++++++++--
  src/security/core/tests/CMakeLists.txt      |  1 +
  src/tools/CMakeLists.txt                    |  4 +--
- 16 files changed, 70 insertions(+), 19 deletions(-)
+ 16 files changed, 72 insertions(+), 19 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index cbec187f..b3ed5667 100644
@@ -260,19 +260,21 @@ index f47c7c6c..8ead0be1 100644
  #include <fcntl.h>
  #include <io.h>
 diff --git a/src/idl/src/string.c b/src/idl/src/string.c
-index 26e8e4cb..b573f9d4 100644
+index 26e8e4cb..1652de04 100644
 --- a/src/idl/src/string.c
 +++ b/src/idl/src/string.c
-@@ -55,7 +55,7 @@ typedef _locale_t locale_t;
+@@ -55,7 +55,9 @@ typedef _locale_t locale_t;
  
  #include "idl/stream.h"
  #include "idl/string.h"
 -
++#ifndef __VXWORKS__
 +typedef int locale_t;
++#endif
  static locale_t posix_locale(void);
  
  #if _WIN32
-@@ -71,6 +71,19 @@ int idl_isspace(int c) { return _isspace_l(c, posix_locale()); }
+@@ -71,6 +73,19 @@ int idl_isspace(int c) { return _isspace_l(c, posix_locale()); }
  int idl_isupper(int c) { return _isupper_l(c, posix_locale()); }
  int idl_toupper(int c) { return _toupper_l(c, posix_locale()); }
  int idl_tolower(int c) { return _tolower_l(c, posix_locale()); }
@@ -292,7 +294,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
  int idl_isalnum(int c) { return isalnum_l(c, posix_locale()); }
  int idl_isalpha(int c) { return isalpha_l(c, posix_locale()); }
-@@ -105,6 +118,8 @@ int idl_strcasecmp(const char *s1, const char *s2)
+@@ -105,6 +120,8 @@ int idl_strcasecmp(const char *s1, const char *s2)
    assert(s2);
  #if _WIN32
    return _stricmp_l(s1, s2, posix_locale());
@@ -301,7 +303,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
    return strcasecmp_l(s1, s2, posix_locale());
  #endif
-@@ -116,6 +131,8 @@ int idl_strncasecmp(const char *s1, const char *s2, size_t n)
+@@ -116,6 +133,8 @@ int idl_strncasecmp(const char *s1, const char *s2, size_t n)
    assert(s2);
  #if _WIN32
    return _strnicmp_l(s1, s2, n, posix_locale());
@@ -310,7 +312,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
    return strncasecmp_l(s1, s2, n, posix_locale());
  #endif
-@@ -182,6 +199,8 @@ __pragma(warning(disable: 4996))
+@@ -182,6 +201,8 @@ __pragma(warning(disable: 4996))
  #if _MSC_VER
  __pragma(warning(pop))
  #endif
@@ -319,7 +321,7 @@ index 26e8e4cb..b573f9d4 100644
  #elif __APPLE__ || __FreeBSD__
    return vsnprintf_l(str, size, posix_locale(), fmt, ap);
  #else
-@@ -280,6 +299,8 @@ unsigned long long idl_strtoull(const char *str, char **endptr, int base)
+@@ -280,6 +301,8 @@ unsigned long long idl_strtoull(const char *str, char **endptr, int base)
  #else
    return _strtoull_l(str, endptr, base, posix_locale());
  #endif
@@ -328,7 +330,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
    return strtoull_l(str, endptr, base, posix_locale());
  #endif
-@@ -294,6 +315,8 @@ long double idl_strtold(const char *str, char **endptr)
+@@ -294,6 +317,8 @@ long double idl_strtold(const char *str, char **endptr)
  #else
    return _strtold_l(str, endptr, posix_locale());
  #endif
@@ -337,7 +339,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
    return strtold_l(str, endptr, posix_locale());
  #endif
-@@ -319,6 +342,8 @@ int idl_vfprintf(FILE *fp, const char *fmt, va_list ap)
+@@ -319,6 +344,8 @@ int idl_vfprintf(FILE *fp, const char *fmt, va_list ap)
    return _vfprintf_p_l(fp, fmt, posix_locale(), ap);
  #elif __APPLE__ || __FreeBSD__
    return vfprintf_l(fp, posix_locale(), fmt, ap);
@@ -346,7 +348,7 @@ index 26e8e4cb..b573f9d4 100644
  #else
    int ret;
    locale_t loc, posixloc = posix_locale();
-@@ -444,7 +469,10 @@ static pthread_once_t once = PTHREAD_ONCE_INIT;
+@@ -444,7 +471,10 @@ static pthread_once_t once = PTHREAD_ONCE_INIT;
  
  static void free_locale(void *ptr)
  {
@@ -357,7 +359,7 @@ index 26e8e4cb..b573f9d4 100644
  }
  
  static void make_key(void)
-@@ -456,14 +484,15 @@ static locale_t posix_locale(void)
+@@ -456,14 +486,15 @@ static locale_t posix_locale(void)
  {
    locale_t locale;
    (void)pthread_once(&once, make_key);

@@ -1,0 +1,152 @@
+From cba19e06873ba62324883eaefa416a50d3f36ca6 Mon Sep 17 00:00:00 2001
+From: Diego <diego.buffa@windriver.com>
+Date: Thu, 15 Jan 2026 18:40:52 +0100
+Subject: [PATCH] VxWorks 32-bit long double support
+
+---
+ src/cpp/Cdr.cpp     | 55 +++++++++++++++++++++++++++++++++++++++++++++
+ src/cpp/FastCdr.cpp | 21 +++++++++++++++++
+ 2 files changed, 76 insertions(+)
+
+diff --git a/src/cpp/Cdr.cpp b/src/cpp/Cdr.cpp
+index 4a8bb25..00c365a 100644
+--- a/src/cpp/Cdr.cpp
++++ b/src/cpp/Cdr.cpp
+@@ -630,7 +630,21 @@ Cdr& Cdr::serialize(
+             m_currentPosition++ << dst[1];
+             m_currentPosition++ << dst[0];
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++            double tmp = static_cast<double>(ldouble_t);
++            const char* tdst = reinterpret_cast<const char*>(&tmp);
++            m_currentPosition++ << tdst[7];
++            m_currentPosition++ << tdst[6];
++            m_currentPosition++ << tdst[5];
++            m_currentPosition++ << tdst[4];
++            m_currentPosition++ << tdst[3];
++            m_currentPosition++ << tdst[2];
++            m_currentPosition++ << tdst[1];
++            m_currentPosition++ << tdst[0];
++            for (int i = 0; i < 8; ++i) m_currentPosition++ << static_cast<char>(0);
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8
+ #endif // FASTCDR_HAVE_FLOAT128 || FASTCDR_SIZEOF_LONG_DOUBLE == 16
+         }
+@@ -649,7 +663,14 @@ Cdr& Cdr::serialize(
+             m_currentPosition << ldouble_t;
+             m_currentPosition += sizeof(ldouble_t);
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++            m_currentPosition << static_cast<double>(ldouble_t);
++            m_currentPosition += 8;
++            m_currentPosition << static_cast<double>(0);
++            m_currentPosition += 8;
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8 || FASTCDR_SIZEOF_LONG_DOUBLE == 16
+ #endif // FASTCDR_HAVE_FLOAT128 && FASTCDR_SIZEOF_LONG_DOUBLE < 16
+         }
+@@ -1384,7 +1405,16 @@ Cdr& Cdr::serializeArray(
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 16
+         }
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++        for (size_t i = 0; i < numElements; ++i) {
++            m_currentPosition << static_cast<double>(ldouble_t[i]);
++            m_currentPosition += 8;
++            m_currentPosition << static_cast<double>(0);
++            m_currentPosition += 8;
++        }
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8 || FASTCDR_SIZEOF_LONG_DOUBLE == 16
+ #endif // FASTCDR_HAVE_FLOAT128 && FASTCDR_SIZEOF_LONG_DOUBLE < 16
+ 
+@@ -1771,7 +1801,22 @@ Cdr& Cdr::deserialize(
+             m_currentPosition++ >> dst[1];
+             m_currentPosition++ >> dst[0];
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++            double tmp;
++            char* tdst = reinterpret_cast<char*>(&tmp);
++            m_currentPosition++ >> tdst[7];
++            m_currentPosition++ >> tdst[6];
++            m_currentPosition++ >> tdst[5];
++            m_currentPosition++ >> tdst[4];
++            m_currentPosition++ >> tdst[3];
++            m_currentPosition++ >> tdst[2];
++            m_currentPosition++ >> tdst[1];
++            m_currentPosition++ >> tdst[0];
++            m_currentPosition += 8;
++            ldouble_t = static_cast<long double>(tmp);
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8
+ #endif // FASTCDR_HAVE_FLOAT128 || FASTCDR_SIZEOF_LONG_DOUBLE == 16
+         }
+@@ -2583,6 +2628,16 @@ Cdr& Cdr::deserializeArray(
+             }
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 16
+         }
++#else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++        for (size_t i = 0; i < numElements; ++i) {
++            double tmp;
++            m_currentPosition >> tmp;
++            ldouble_t[i] = static_cast<long double>(tmp);
++            m_currentPosition += 8;
++            m_currentPosition += 8;
++        }
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8 || FASTCDR_SIZEOF_LONG_DOUBLE == 16
+ #endif // FASTCDR_HAVE_FLOAT128 && FASTCDR_SIZEOF_LONG_DOUBLE < 16
+ 
+diff --git a/src/cpp/FastCdr.cpp b/src/cpp/FastCdr.cpp
+index 458c8b3..07ca503 100644
+--- a/src/cpp/FastCdr.cpp
++++ b/src/cpp/FastCdr.cpp
+@@ -346,7 +346,17 @@ FastCdr& FastCdr::serializeArray(
+             m_currentPosition += 8;
+         }
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++        for (size_t idx = 0; idx < numElements; ++idx)
++        {
++            m_currentPosition << static_cast<double>(ldouble_t[idx]);
++            m_currentPosition += 8;
++            m_currentPosition << static_cast<double>(0);
++            m_currentPosition += 8;
++        }
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 16
+ #endif // FASTCDR_HAVE_FLOAT128 && FASTCDR_SIZEOF_LONG_DOUBLE < 16
+@@ -680,7 +690,18 @@ FastCdr& FastCdr::deserializeArray(
+             m_currentPosition += 8;
+         }
+ #else
++#if defined(__VXWORKS__) && FASTCDR_SIZEOF_LONG_DOUBLE == 12
++        for (size_t idx = 0; idx < numElements; ++idx)
++        {
++            double tmp;
++            m_currentPosition >> tmp;
++            ldouble_t[idx] = tmp;
++            m_currentPosition += 8;
++            m_currentPosition += 8;
++        }
++#else
+ #error unsupported long double type and no __float128 available
++#endif
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 8
+ #endif // FASTCDR_SIZEOF_LONG_DOUBLE == 16
+ #endif // FASTCDR_HAVE_FLOAT128 && FASTCDR_SIZEOF_LONG_DOUBLE < 16
+-- 
+2.52.0
+

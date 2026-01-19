@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Diego <diego.buffa@windriver.com>
+Date: Thu, 16 Jan 2026 10:17:00 +0100
+Subject: [PATCH] Fix BufferNode alignment for 32-bit architectures
+
+---
+ src/cpp/rtps/transport/shared_mem/SharedMemManager.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cpp/rtps/transport/shared_mem/SharedMemManager.hpp b/src/cpp/rtps/transport/shared_mem/SharedMemManager.hpp
+index 2791d3fb6..95f83c07c 100644
+--- a/src/cpp/rtps/transport/shared_mem/SharedMemManager.hpp
++++ b/src/cpp/rtps/transport/shared_mem/SharedMemManager.hpp
+@@ -44,7 +44,7 @@ class SharedMemManager :
+ {
+ private:
+ 
+-    struct BufferNode
++    struct alignas(8) BufferNode
+     {
+         struct Status
+         {
+-- 
+2.34.1
+

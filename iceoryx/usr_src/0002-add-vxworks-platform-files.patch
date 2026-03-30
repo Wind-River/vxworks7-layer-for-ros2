@@ -14,7 +14,7 @@ Subject: [PATCH 2/2] add vxworks platform files
  .../include/iceoryx_hoofs/platform/inet.hpp   |  21 ++++
  .../include/iceoryx_hoofs/platform/mman.hpp   |  24 +++++
  .../include/iceoryx_hoofs/platform/mqueue.hpp |  24 +++++
- .../platform/platform_correction.hpp          |  28 +++++
+ .../platform/platform_correction.hpp          |  27 +++++
  .../platform/platform_settings.hpp            |  48 +++++++++
  .../iceoryx_hoofs/platform/pthread.hpp        |  64 +++++++++++
  .../include/iceoryx_hoofs/platform/pwd.hpp    |  21 ++++
@@ -34,7 +34,7 @@ Subject: [PATCH 2/2] add vxworks platform files
  .../platform/vxworks/source/mqueue.cpp        |  27 +++++
  .../platform/vxworks/source/socket.cpp        |  72 +++++++++++++
  .../platform/vxworks/source/unistd.cpp        |  22 ++++
- 30 files changed, 941 insertions(+)
+ 30 files changed, 940 insertions(+)
  create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/acl.hpp
  create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/dlfcn.hpp
  create mode 100644 iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/errno.hpp
@@ -438,7 +438,7 @@ new file mode 100644
 index 000000000..7adb96e75
 --- /dev/null
 +++ b/iceoryx_hoofs/platform/vxworks/include/iceoryx_hoofs/platform/platform_correction.hpp
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,27 @@
 +// Copyright (c) 2022 by Wind River Inc. All rights reserved.
 +//
 +// Licensed under the Apache License, Version 2.0 (the "License");
@@ -460,7 +460,6 @@ index 000000000..7adb96e75
 +#include <types/vxTypesOld.h>
 +#include <vxWorksCommon.h>
 +
-+#undef ERROR
 +#undef LOCAL
 +#undef NONE
 +#undef READ

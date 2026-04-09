@@ -1,0 +1,63 @@
+From 3c7c102c0c8bf786ecb28399c180ba8015b875e6 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 9 Apr 2026 23:50:37 +0200
+Subject: [PATCH 2/2] zstd_vendor: Add patch for VxWorks CLOCKS_PER_SEC
+ compatibility
+
+- Add 0002.patch to fix dictBuilder compile-time initialization errors
+- Changes g_refreshRate from const to runtime initialization in cover.c and fastcover.c
+- VxWorks defines CLOCKS_PER_SEC as non-constant expression
+---
+ zstd_vendor/patches/0002.patch | 40 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
+ create mode 100644 zstd_vendor/patches/0002.patch
+
+diff --git a/zstd_vendor/patches/0002.patch b/zstd_vendor/patches/0002.patch
+new file mode 100644
+index 00000000..49dd7b46
+--- /dev/null
++++ b/zstd_vendor/patches/0002.patch
+@@ -0,0 +1,40 @@
++diff --git a/lib/dictBuilder/cover.c b/lib/dictBuilder/cover.c
++index 9e5e7d5..1f64299 100644
++--- a/lib/dictBuilder/cover.c
+++++ b/lib/dictBuilder/cover.c
++@@ -72,12 +72,14 @@ static int g_displayLevel = 0;
++ #define DISPLAYLEVEL(l, ...) LOCALDISPLAYLEVEL(g_displayLevel, l, __VA_ARGS__)
++ 
++ #ifndef LOCALDISPLAYUPDATE
++-static const clock_t g_refreshRate = CLOCKS_PER_SEC * 15 / 100;
+++static clock_t g_refreshRate = 0;
++ static clock_t g_time = 0;
++ #endif
++ #undef  LOCALDISPLAYUPDATE
++ #define LOCALDISPLAYUPDATE(displayLevel, l, ...)                               \
++   if (displayLevel >= l) {                                                     \
+++    if (g_refreshRate == 0)                                                    \
+++        g_refreshRate = (clock_t)((CLOCKS_PER_SEC * 15) / 100);                \
++     if ((clock() - g_time > g_refreshRate) || (displayLevel >= 4)) {             \
++       g_time = clock();                                                        \
++       DISPLAY(__VA_ARGS__);                                                    \
++diff --git a/lib/dictBuilder/fastcover.c b/lib/dictBuilder/fastcover.c
++index 46bba01..a5ee880 100644
++--- a/lib/dictBuilder/fastcover.c
+++++ b/lib/dictBuilder/fastcover.c
++@@ -68,12 +68,14 @@ static int g_displayLevel = 0;
++ #define DISPLAYLEVEL(l, ...) LOCALDISPLAYLEVEL(g_displayLevel, l, __VA_ARGS__)
++ 
++ #ifndef LOCALDISPLAYUPDATE
++-static const clock_t g_refreshRate = CLOCKS_PER_SEC * 15 / 100;
+++static clock_t g_refreshRate = 0;
++ static clock_t g_time = 0;
++ #endif
++ #undef  LOCALDISPLAYUPDATE
++ #define LOCALDISPLAYUPDATE(displayLevel, l, ...)                               \
++   if (displayLevel >= l) {                                                     \
+++    if (g_refreshRate == 0)                                                    \
+++        g_refreshRate = (clock_t)((CLOCKS_PER_SEC * 15) / 100);                \
++     if ((clock() - g_time > g_refreshRate) || (displayLevel >= 4)) {             \
++       g_time = clock();                                                        \
++       DISPLAY(__VA_ARGS__);                                                    \
+-- 
+2.43.0
+

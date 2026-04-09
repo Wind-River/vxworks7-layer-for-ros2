@@ -1,0 +1,48 @@
+From d9884818d67183ed3484b872e7f3a23d885ccd82 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 9 Apr 2026 23:49:26 +0200
+Subject: [PATCH 1/2] liblz4_vendor: Add patch to remove MSVC /W4 flag for
+ VxWorks compatibility
+
+- Add 0001-remove-msvc-w4-flag.patch to strip MSVC-specific warning flags
+- Update CMakeLists.txt to apply patch during build
+---
+ liblz4_vendor/CMakeLists.txt                        |  1 +
+ .../patches/0001-remove-msvc-w4-flag.patch          | 13 +++++++++++++
+ 2 files changed, 14 insertions(+)
+ create mode 100644 liblz4_vendor/patches/0001-remove-msvc-w4-flag.patch
+
+diff --git a/liblz4_vendor/CMakeLists.txt b/liblz4_vendor/CMakeLists.txt
+index 6f324080..b56b4a7d 100644
+--- a/liblz4_vendor/CMakeLists.txt
++++ b/liblz4_vendor/CMakeLists.txt
+@@ -19,6 +19,7 @@ ament_vendor(liblz4_vendor
+     -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+     -DLZ4_BUILD_LEGACY_LZ4C:BOOL=OFF
+     -DLZ4_BUILD_CLI:BOOL=OFF
++  PATCHES patches
+ )
+ 
+ install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
+diff --git a/liblz4_vendor/patches/0001-remove-msvc-w4-flag.patch b/liblz4_vendor/patches/0001-remove-msvc-w4-flag.patch
+new file mode 100644
+index 00000000..e34eafbd
+--- /dev/null
++++ b/liblz4_vendor/patches/0001-remove-msvc-w4-flag.patch
+@@ -0,0 +1,13 @@
++diff --git a/build/cmake/CMakeLists.txt b/build/cmake/CMakeLists.txt
++index eb7007b..feed7eb 100644
++--- a/build/cmake/CMakeLists.txt
+++++ b/build/cmake/CMakeLists.txt
++@@ -173,7 +173,7 @@ foreach (flag
++     -Wpointer-arith
++ 
++     # MSVC-style
++-    /W4)
+++    )
++   # Because https://gcc.gnu.org/wiki/FAQ#wnowarning
++   string(REGEX REPLACE "\\-Wno\\-(.+)" "-W\\1" flag_to_test "${flag}")
++   string(REGEX REPLACE "[^a-zA-Z0-9]+" "_" test_name "CFLAG_${flag_to_test}")
+-- 
+2.43.0
+

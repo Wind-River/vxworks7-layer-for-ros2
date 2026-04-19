@@ -1,0 +1,103 @@
+From 4a3c87206a3b0b068af0f7dce298f169286088be Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 20 Apr 2026 00:08:07 +0200
+Subject: [PATCH] Add patches for VxWorks and pybind11
+
+- Add chrono localtime_thread_safe fix for VxWorks
+- Add fix for pybind11 extension
+- Update CMakeLists.txt accordingly
+---
+ CMakeLists.txt                                |  4 +++
+ ...ix-localtime_thread_safe-for-VxWorks.patch | 32 +++++++++++++++++++
+ patches/0003-fix-pybind11-extension.patch     | 25 +++++++++++++++
+ 3 files changed, 61 insertions(+)
+ create mode 100644 patches/0002-chrono-fix-localtime_thread_safe-for-VxWorks.patch
+ create mode 100644 patches/0003-fix-pybind11-extension.patch
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 69666b1..0875928 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,10 @@ ament_vendor(pybind11_vendor
+   VCS_VERSION v2.11.1
+   PATCHES patches
+   GLOBAL_HOOK
++  CMAKE_ARGS
++    -DPython_EXECUTABLE=${Python3_EXECUTABLE}
++    -DPython_ROOT_DIR=/usr/3pp/develop/usr/
++    -DPYBIND11_FINDPYTHON=ON
+ )
+ 
+ ament_package(CONFIG_EXTRAS_POST "${PROJECT_NAME}-extras.cmake")
+diff --git a/patches/0002-chrono-fix-localtime_thread_safe-for-VxWorks.patch b/patches/0002-chrono-fix-localtime_thread_safe-for-VxWorks.patch
+new file mode 100644
+index 0000000..3d7e563
+--- /dev/null
++++ b/patches/0002-chrono-fix-localtime_thread_safe-for-VxWorks.patch
+@@ -0,0 +1,32 @@
++From 3fa1ede3f55912095433e565df9f921d62898aba Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
++Date: Sun, 19 Apr 2026 17:51:20 +0200
++Subject: [PATCH 2/3] chrono: fix localtime_thread_safe for VxWorks
++
++Use VxWorks-compatible localtime_s(time, buf) signature instead of
++standard localtime_s(buf, time) to ensure correct compilation.
++---
++ include/pybind11/chrono.h | 4 ++++
++ 1 file changed, 4 insertions(+)
++
++diff --git a/include/pybind11/chrono.h b/include/pybind11/chrono.h
++index 167ea0e3..8133b20f 100644
++--- a/include/pybind11/chrono.h
+++++ b/include/pybind11/chrono.h
++@@ -101,9 +101,13 @@ public:
++ 
++ inline std::tm *localtime_thread_safe(const std::time_t *time, std::tm *buf) {
++ #if (defined(__STDC_LIB_EXT1__) && defined(__STDC_WANT_LIB_EXT1__)) || defined(_MSC_VER)
+++    #if defined (__VXWORKS__)
+++    return localtime_s(time, buf);
+++    #else
++     if (localtime_s(buf, time))
++         return nullptr;
++     return buf;
+++    #endif
++ #else
++     static std::mutex mtx;
++     std::lock_guard<std::mutex> lock(mtx);
++-- 
++2.43.0
++
+diff --git a/patches/0003-fix-pybind11-extension.patch b/patches/0003-fix-pybind11-extension.patch
+new file mode 100644
+index 0000000..bed6c47
+--- /dev/null
++++ b/patches/0003-fix-pybind11-extension.patch
+@@ -0,0 +1,25 @@
++From 4dc48d83e6854dd8b1e29058568c23d3200f6f5b Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
++Date: Sun, 19 Apr 2026 17:52:36 +0200
++Subject: [PATCH 3/3] fix pybind11 extension - issue 4583
++
++---
++ tools/pybind11NewTools.cmake | 2 +-
++ 1 file changed, 1 insertion(+), 1 deletion(-)
++
++diff --git a/tools/pybind11NewTools.cmake b/tools/pybind11NewTools.cmake
++index 7d7424a7..b9fd100c 100644
++--- a/tools/pybind11NewTools.cmake
+++++ b/tools/pybind11NewTools.cmake
++@@ -73,7 +73,7 @@ if(NOT DEFINED ${_Python}_EXECUTABLE)
++ 
++ endif()
++ 
++-if(NOT ${_Python}_EXECUTABLE STREQUAL PYBIND11_PYTHON_EXECUTABLE_LAST)
+++if(DEFINED PYBIND11_PYTHON_EXECUTABLE_LAST AND NOT ${_Python}_EXECUTABLE STREQUAL PYBIND11_PYTHON_EXECUTABLE_LAST)
++   # Detect changes to the Python version/binary in subsequent CMake runs, and refresh config if needed
++   unset(PYTHON_IS_DEBUG CACHE)
++   unset(PYTHON_MODULE_EXTENSION CACHE)
++-- 
++2.43.0
++
+-- 
+2.43.0
+

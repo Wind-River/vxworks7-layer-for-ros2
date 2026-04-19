@@ -1,0 +1,86 @@
+From 01c94d891f03fcdc2c9987f3a95c1e0cfcf48d5a Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 20 Apr 2026 00:32:31 +0200
+Subject: [PATCH] add VxWorks patch to uncrustify_vendor
+
+---
+ patches/0001-add-__VXWORKS__-condition.patch | 67 ++++++++++++++++++++
+ 1 file changed, 67 insertions(+)
+ create mode 100644 patches/0001-add-__VXWORKS__-condition.patch
+
+diff --git a/patches/0001-add-__VXWORKS__-condition.patch b/patches/0001-add-__VXWORKS__-condition.patch
+new file mode 100644
+index 0000000..7022ffb
+--- /dev/null
++++ b/patches/0001-add-__VXWORKS__-condition.patch
+@@ -0,0 +1,67 @@
++From 496ac403f719f66ff33223ff9a1c0a787e1d073e Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
++Date: Mon, 20 Apr 2026 00:30:20 +0200
++Subject: [PATCH] add __VXWORKS__ condition
++
++---
++ src/error_types.h | 2 +-
++ src/indent.cpp    | 2 +-
++ src/newlines.cpp  | 2 +-
++ src/space.cpp     | 2 +-
++ 4 files changed, 4 insertions(+), 4 deletions(-)
++
++diff --git a/src/error_types.h b/src/error_types.h
++index 4b16276..c057668 100644
++--- a/src/error_types.h
+++++ b/src/error_types.h
++@@ -22,7 +22,7 @@
++ #endif
++ 
++ 
++-#if defined (WIN32) || defined (__QNXNTO__)
+++#if defined (WIN32) || defined (__QNXNTO__) || defined(__VXWORKS__)
++ // Windows does not know sysexists.h. Thus define the error codes
++ 
++ #define EX_OK             0    //! successful termination
++diff --git a/src/indent.cpp b/src/indent.cpp
++index 364a899..c57af1f 100644
++--- a/src/indent.cpp
+++++ b/src/indent.cpp
++@@ -18,7 +18,7 @@
++ #include "space.h"
++ #include <cstdint>
++ 
++-#ifdef WIN32
+++#if defined(WIN32) || defined(__VXWORKS__)
++ #include <algorithm>                   // to get max
++ #endif // ifdef WIN32
++ 
++diff --git a/src/newlines.cpp b/src/newlines.cpp
++index 6d164aa..7233f80 100644
++--- a/src/newlines.cpp
+++++ b/src/newlines.cpp
++@@ -28,7 +28,7 @@
++ #include "space.h"
++ #include "unc_tools.h"
++ 
++-#ifdef WIN32
+++#if defined(WIN32) || defined(__VXWORKS__)
++ #include <algorithm>                   // to get max
++ #endif // ifdef WIN32
++ 
++diff --git a/src/space.cpp b/src/space.cpp
++index ed85a4d..a933e19 100644
++--- a/src/space.cpp
+++++ b/src/space.cpp
++@@ -24,7 +24,7 @@
++ #include "options_for_QT.h"
++ #include "punctuators.h"
++ 
++-#ifdef WIN32
+++#if defined(WIN32) || defined(__VXWORKS__)
++ #include <algorithm>                   // to get max
++ #endif // ifdef WIN32
++ 
++-- 
++2.43.0
++
+-- 
+2.43.0
+

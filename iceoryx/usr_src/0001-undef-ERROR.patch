@@ -1,0 +1,27 @@
+From 1022ec27a1a2b3ff710b6d12fa399496e40d4365 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 21 Apr 2026 07:30:27 +0200
+Subject: [PATCH] undef ERROR
+
+---
+ .../iceoryx_posh/internal/runtime/ipc_interface_base.hpp      | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/iceoryx_posh/include/iceoryx_posh/internal/runtime/ipc_interface_base.hpp b/iceoryx_posh/include/iceoryx_posh/internal/runtime/ipc_interface_base.hpp
+index 293c3c066..16aba0554 100644
+--- a/iceoryx_posh/include/iceoryx_posh/internal/runtime/ipc_interface_base.hpp
++++ b/iceoryx_posh/include/iceoryx_posh/internal/runtime/ipc_interface_base.hpp
+@@ -42,6 +42,10 @@
+ #include <process.h>
+ #endif
+ 
++#ifdef ERROR
++#undef ERROR
++#endif
++
+ namespace iox
+ {
+ namespace runtime
+-- 
+2.43.0
+

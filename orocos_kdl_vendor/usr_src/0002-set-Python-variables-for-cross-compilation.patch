@@ -1,0 +1,32 @@
+From ae6c4e6306b0605d818bae056081c97208e6e6af Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 21 Apr 2026 07:04:12 +0200
+Subject: [PATCH 2/2] set Python variables for cross-compilation
+
+---
+ python_orocos_kdl_vendor/CMakeLists.txt | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/python_orocos_kdl_vendor/CMakeLists.txt b/python_orocos_kdl_vendor/CMakeLists.txt
+index bd493da..bec3976 100644
+--- a/python_orocos_kdl_vendor/CMakeLists.txt
++++ b/python_orocos_kdl_vendor/CMakeLists.txt
+@@ -56,6 +56,15 @@ macro(build_pykdl)
+   # TODO(sloretz) use FetchContent_MakeAvailable() when CMake 3.14 is the minimum
+   if(NOT python_orocos_kdl_POPULATED)
+     fetchcontent_populate(python_orocos_kdl)
++    # Set Python variables for cross-compilation
++    if(DEFINED Python3_EXECUTABLE)
++      set(Python_EXECUTABLE ${Python3_EXECUTABLE} CACHE FILEPATH "Python executable" FORCE)
++    endif()
++    if(DEFINED Python3_ROOT_DIR)
++      set(Python_ROOT_DIR ${Python3_ROOT_DIR} CACHE PATH "Python root directory" FORCE)
++    else()
++      set(Python_ROOT_DIR /usr/3pp/develop/usr/ CACHE PATH "Python root directory" FORCE)
++    endif()
+     # Make python_orocos_kdl targets part of this project
+     add_subdirectory(
+       "${python_orocos_kdl_SOURCE_DIR}/python_orocos_kdl"
+-- 
+2.43.0
+

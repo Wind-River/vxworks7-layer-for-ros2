@@ -1,0 +1,25 @@
+From c62f9f115430fb64cce1420191acfd649f61410c Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 21 Apr 2026 08:44:35 +0200
+Subject: [PATCH] do not set priority
+
+---
+ .../src/rosbag2_compression/sequential_compression_writer.cpp   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp b/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp
+index 36741ada..aa54341e 100644
+--- a/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp
++++ b/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp
+@@ -92,7 +92,7 @@ void SequentialCompressionWriter::compression_thread_fn()
+             wanted_thread_priority << ". Detected thread priority: " << detected_thread_priority);
+       }
+     }
+-#else
++#elif !defined(__VXWORKS__)
+     int wanted_nice_value = *compression_options_.thread_priority;
+ 
+     errno = 0;
+-- 
+2.43.0
+

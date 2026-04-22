@@ -1,0 +1,25 @@
+From 741dfcf1cd25149f6b2223c7ff585b3efa76f617 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Thu, 23 Apr 2026 00:07:27 +0200
+Subject: [PATCH] add bullet3_vendor dependency
+
+---
+ tf2_bullet/package.xml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tf2_bullet/package.xml b/tf2_bullet/package.xml
+index bee3baf2..f61fb666 100644
+--- a/tf2_bullet/package.xml
++++ b/tf2_bullet/package.xml
+@@ -16,6 +16,8 @@
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
+ 
++  <depend>bullet3_vendor</depend>
++
+   <build_depend>bullet</build_depend>
+   <build_depend>geometry_msgs</build_depend>
+   <build_depend>tf2</build_depend>
+-- 
+2.43.0
+

@@ -1,0 +1,12 @@
+diff --git a/src/cpp/utils/IPFinder.cpp b/src/cpp/utils/IPFinder.cpp
+index 85ed485eb..33b81057e 100644
+--- a/src/cpp/utils/IPFinder.cpp
++++ b/src/cpp/utils/IPFinder.cpp
+@@ -493,6 +493,7 @@ bool IPFinder::getAllMACAddress(
+ bool IPFinder::getAllMACAddress(
+         std::vector<info_MAC>* macs)
+ {
++    (void)macs;
+     return false;
+ }
+ 

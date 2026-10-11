@@ -1,0 +1,14 @@
+diff --git a/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp b/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
+index 9c05c0388..a8267668d 100644
+--- a/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
++++ b/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
+@@ -120,6 +120,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
+          *
+          * - SINGLE_DH_USE: always create a new key using Diffie-Hellman parameters.
+          */
++#ifdef NONE
++#undef NONE
++#endif
+         enum TLSOptions : uint32_t
+         {
+             NONE                    = 0,      // 0000 0000 0000

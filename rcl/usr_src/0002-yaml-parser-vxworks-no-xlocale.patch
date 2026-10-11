@@ -1,0 +1,28 @@
+diff --git a/rcl_yaml_param_parser/src/parse.c b/rcl_yaml_param_parser/src/parse.c
+index f8dd8ff..f40fec1 100644
+--- a/rcl_yaml_param_parser/src/parse.c
++++ b/rcl_yaml_param_parser/src/parse.c
+@@ -795,7 +795,9 @@ _get_int_value(
+ }
+ 
+ // Initialization of c_locale, used by strtod_locale_independent.
+-#ifdef _WIN32
++#if defined(__VXWORKS__)
++// VxWorks: no locale_t/newlocale; strtod_locale_independent uses plain strtod.
++#elif defined(_WIN32)
+ static _locale_t c_locale = NULL;
+ static INIT_ONCE c_locale_once_flag = INIT_ONCE_STATIC_INIT;
+ 
+@@ -830,7 +832,11 @@ static void init_c_locale(void)
+ ///
+ static double strtod_locale_independent(const char *restrict nptr, char **restrict endptr)
+ {
+-#ifdef _WIN32
++#if defined(__VXWORKS__)
++  // VxWorks has no newlocale/uselocale (xlocale); the C library is always in
++  // the "C" locale, so a plain strtod is already locale-independent.
++  return strtod(nptr, endptr);
++#elif defined(_WIN32)
+   InitOnceExecuteOnce(&c_locale_once_flag, init_c_locale, NULL, NULL);
+ 
+   if (NULL == c_locale) {

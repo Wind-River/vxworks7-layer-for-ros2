@@ -1,0 +1,14 @@
+diff --git a/src/cpp/rtps/domain/RTPSDomain.cpp b/src/cpp/rtps/domain/RTPSDomain.cpp
+index 3b9c8c38e..18eeac2ef 100644
+--- a/src/cpp/rtps/domain/RTPSDomain.cpp
++++ b/src/cpp/rtps/domain/RTPSDomain.cpp
+@@ -20,6 +20,9 @@
+ 
+ #include <chrono>
+ #include <cstdlib>
++#if defined(__VXWORKS__)
++#include <sys/wait.h>   // WEXITSTATUS
++#endif
+ #include <fstream>
+ #include <functional>
+ #include <memory>

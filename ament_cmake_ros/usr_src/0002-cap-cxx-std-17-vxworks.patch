@@ -1,0 +1,17 @@
+diff --git a/ament_cmake_ros_core/cmake/ament_ros_defaults.cmake b/ament_cmake_ros_core/cmake/ament_ros_defaults.cmake
+index 8c37c1d..b7505a2 100644
+--- a/ament_cmake_ros_core/cmake/ament_ros_defaults.cmake
++++ b/ament_cmake_ros_core/cmake/ament_ros_defaults.cmake
+@@ -13,7 +13,11 @@
+ # limitations under the License.
+ 
+ add_library(ament_ros_cxx_standard INTERFACE)
+-target_compile_features(ament_ros_cxx_standard INTERFACE cxx_std_20)
++if(CMAKE_SYSTEM_NAME STREQUAL "VxWorks")
++  target_compile_features(ament_ros_cxx_standard INTERFACE cxx_std_17)
++else()
++  target_compile_features(ament_ros_cxx_standard INTERFACE cxx_std_20)
++endif()
+ 
+ add_library(ament_ros_c_standard INTERFACE)
+ target_compile_features(ament_ros_c_standard INTERFACE c_std_17)

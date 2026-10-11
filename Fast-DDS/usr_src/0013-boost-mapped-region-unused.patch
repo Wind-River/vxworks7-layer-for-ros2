@@ -1,0 +1,12 @@
+diff --git a/thirdparty/boost/include/boost/interprocess/mapped_region.hpp b/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
+index 1fb64086b..f8f7f1228 100644
+--- a/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
++++ b/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
+@@ -757,6 +757,7 @@ inline bool mapped_region::advise(advice_types advice)
+    // Suppress "unused variable" warnings
+    (void)mode_padv;
+    (void)mode_madv;
++   (void)unix_advice;
+    unsigned int mode = mode_none;
+    //Choose advice either from POSIX (preferred) or native Unix
+    switch(advice){

@@ -1,0 +1,21 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Subject: [PATCH] mcap_vendor: depend on lz4_vendor + zstd_vendor (build order)
+
+---
+
+diff --git a/package.xml b/package.xml
+index c7bf3cc2..39df0769 100644
+--- a/package.xml
++++ b/package.xml
+@@ -14,6 +14,11 @@
+ 
+   <depend>zstd_cmake_module</depend>
+ 
++  <!-- VxWorks/cross: force the lib vendors to build BEFORE mcap so
++       find_package(lz4)/find_package(zstd) resolve. -->
++  <depend>lz4_vendor</depend>
++  <depend>zstd_vendor</depend>
++
+   <build_depend>lz4_cmake_module</build_depend>
+   <build_export_depend>lz4_cmake_module</build_export_depend>
+ 

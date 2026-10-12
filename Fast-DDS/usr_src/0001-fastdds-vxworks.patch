@@ -1,0 +1,357 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Oct 2026 22:17:53 +0200
+Subject: [PATCH] Fast-DDS VxWorks port (lyrical, from run1 known-good)
+
+---
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7366e5718..c8abf0824 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -318,7 +318,7 @@ if(SECURITY AND QNX)
+     set(OPENSSL_LIBRARIES ssl crypto)
+ endif()
+ 
+-option(SQLITE3_SUPPORT "Activate SQLITE3 support" ON)
++option(SQLITE3_SUPPORT "Activate SQLITE3 support" OFF)
+ 
+ ###############################################################################
+ # SHM as Default transport
+diff --git a/cmake/modules/FindAsio.cmake b/cmake/modules/FindAsio.cmake
+index ce8f22d06..9a8f262da 100644
+--- a/cmake/modules/FindAsio.cmake
++++ b/cmake/modules/FindAsio.cmake
+@@ -1,4 +1,4 @@
+-set(ASIO_REQUIRED_VERSION ${FIND_VERSION})
++set(ASIO_REQUIRED_VERSION 1.12.0)
+ 
+ if (THIRDPARTY_Asio STREQUAL "FORCE" OR ANDROID)
+     find_path(Asio_INCLUDE_DIR NAMES asio.hpp NO_CMAKE_FIND_ROOT_PATH)
+diff --git a/cmake/modules/FindThirdpartyBoost.cmake b/cmake/modules/FindThirdpartyBoost.cmake
+index 43354c0e5..06a43f94d 100644
+--- a/cmake/modules/FindThirdpartyBoost.cmake
++++ b/cmake/modules/FindThirdpartyBoost.cmake
+@@ -11,9 +11,11 @@ set(THIRDPARTY_BOOST_INCLUDE_DIR
+     "Path to thirdparty/boost"
+ )
+ 
+-find_package(Threads REQUIRED)
++if(NOT VXWORKS)
++    find_package(Threads REQUIRED)
++endif()
+ 
+-if(WIN32 OR APPLE OR ANDROID OR QNXNTO)
++if(WIN32 OR APPLE OR ANDROID OR QNXNTO OR VXWORKS)
+     set(THIRDPARTY_BOOST_LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+ else() # Posix
+     set(THIRDPARTY_BOOST_LINK_LIBS ${CMAKE_THREAD_LIBS_INIT} rt)
+diff --git a/include/fastdds/dds/log/Log.hpp b/include/fastdds/dds/log/Log.hpp
+index dc8d92c9d..869fa36de 100644
+--- a/include/fastdds/dds/log/Log.hpp
++++ b/include/fastdds/dds/log/Log.hpp
+@@ -17,6 +17,7 @@
+ 
+ #include <regex>
+ #include <sstream>
++#include <memory>
+ 
+ #include <fastdds/rtps/attributes/ThreadSettings.hpp>
+ #include <fastdds/fastdds_dll.hpp>
+diff --git a/include/fastdds/rtps/attributes/BuiltinTransports.hpp b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+index c7e424282..909ffe19a 100644
+--- a/include/fastdds/rtps/attributes/BuiltinTransports.hpp
++++ b/include/fastdds/rtps/attributes/BuiltinTransports.hpp
+@@ -29,7 +29,9 @@ namespace eprosima {
+ namespace fastdds {
+ namespace rtps {
+ 
+-
++#ifdef NONE
++#undef NONE
++#endif
+ /**
+  * @brief Options for configuring the built-in transports when using LARGE_DATA mode.
+  */
+diff --git a/include/fastdds/rtps/attributes/ExternalLocators.hpp b/include/fastdds/rtps/attributes/ExternalLocators.hpp
+index abf07de13..61d384615 100644
+--- a/include/fastdds/rtps/attributes/ExternalLocators.hpp
++++ b/include/fastdds/rtps/attributes/ExternalLocators.hpp
+@@ -21,6 +21,7 @@
+ 
+ #include <map>
+ #include <vector>
++#include <functional>
+ 
+ #include <fastdds/rtps/common/LocatorWithMask.hpp>
+ 
+diff --git a/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp b/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
+index 9c05c0388..a8267668d 100644
+--- a/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
++++ b/include/fastdds/rtps/transport/TCPTransportDescriptor.hpp
+@@ -120,6 +120,9 @@ struct TCPTransportDescriptor : public SocketTransportDescriptor
+          *
+          * - SINGLE_DH_USE: always create a new key using Diffie-Hellman parameters.
+          */
++#ifdef NONE
++#undef NONE
++#endif
+         enum TLSOptions : uint32_t
+         {
+             NONE                    = 0,      // 0000 0000 0000
+diff --git a/include/fastdds/utils/TimedMutex.hpp b/include/fastdds/utils/TimedMutex.hpp
+index 75dd4b07c..327d46290 100644
+--- a/include/fastdds/utils/TimedMutex.hpp
++++ b/include/fastdds/utils/TimedMutex.hpp
+@@ -201,7 +201,7 @@ private:
+ };
+ #endif // if defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 193632528
+ 
+-#elif _GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__unix__)
++#elif (_GTHREAD_USE_MUTEX_TIMEDLOCK || !defined(__unix__)) && !defined(__VXWORKS__)
+ using TimedMutex = std::timed_mutex;
+ using RecursiveTimedMutex = std::recursive_timed_mutex;
+ #else
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index 070597df6..effda622b 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -52,7 +52,7 @@ else()
+     set(HAVE_STRICT_REALTIME 0)
+ endif()
+ 
+-if(NOT ANDROID)
++if(NOT ANDROID AND NOT VXWORKS)
+     find_package(Threads REQUIRED)
+ endif()
+ 
+diff --git a/src/cpp/fastdds/log/Log.cpp b/src/cpp/fastdds/log/Log.cpp
+index df001b7d0..7685049e1 100644
+--- a/src/cpp/fastdds/log/Log.cpp
++++ b/src/cpp/fastdds/log/Log.cpp
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++#include <atomic>
+ #include <chrono>
+ #include <iomanip>
+ #include <iostream>
+diff --git a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp b/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
+index bdb25584d..044a0873b 100644
+--- a/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
++++ b/src/cpp/fastdds/topic/DDSSQLFilter/DDSFilterValue.hpp
+@@ -211,7 +211,9 @@ protected:
+     void value_has_changed();
+ 
+ private:
+-
++#ifdef NONE
++#undef NONE
++#endif
+     enum class RegExpKind
+     {
+         NONE, LIKE, MATCH
+diff --git a/src/cpp/rtps/domain/RTPSDomain.cpp b/src/cpp/rtps/domain/RTPSDomain.cpp
+index 3b9c8c38e..18eeac2ef 100644
+--- a/src/cpp/rtps/domain/RTPSDomain.cpp
++++ b/src/cpp/rtps/domain/RTPSDomain.cpp
+@@ -20,6 +20,9 @@
+ 
+ #include <chrono>
+ #include <cstdlib>
++#if defined(__VXWORKS__)
++#include <sys/wait.h>   // WEXITSTATUS
++#endif
+ #include <fstream>
+ #include <functional>
+ #include <memory>
+diff --git a/src/cpp/rtps/transport/TCPChannelResource.cpp b/src/cpp/rtps/transport/TCPChannelResource.cpp
+index 2d58e9708..5d7f23cbd 100644
+--- a/src/cpp/rtps/transport/TCPChannelResource.cpp
++++ b/src/cpp/rtps/transport/TCPChannelResource.cpp
+@@ -16,6 +16,7 @@
+ 
+ #include <chrono>
+ #include <thread>
++#include <sys/ttycom.h>
+ 
+ #include <fastdds/utils/IPLocator.hpp>
+ 
+diff --git a/src/cpp/rtps/transport/TCPChannelResourceSecure.cpp b/src/cpp/rtps/transport/TCPChannelResourceSecure.cpp
+index e7f4edbcc..4a4f519b7 100644
+--- a/src/cpp/rtps/transport/TCPChannelResourceSecure.cpp
++++ b/src/cpp/rtps/transport/TCPChannelResourceSecure.cpp
+@@ -38,8 +38,8 @@ TCPChannelResourceSecure::TCPChannelResourceSecure(
+     : TCPChannelResource(parent, locator, maxMsgSize)
+     , context_(context)
+     , ssl_context_(ssl_context)
+-    , strand_read_(make_strand(context))
+-    , strand_write_(make_strand(context))
++    , strand_read_(asio::strand<asio::io_context::executor_type>(context.get_executor()))
++    , strand_write_(asio::strand<asio::io_context::executor_type>(context.get_executor()))
+ {
+ }
+ 
+@@ -52,8 +52,8 @@ TCPChannelResourceSecure::TCPChannelResourceSecure(
+     : TCPChannelResource(parent, maxMsgSize)
+     , context_(context)
+     , ssl_context_(ssl_context)
+-    , strand_read_(make_strand(context))
+-    , strand_write_(make_strand(context))
++    , strand_read_(asio::strand<asio::io_context::executor_type>(context.get_executor()))
++    , strand_write_(asio::strand<asio::io_context::executor_type>(context.get_executor()))
+     , secure_socket_(socket)
+ {
+     set_tls_verify_mode(parent->configuration());
+diff --git a/src/cpp/security/accesscontrol/DistinguishedName.h b/src/cpp/security/accesscontrol/DistinguishedName.h
+index 5f0211bfe..89b3c213f 100644
+--- a/src/cpp/security/accesscontrol/DistinguishedName.h
++++ b/src/cpp/security/accesscontrol/DistinguishedName.h
+@@ -169,7 +169,9 @@ public:
+     static bool compare(
+             const DistinguishedName& name1,
+             const DistinguishedName& name2) noexcept;
+-
++#ifdef OK
++#undef OK
++#endif
+     enum class ErrorCase
+     {
+         OK,
+diff --git a/src/cpp/security/accesscontrol/GovernanceParser.h b/src/cpp/security/accesscontrol/GovernanceParser.h
+index 51888449c..860d5a2dd 100644
+--- a/src/cpp/security/accesscontrol/GovernanceParser.h
++++ b/src/cpp/security/accesscontrol/GovernanceParser.h
+@@ -24,6 +24,9 @@ namespace fastdds {
+ namespace rtps {
+ namespace security {
+ 
++#ifdef NONE
++#undef NONE
++#endif
+ enum class ProtectionKind
+ {
+     NONE,
+diff --git a/src/cpp/utils/IPFinder.cpp b/src/cpp/utils/IPFinder.cpp
+index 85ed485eb..33b81057e 100644
+--- a/src/cpp/utils/IPFinder.cpp
++++ b/src/cpp/utils/IPFinder.cpp
+@@ -493,6 +493,7 @@ bool IPFinder::getAllMACAddress(
+ bool IPFinder::getAllMACAddress(
+         std::vector<info_MAC>* macs)
+ {
++    (void)macs;
+     return false;
+ }
+ 
+diff --git a/src/cpp/utils/SystemInfo.hpp b/src/cpp/utils/SystemInfo.hpp
+index 709d24576..83a7d87ba 100644
+--- a/src/cpp/utils/SystemInfo.hpp
++++ b/src/cpp/utils/SystemInfo.hpp
+@@ -21,7 +21,9 @@
+ #include <unistd.h>
+ #endif // if defined(_WIN32)
+ 
++#include <chrono>
+ #include <cstdint>
++#include <functional>
+ #include <memory>
+ #include <mutex>
+ #include <string>
+diff --git a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+index 8b0076fed..05612104a 100644
+--- a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+@@ -26,6 +26,8 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
++#include <cstring>
++#include <cerrno>
+ 
+ #include "SharedDir.hpp"
+ 
+@@ -56,7 +58,11 @@ public:
+ 
+         if ((fd_ = open_and_lock_file(file_path, was_lock_created)) == -1)
+         {
+-            throw std::runtime_error("open_and_lock_file failed");
++            throw std::runtime_error(
++                 "open_and_lock_file failed for path: " + file_path +
++                 " with errno " + std::to_string(errno) +
++                 " (" + std::strerror(errno) + ")"
++            );
+         }
+ 
+         name_ = name;
+@@ -215,7 +221,7 @@ private:
+         int fd = -1;
+         do
+         {
+-            fd = open(file_path.c_str(), O_RDONLY, 0);
++            fd = open(file_path.c_str(), O_RDWR, 0666);
+ 
+             if (fd != -1)
+             {
+@@ -224,7 +230,7 @@ private:
+             else
+             {
+                 *was_lock_created = true;
+-                fd = open(file_path.c_str(), O_CREAT | O_RDONLY, 0666);
++                fd = open(file_path.c_str(), O_CREAT | O_RDWR, 0666);
+             }
+ 
+             if (fd == -1)
+diff --git a/src/cpp/utils/shared_memory/SharedDir.hpp b/src/cpp/utils/shared_memory/SharedDir.hpp
+index 3c1320007..f709cbd53 100644
+--- a/src/cpp/utils/shared_memory/SharedDir.hpp
++++ b/src/cpp/utils/shared_memory/SharedDir.hpp
+@@ -104,6 +104,9 @@ public:
+             // directory exists do nothing
+         }
+         return (std::string(defaultdir) + "/" + filename);
++#elif defined(__VXWORKS__)
++        static const char defaultdir[] = "/tmp";
++        return (std::string(defaultdir) + "/" + filename);
+ #else
+         return SharedDir::get_file_path(filename);
+ #endif  // __QNXNTO__
+diff --git a/src/cpp/xmlparser/XMLParserCommon.h b/src/cpp/xmlparser/XMLParserCommon.h
+index 5e65dcbe2..a3082ee6c 100644
+--- a/src/cpp/xmlparser/XMLParserCommon.h
++++ b/src/cpp/xmlparser/XMLParserCommon.h
+@@ -321,6 +321,9 @@ extern const char* OFFSETD2;
+ extern const char* OFFSETD3;
+ extern const char* OFFSETD4;
+ extern const char* RTPS_PDP_TYPE;
++#ifdef NONE
++#undef NONE
++#endif
+ extern const char* NONE;
+ extern const char* CLIENT;
+ extern const char* SERVER;
+diff --git a/thirdparty/boost/include/boost/interprocess/mapped_region.hpp b/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
+index 1fb64086b..f8f7f1228 100644
+--- a/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
++++ b/thirdparty/boost/include/boost/interprocess/mapped_region.hpp
+@@ -757,6 +757,7 @@ inline bool mapped_region::advise(advice_types advice)
+    // Suppress "unused variable" warnings
+    (void)mode_padv;
+    (void)mode_madv;
++   (void)unix_advice;
+    unsigned int mode = mode_none;
+    //Choose advice either from POSIX (preferred) or native Unix
+    switch(advice){
+diff --git a/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp b/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
+index 96fdb6ca9..244c50bf6 100644
+--- a/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
++++ b/thirdparty/boost/include/boost/interprocess/shared_memory_object.hpp
+@@ -396,7 +396,7 @@ inline void shared_memory_object::truncate(offset_t length)
+ {
+    
+    // QNX correctly checks available size on ftruncate, so the patch is not necessary
+-#if defined(BOOST_FASTDDS_PATCHES) && !defined(__QNXNTO__)
++#if defined(BOOST_FASTDDS_PATCHES) && !defined(__QNXNTO__) && !defined(__VXWORKS__)
+ 
+    if (0 != posix_fallocate(m_handle, 0, length))
+    {

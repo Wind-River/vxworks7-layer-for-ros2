@@ -1,0 +1,59 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Mon, 12 Oct 2026 22:10:22 +0200
+Subject: [PATCH] ros2cli VxWorks fixes (lyrical)
+
+---
+
+diff --git a/ros2pkg/ros2pkg/api/__init__.py b/ros2pkg/ros2pkg/api/__init__.py
+index aa9f7408..7d944706 100644
+--- a/ros2pkg/ros2pkg/api/__init__.py
++++ b/ros2pkg/ros2pkg/api/__init__.py
+@@ -13,6 +13,7 @@
+ # limitations under the License.
+ 
+ import os
++import stat
+ 
+ from ament_index_python import get_package_prefix
+ from ament_index_python import get_packages_with_prefixes
+@@ -50,7 +51,8 @@ def get_executable_paths(*, package_name):
+         # select executable files
+         for filename in sorted(filenames):
+             path = os.path.join(dirpath, filename)
+-            if os.access(path, os.X_OK):
++            st = os.stat(path)
++            if (st[stat.ST_MODE]&stat.S_IXUSR) != 0:
+                 executable_paths.append(path)
+     return executable_paths
+ 
+diff --git a/ros2run/ros2run/api/__init__.py b/ros2run/ros2run/api/__init__.py
+index 3a36f651..f9180fd1 100644
+--- a/ros2run/ros2run/api/__init__.py
++++ b/ros2run/ros2run/api/__init__.py
+@@ -16,6 +16,7 @@ import os
+ import signal
+ import subprocess
+ import sys
++from elftools.elf.elffile import ELFFile
+ 
+ from ros2pkg.api import get_executable_paths
+ from ros2pkg.api import PackageNotFound
+@@ -58,6 +59,18 @@ def run_executable(*, path, argv, prefix=None):
+     if os.name == 'nt' and path.endswith('.py'):
+         cmd.insert(0, sys.executable)
+ 
++    # on VxWorks Python scripts are invokable through the interpreter
++    if sys.platform == 'vxworks':
++        pyfmt = False
++        f = open(path, 'rb')
++        try:
++            elf = ELFFile(f)
++        except Exception as e:
++            pyfmt = True
++
++        if pyfmt:
++            cmd.insert(0, sys.executable)
++
+     if prefix is not None:
+         cmd = prefix + cmd
+ 

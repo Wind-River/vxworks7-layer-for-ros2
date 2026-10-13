@@ -1,0 +1,42 @@
+rclrs: build QoSProfile::best_available() inline instead of via the C extern static.
+
+qos.rs references `rmw_qos_profile_best_available` as an `extern "C" static`
+(bindgen), but in rmw/qos_profiles.h ALL the rmw_qos_profile_* values are
+header-only `static const` (internal linkage) — none are exported by librmw.so.
+Native (Linux) builds happen to resolve the extern because the toolchain keeps an
+internal-linkage copy around; under the VxWorks clang/LLVM link (--gc-sections,
+default visibility) that copy is dead-stripped everywhere, so there is no symbol to
+bind and the node fails to link (undefined reference to
+rmw_qos_profile_best_available).
+
+rclrs already builds every OTHER qos profile (default/sensor_data/parameters/...)
+inline in Rust; this makes best_available() consistent with its siblings, using the
+same constants the C header defines (KEEP_LAST depth 10, all *_BEST_AVAILABLE
+policies, default deadline/lifespan/lease). No behavior change on any platform.
+
+--- a/src/qos.rs
++++ b/src/qos.rs
+@@ -359,10 +359,19 @@
+     /// > discovery.
+     #[cfg(not(ros_distro = "humble"))]
+     pub fn best_available() -> Self {
+-        unsafe {
+-            // SAFETY: There are no preconditions for using this static const
+-            // global variable
+-            (&rmw_qos_profile_best_available).into()
++        // VxWorks: the C `rmw_qos_profile_best_available` is a `static const` in
++        // rmw/qos_profiles.h (inline, per-TU), NOT an exported library symbol, so the
++        // bindgen `extern` reference has no provider. Build the profile inline from
++        // the same constants the C header uses.
++        QoSProfile {
++            history: QoSHistoryPolicy::KeepLast { depth: 10 },
++            reliability: QoSReliabilityPolicy::BestAvailable,
++            durability: QoSDurabilityPolicy::BestAvailable,
++            deadline: QoSDuration::SystemDefault,
++            lifespan: QoSDuration::SystemDefault,
++            liveliness: QoSLivelinessPolicy::BestAvailable,
++            liveliness_lease: QoSDuration::SystemDefault,
++            avoid_ros_namespace_conventions: false,
+         }
+     }
+ }

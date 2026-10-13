@@ -1,0 +1,17 @@
+Default DOWNLOAD_TOML_LIB to OFF so iceoryx_posh consumes the vendored cpptoml.
+
+The inline cpptoml ExternalProject download+build runs host git/doxygen that
+fail under the VxWorks SDK (they load a VxWorks libc.so.1 off LD_LIBRARY_PATH).
+cpptoml_vendor installs cpptoml + its cmake config; with DOWNLOAD_TOML_LIB=OFF
+iceoryx_posh resolves it via find_package(cpptoml), avoiding the inline build.
+--- a/iceoryx_posh/CMakeLists.txt
++++ b/iceoryx_posh/CMakeLists.txt
+@@ -23,7 +23,7 @@
+ find_package(Threads REQUIRED)
+ find_package(iceoryx_hoofs REQUIRED)
+ 
+-option(DOWNLOAD_TOML_LIB "Download cpptoml via the CMake ExternalProject module" ON)
++option(DOWNLOAD_TOML_LIB "Download cpptoml via the CMake ExternalProject module" OFF)
+ option(TOML_CONFIG "TOML support for RouDi with dynamic configuration" ON)
+ option(ONE_TO_MANY_ONLY "Restricts communication to 1:n pattern" OFF)
+ 

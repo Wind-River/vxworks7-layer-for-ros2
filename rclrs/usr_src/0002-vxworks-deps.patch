@@ -1,0 +1,19 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -30,7 +30,6 @@
+ futures-lite = { version = "2.6", features = ["std", "race"] }
+ 
+ # Needed for the runtime-agnostic timeout feature
+-async-std = "1.13"
+ 
+ # Needed for dynamic messages
+ libloading = "0.8"
+@@ -54,7 +53,7 @@
+ tokio-stream = "0.1"
+ 
+ # Needed by action clients to generate UUID values for their goals
+-uuid = { version = "1", features = ["v4"] }
++uuid = { version = "=1.26.1", features = ["v4"] }
+ 
+ [dev-dependencies]
+ # Needed for e.g. writing yaml files in tests

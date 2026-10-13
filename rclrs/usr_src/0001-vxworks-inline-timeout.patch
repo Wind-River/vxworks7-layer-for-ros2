@@ -1,0 +1,94 @@
+--- a/src/node.rs
++++ b/src/node.rs
+@@ -26,7 +26,90 @@
+     StreamExt,
+ };
+ 
+-use async_std::future::timeout;
++// Runtime-agnostic timeout: async-std's timeout pulls in the async-io/polling/
++// rustix reactor, which has no VxWorks support. rclrs's executor already uses
++// std::thread for its own timing, so we provide a small thread-backed timeout
++// here that works on any executor without extra dependencies.
++use vx_timeout::timeout;
++
++mod vx_timeout {
++    use std::future::Future;
++    use std::pin::Pin;
++    use std::sync::{Arc, Mutex};
++    use std::task::{Context, Poll, Waker};
++    use std::time::Duration;
++
++    /// Error returned when the timeout elapses before the future completes.
++    pub struct Elapsed;
++
++    struct DelayState {
++        fired: bool,
++        waker: Option<Waker>,
++    }
++
++    /// A future that completes after `dur`, backed by a std thread that sleeps
++    /// and then wakes the task. Runtime-agnostic (no reactor required).
++    struct Delay {
++        state: Arc<Mutex<DelayState>>,
++        started: bool,
++        dur: Duration,
++    }
++
++    impl Delay {
++        fn new(dur: Duration) -> Self {
++            Delay {
++                state: Arc::new(Mutex::new(DelayState { fired: false, waker: None })),
++                started: false,
++                dur,
++            }
++        }
++    }
++
++    impl Future for Delay {
++        type Output = ();
++        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
++            let state = self.state.clone();
++            {
++                let mut guard = state.lock().unwrap();
++                if guard.fired {
++                    return Poll::Ready(());
++                }
++                guard.waker = Some(cx.waker().clone());
++            }
++            if !self.started {
++                self.started = true;
++                let dur = self.dur;
++                let state = self.state.clone();
++                std::thread::spawn(move || {
++                    std::thread::sleep(dur);
++                    let waker = {
++                        let mut guard = state.lock().unwrap();
++                        guard.fired = true;
++                        guard.waker.take()
++                    };
++                    if let Some(w) = waker {
++                        w.wake();
++                    }
++                });
++            }
++            Poll::Pending
++        }
++    }
++
++    /// Run `fut` with a timeout. Returns `Ok(output)` if it completes first, or
++    /// `Err(Elapsed)` if `dur` elapses first. Executor-agnostic.
++    pub async fn timeout<F: Future>(dur: Duration, fut: F) -> Result<F::Output, Elapsed> {
++        let delay = Delay::new(dur);
++        futures_lite::future::or(
++            async move { Ok(fut.await) },
++            async move {
++                delay.await;
++                Err(Elapsed)
++            },
++        )
++        .await
++    }
++}
+ 
+ use rosidl_runtime_rs::{Action, Message};
+ 

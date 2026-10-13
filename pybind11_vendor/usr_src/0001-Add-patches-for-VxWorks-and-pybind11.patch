@@ -9,8 +9,8 @@ Subject: [PATCH] Add patches for VxWorks and pybind11
 ---
  CMakeLists.txt                                |  4 +++
  ...ix-localtime_thread_safe-for-VxWorks.patch | 32 +++++++++++++++++++
- patches/0003-fix-pybind11-extension.patch     | 25 +++++++++++++++
- 3 files changed, 61 insertions(+)
+ patches/0003-fix-pybind11-extension.patch     | 44 +++++++++++++++++++++
+ 3 files changed, 80 insertions(+)
  create mode 100644 patches/0002-chrono-fix-localtime_thread_safe-for-VxWorks.patch
  create mode 100644 patches/0003-fix-pybind11-extension.patch
 
@@ -72,15 +72,24 @@ new file mode 100644
 index 0000000..bed6c47
 --- /dev/null
 +++ b/patches/0003-fix-pybind11-extension.patch
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,44 @@
 +From 4dc48d83e6854dd8b1e29058568c23d3200f6f5b Mon Sep 17 00:00:00 2001
 +From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
 +Date: Sun, 19 Apr 2026 17:52:36 +0200
 +Subject: [PATCH 3/3] fix pybind11 extension - issue 4583
 +
++Two cross-compile fixes in pybind11NewTools.cmake:
++1. Guard the PYBIND11_PYTHON_EXECUTABLE_LAST compare so it does not fire
++   when the variable is undefined on the first run.
++2. Derive PYTHON_MODULE_EXTENSION from the externally provided Python_SOABI
++   when cross-compiling. The target interpreter cannot run on the host, so
++   the interpreter query below would read the HOST EXT_SUFFIX and mis-name
++   the extension (.cpython-39-x86_64-linux-gnu.so), which on-target CPython
++   cannot import. Reusing Python_SOABI avoids any arch/version/OS hardcoding.
++   See CMake issue 26543.
 +---
-+ tools/pybind11NewTools.cmake | 2 +-
-+ 1 file changed, 1 insertion(+), 1 deletion(-)
++ tools/pybind11NewTools.cmake | 15 ++++++++++++++-
++ 1 file changed, 14 insertions(+), 1 deletion(-)
 +
 +diff --git a/tools/pybind11NewTools.cmake b/tools/pybind11NewTools.cmake
 +index 7d7424a7..b9fd100c 100644
@@ -95,9 +104,26 @@ index 0000000..bed6c47
 +   # Detect changes to the Python version/binary in subsequent CMake runs, and refresh config if needed
 +   unset(PYTHON_IS_DEBUG CACHE)
 +   unset(PYTHON_MODULE_EXTENSION CACHE)
++@@ -95,6 +95,19 @@ endif()
++ 
++ # Get the suffix - SO is deprecated, should use EXT_SUFFIX, but this is
++ # required for PyPy3 (as of 7.3.1)
+++# Cross-compile: if the build provides the target SOABI (-DPython_SOABI, the same value
+++# modern FindPython uses), derive the module extension from it instead of running the
+++# target interpreter (which cannot execute on the host). See CMake issue 26543.
+++if(NOT DEFINED PYTHON_MODULE_EXTENSION
+++   AND DEFINED Python_SOABI AND NOT Python_SOABI STREQUAL "")
+++  set(PYTHON_MODULE_EXTENSION
+++      ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}"
+++      CACHE INTERNAL "cross: from Python_SOABI")
+++  message(STATUS "pybind11 (cross): PYTHON_MODULE_EXTENSION=${PYTHON_MODULE_EXTENSION} (from Python_SOABI)")
+++endif()
+++
++ if(NOT DEFINED PYTHON_MODULE_EXTENSION)
++   execute_process(
++     COMMAND
 +-- 
 +2.43.0
 +
 -- 
 2.43.0
-

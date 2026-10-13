@@ -1,0 +1,124 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <Andrei.Kholodnyi@gmail.com>
+Date: Mon, 13 Oct 2026 12:52:00 +0200
+Subject: [PATCH] asio_vendor: add VxWorks source patches to ./patches
+
+The asio_vendor ExternalProject applies ./patches/*.patch on top of the
+fetched upstream Asio source at build time. Deliver those VxWorks patches
+here (the vendor repo itself stays pristine).
+---
+diff --git a/patches/0001-config-vxworks-unistd.patch b/patches/0001-config-vxworks-unistd.patch
+new file mode 100644
+index 0000000..0a19d6d
+--- /dev/null
++++ b/patches/0001-config-vxworks-unistd.patch
+@@ -0,0 +1,16 @@
++Add VxWorks to the ASIO_HAS_UNISTD_H platform list.
++
++VxWorks is POSIX-like and provides <unistd.h> with the feature macros Asio
++probes (e.g. threads support). Without this, ASIO_HAS_UNISTD_H stays undefined
++and downstream feature detection is wrong. Re-based onto standalone asio 1.30.2.
++--- a/asio/include/asio/detail/config.hpp
+++++ b/asio/include/asio/detail/config.hpp
++@@ -813,7 +813,8 @@
++    || defined(__OpenBSD__) \
++    || defined(__linux__) \
++-   || defined(__HAIKU__)
+++   || defined(__HAIKU__) \
+++   || defined(__VXWORKS__)
++ #   define ASIO_HAS_UNISTD_H 1
++ #  endif
++ # endif // !defined(ASIO_HAS_BOOST_CONFIG)
+diff --git a/patches/0002-socket_ops-vxworks.patch b/patches/0002-socket_ops-vxworks.patch
+new file mode 100644
+index 0000000..f211277
+--- /dev/null
++++ b/patches/0002-socket_ops-vxworks.patch
+@@ -0,0 +1,30 @@
++VxWorks support in socket_ops.ipp.
++
++- Pull in ioLib.h (ioctl) and sys/poll.h on VxWorks.
++- socketpair() is not available on VxWorks, so take the same not-supported path
++  as Windows/Cygwin.
++Re-based onto standalone asio 1.30.2.
++--- a/asio/include/asio/detail/impl/socket_ops.ipp
+++++ b/asio/include/asio/detail/impl/socket_ops.ipp
++@@ -32,6 +32,11 @@
++ # include <locale>
++ # include <string>
++ #endif // defined(ASIO_WINDOWS_RUNTIME)
++ 
+++#if defined(__VXWORKS__)
+++#include "ioLib.h"   // ioctl
+++#include "sys/poll.h" // poll
+++#endif // defined(__VXWORKS__)
+++
++ #if defined(ASIO_WINDOWS) || defined(__CYGWIN__) \
++   || defined(__MACH__) && defined(__APPLE__)
++ # if defined(ASIO_HAS_PTHREADS)
++@@ -671,7 +676,7 @@ bool is_write_pending(socket_type s, asio::error_code& ec)
++ int socketpair(int af, int type, int protocol,
++     socket_type sv[2], asio::error_code& ec)
++ {
++-#if defined(ASIO_WINDOWS) || defined(__CYGWIN__)
+++#if defined(ASIO_WINDOWS) || defined(__CYGWIN__) || defined(__VXWORKS__)
++   (void)(af);
++   (void)(type);
++   (void)(protocol);
+diff --git a/patches/0003-socket_types-vxworks-poll.patch b/patches/0003-socket_types-vxworks-poll.patch
+new file mode 100644
+index 0000000..1c224c6
+--- /dev/null
++++ b/patches/0003-socket_types-vxworks-poll.patch
+@@ -0,0 +1,19 @@
++VxWorks poll header in socket_types.hpp.
++
++Ported from the Wind River Boost.Asio VxWorks patch (boost/asio/detail/
++socket_types.hpp), translated to standalone-Asio macros. VxWorks (major > 6)
++provides <sys/poll.h>; make sure it is included rather than falling into the
++SYMBIAN-less branch unconditionally.
++--- a/asio/include/asio/detail/socket_types.hpp
+++++ b/asio/include/asio/detail/socket_types.hpp
++@@ -62,7 +62,9 @@
++    || defined(__OpenBSD__) || defined(__linux__) \
++    || defined(__EMSCRIPTEN__)
++ #  include <poll.h>
++-# elif !defined(__SYMBIAN32__)
+++# elif !defined(__SYMBIAN32__) && !defined(__VXWORKS__)
+++#  include <sys/poll.h>
+++# elif defined(__VXWORKS__) && (_WRS_VXWORKS_MAJOR > 6)
++ #  include <sys/poll.h>
++ # endif
++ # include <sys/types.h>
+diff --git a/patches/0004-socket_option-vxworks-multicast-loop.patch b/patches/0004-socket_option-vxworks-multicast-loop.patch
+new file mode 100644
+index 0000000..fe74b67
+--- /dev/null
++++ b/patches/0004-socket_option-vxworks-multicast-loop.patch
+@@ -0,0 +1,26 @@
++VxWorks IP_MULTICAST_LOOP returns a 1-byte option length.
++
++Ported from the Wind River Boost.Asio VxWorks patch
++(boost/asio/ip/detail/socket_option.hpp), translated to standalone-Asio macros.
++On VxWorks the IP stack sets *optlen to 1 byte for IP_MULTICAST_LOOP, whereas
++Asio's multicast_enable_loopback stores an int; the resize() length check then
++throws length_error. Accept the 1-byte case. Matters for ROS 2: DDS discovery
++uses IP multicast, so this path is exercised at runtime.
++--- a/asio/include/asio/ip/detail/socket_option.hpp
+++++ b/asio/include/asio/ip/detail/socket_option.hpp
++@@ -147,6 +147,15 @@
++     }
++     else
++     {
+++#if defined(__VXWORKS__)
+++      // VxWorks sets *optlen to 1 byte for IP_MULTICAST_LOOP, not sizeof(int).
+++      if (s == 1)
+++      {
+++        ipv4_value_ = *reinterpret_cast<char*>(&ipv4_value_) ? 1 : 0;
+++        ipv6_value_ = ipv4_value_ ? 1 : 0;
+++        return;
+++      }
+++#endif // defined(__VXWORKS__)
++       if (s != sizeof(ipv4_value_))
++       {
++         std::length_error ex("multicast_enable_loopback socket option resize");

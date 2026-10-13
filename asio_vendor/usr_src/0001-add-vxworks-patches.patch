@@ -9,18 +9,18 @@ here (the vendor repo itself stays pristine).
 ---
 diff --git a/patches/0001-config-vxworks-unistd.patch b/patches/0001-config-vxworks-unistd.patch
 new file mode 100644
-index 0000000..0a19d6d
+index 0000000..73f1749
 --- /dev/null
 +++ b/patches/0001-config-vxworks-unistd.patch
 @@ -0,0 +1,16 @@
 +Add VxWorks to the ASIO_HAS_UNISTD_H platform list.
 +
 +VxWorks is POSIX-like and provides <unistd.h> with the feature macros Asio
-+probes (e.g. threads support). Without this, ASIO_HAS_UNISTD_H stays undefined
-+and downstream feature detection is wrong. Re-based onto standalone asio 1.30.2.
++probes. Without this, ASIO_HAS_UNISTD_H stays undefined. Re-based on 1.30.2.
 +--- a/asio/include/asio/detail/config.hpp
 ++++ b/asio/include/asio/detail/config.hpp
 +@@ -813,7 +813,8 @@
++    || defined(__NetBSD__) \
 +    || defined(__OpenBSD__) \
 +    || defined(__linux__) \
 +-   || defined(__HAIKU__)
@@ -31,10 +31,10 @@ index 0000000..0a19d6d
 + # endif // !defined(ASIO_HAS_BOOST_CONFIG)
 diff --git a/patches/0002-socket_ops-vxworks.patch b/patches/0002-socket_ops-vxworks.patch
 new file mode 100644
-index 0000000..f211277
+index 0000000..b720253
 --- /dev/null
 +++ b/patches/0002-socket_ops-vxworks.patch
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,29 @@
 +VxWorks support in socket_ops.ipp.
 +
 +- Pull in ioLib.h (ioctl) and sys/poll.h on VxWorks.
@@ -43,8 +43,7 @@ index 0000000..f211277
 +Re-based onto standalone asio 1.30.2.
 +--- a/asio/include/asio/detail/impl/socket_ops.ipp
 ++++ b/asio/include/asio/detail/impl/socket_ops.ipp
-+@@ -32,6 +32,11 @@
-+ # include <locale>
++@@ -33,6 +33,11 @@
 + # include <string>
 + #endif // defined(ASIO_WINDOWS_RUNTIME)
 + 
@@ -56,7 +55,7 @@ index 0000000..f211277
 + #if defined(ASIO_WINDOWS) || defined(__CYGWIN__) \
 +   || defined(__MACH__) && defined(__APPLE__)
 + # if defined(ASIO_HAS_PTHREADS)
-+@@ -671,7 +676,7 @@ bool is_write_pending(socket_type s, asio::error_code& ec)
++@@ -671,7 +676,7 @@
 + int socketpair(int af, int type, int protocol,
 +     socket_type sv[2], asio::error_code& ec)
 + {

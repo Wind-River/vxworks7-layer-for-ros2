@@ -1,0 +1,202 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Wed, 28 Oct 2026 01:20:00 +0100
+Subject: [PATCH] Fast-DDS VxWorks: make shared-memory transport work across RTPs
+
+The SHM transport did not deliver data between two RTPs on VxWorks. None of the
+three causes is a VxWorks defect: each is a Fast-DDS (or vendored-boost)
+assumption that does not hold on VxWorks. The fixes adapt Fast-DDS to the
+documented VxWorks behaviour and are all guarded by __VXWORKS__.
+
+1. boost::interprocess assumes _POSIX_SEMAPHORES implies cross-process unnamed
+   semaphores. On VxWorks unnamed semaphores are by design not accessible from
+   other RTPs (man sem_init(2rtp)): the sem_t holds only a process-local handle.
+   Tell boost to use its portable spin semaphore (shared-memory atomics), which
+   works cross-RTP. This is a wrong platform assumption in boost, not a VxWorks
+   bug.
+2. RobustExclusiveLock/RobustSharedLock assume BSD flock() semantics (the lock
+   is tied to the open file and survives stat()). On VxWorks flock() is emulated
+   (libunixextra) with fcntl() record locks, whose standard POSIX semantics drop
+   the lock on ANY close() of the file. The stat(path) "file deleted" check opens
+   and closes a descriptor internally and so releases the port owner's lock; the
+   peer then judged a live port a zombie and removed it. Use fstat(fd)/st_nlink
+   (which does not drop the lock) instead of stat(path), and open the _sl lock
+   files O_RDWR (fcntl F_WRLCK needs a writable fd; it fails EBADF on O_RDONLY).
+   The lock-dropping is correct record-lock behaviour; the mismatch is Fast-DDS
+   relying on BSD flock() semantics that do not hold under fcntl emulation.
+3. Fast-DDS selects thread_impl_basic (std::thread) on VxWorks, and std::thread
+   silently ignores the ThreadSettings::stack_size the library intends to pass.
+   Every Fast-DDS thread then got VxWorks' documented 20480 byte POSIX default
+   thread stack, which the discovery thread overflows. 20 KiB is a normal
+   VxWorks default, not a bug; the gap is Fast-DDS' VxWorks-unaware thread
+   selection. Use the pthread implementation on VxWorks (which honours
+   stack_size) and default to 512 KiB when no size is requested.
+---
+diff --git a/src/cpp/utils/SystemInfo.cpp b/src/cpp/utils/SystemInfo.cpp
+index b44d015..d13813b 100644
+--- a/src/cpp/utils/SystemInfo.cpp
++++ b/src/cpp/utils/SystemInfo.cpp
+@@ -354,6 +354,20 @@ std::mutex SystemInfo::interfaces_mtx_;
+ #elif defined(_POSIX_SOURCE) || defined(__QNXNTO__) || defined(__ANDROID__)
+ #include "threading/threading_pthread.ipp"
+ #include "thread_impl/thread_impl_pthread.ipp"
++#elif defined(__VXWORKS__)
++// VxWorks needs the pthread thread-creation path: std::thread (thread_impl_basic) ignores
++// ThreadSettings::stack_size, so threads would get VxWorks' 20480-byte POSIX default stack and overflow.
++// thread_impl_pthread.ipp honours stack_size via pthread_attr_setstacksize.
++//
++// It must be paired with threading_empty.ipp (no-op thread naming / scheduler stubs), NOT the Linux
++// threading_pthread.ipp used by the _POSIX_SOURCE branch above: that file is glibc/Linux-shaped and does not
++// compile on this VxWorks SDK -- it #includes <sys/sysinfo.h> (absent from the sysroot, guarded only by
++// !__QNX__) and references the Linux scheduler constants SCHED_BATCH/SCHED_IDLE (also absent). The only cost
++// of the empty stubs is that Fast-DDS threads are left unnamed and ThreadSettings scheduler class/priority are
++// not applied on VxWorks (cosmetic/tuning, not correctness). A dedicated threading_vxworks.ipp could restore
++// those later using pthread_setname_np (which the SDK does provide) and the VxWorks scheduler API.
++#include "threading/threading_empty.ipp"
++#include "thread_impl/thread_impl_pthread.ipp"
+ #else
+ #include "threading/threading_empty.ipp"
+ #endif // Platform selection
+diff --git a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+index 0561210..ec3aee9 100644
+--- a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+@@ -248,7 +248,15 @@ private:
+             // Check if file was deleted by clean up script between open and lock
+             // if yes, repeat file creation
+             struct stat buffer = {};
++#ifdef __VXWORKS__
++            // VxWorks: flock() is emulated with fcntl() record locks, which the kernel drops as soon as the
++            // process closes ANY descriptor of the file. stat()/lstat()/access() on a path open and close such
++            // a descriptor internally, so they must not be used while holding the lock. Use fstat() on the
++            // locked descriptor instead: st_nlink == 0 means the file was unlinked after open().
++            if (fstat(fd, &buffer) == 0 && buffer.st_nlink == 0)
++#else
+             if (stat(file_path.c_str(), &buffer) != 0 && errno == ENOENT)
++#endif // ifdef __VXWORKS__
+             {
+                 close(fd);
+                 fd = -1;
+diff --git a/src/cpp/utils/shared_memory/RobustSharedLock.hpp b/src/cpp/utils/shared_memory/RobustSharedLock.hpp
+index 428ee32..433a4fa 100644
+--- a/src/cpp/utils/shared_memory/RobustSharedLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustSharedLock.hpp
+@@ -346,6 +346,13 @@ private:
+ 
+ #else
+ 
++#ifdef __VXWORKS__
++    // VxWorks: flock(LOCK_EX) is emulated with fcntl(F_WRLCK), which fails with EBADF on a read-only descriptor.
++    static constexpr int LOCK_FILE_OPEN_MODE = O_RDWR;
++#else
++    static constexpr int LOCK_FILE_OPEN_MODE = O_RDONLY;
++#endif // ifdef __VXWORKS__
++
+     int open_and_lock_file(
+             const std::string& file_path,
+             bool* was_lock_created,
+@@ -354,7 +361,7 @@ private:
+         int fd = -1;
+         do
+         {
+-            fd = open(file_path.c_str(), O_RDONLY, 0);
++            fd = open(file_path.c_str(), LOCK_FILE_OPEN_MODE, 0);
+ 
+             if (fd != -1)
+             {
+@@ -363,7 +370,7 @@ private:
+             else
+             {
+                 *was_lock_created = true;
+-                fd = open(file_path.c_str(), O_CREAT | O_RDONLY, 0666);
++                fd = open(file_path.c_str(), O_CREAT | LOCK_FILE_OPEN_MODE, 0666);
+             }
+ 
+             if (was_lock_released != nullptr)
+@@ -374,7 +381,12 @@ private:
+                     // Check if file was deleted by clean up script between open and lock
+                     // if yes, repeat file creation
+                     struct stat buffer = {};
++#ifdef __VXWORKS__
++                    // See RobustExclusiveLock: stat() on a path drops the fcntl()-based flock on VxWorks.
++                    if (fstat(fd, &buffer) == 0 && buffer.st_nlink == 0)
++#else
+                     if (stat(file_path.c_str(), &buffer) != 0 && errno == ENOENT)
++#endif // ifdef __VXWORKS__
+                     {
+                         close(fd);
+                         fd = -1;
+@@ -418,7 +430,7 @@ private:
+     {
+         LockStatus lock_status;
+ 
+-        auto fd = open(file_path.c_str(), O_RDONLY, 0);
++        auto fd = open(file_path.c_str(), LOCK_FILE_OPEN_MODE, 0);
+ 
+         if (fd != -1)
+         {
+diff --git a/src/cpp/utils/thread.hpp b/src/cpp/utils/thread.hpp
+index 8c07933..97124ee 100644
+--- a/src/cpp/utils/thread.hpp
++++ b/src/cpp/utils/thread.hpp
+@@ -16,7 +16,7 @@
+ #define UTILS__THREAD_HPP_
+ 
+ // thread.hpp declarations
+-#if defined(_WIN32) || defined(__APPLE__) || defined(_POSIX_SOURCE) || defined(__QNXNTO__) || defined(__ANDROID__)
++#if defined(_WIN32) || defined(__APPLE__) || defined(_POSIX_SOURCE) || defined(__QNXNTO__) || defined(__ANDROID__) || defined(__VXWORKS__)
+ #include "thread_impl/thread_impl_custom.hpp"
+ #else
+ #include "thread_impl/thread_impl_basic.hpp"
+diff --git a/src/cpp/utils/thread_impl/thread_impl_pthread.ipp b/src/cpp/utils/thread_impl/thread_impl_pthread.ipp
+index 0c9149b..c7624fc 100644
+--- a/src/cpp/utils/thread_impl/thread_impl_pthread.ipp
++++ b/src/cpp/utils/thread_impl/thread_impl_pthread.ipp
+@@ -43,6 +43,18 @@ thread::native_handle_type thread::start_thread_impl(
+             };
+     std::unique_ptr<pthread_attr_t, decltype(attr_deleter)> attr_scope_destroy(&attr, attr_deleter);
+ 
++#ifdef __VXWORKS__
++    // ThreadSettings::stack_size defaults to -1 ("use the platform default"). On Linux that pthread default
++    // is large (often 8 MiB), so -1 is harmless there. On VxWorks pthread_attr_init() selects only a 20480 byte
++    // default stack for POSIX threads, which is far too small for the discovery/receive threads and overflows
++    // (rtpSpStackSize / 'rtp exec -u' only size the RTP's initial task, not pthreads). So when the caller did
++    // not request a size (stack_size < 0), substitute a usable default instead of the 20 KiB VxWorks default.
++    if (stack_size < 0)
++    {
++        stack_size = 512 * 1024;
++    }
++#endif // ifdef __VXWORKS__
++
+     // Set the requested stack size, if given.
+     if (stack_size >= 0)
+     {
+diff --git a/thirdparty/boost/include/boost/interprocess/detail/workaround.hpp b/thirdparty/boost/include/boost/interprocess/detail/workaround.hpp
+index 397d9f7..6876cbe 100644
+--- a/thirdparty/boost/include/boost/interprocess/detail/workaround.hpp
++++ b/thirdparty/boost/include/boost/interprocess/detail/workaround.hpp
+@@ -102,7 +102,12 @@
+             defined(__APPLE__)
+          #define BOOST_INTERPROCESS_POSIX_NAMED_SEMAPHORES
+          //MacOsX declares _POSIX_SEMAPHORES but sem_init returns ENOSYS
+-         #if !defined(__APPLE__)
++         //VxWorks declares _POSIX_SEMAPHORES but unnamed sem_init(pshared) does
++         //NOT work across RTPs: sem_t holds only a process-local SEM_ID handle,
++         //so a peer RTP's sem_post/sem_wait fail (EINVAL) even when the sem_t is
++         //in genuinely shared memory. Fall back to the spin semaphore (shared-mem
++         //atomics) which works cross-RTP. (Verified by sd_pshared_sem_probe.)
++         #if !defined(__APPLE__) && !defined(__VXWORKS__)
+             #define BOOST_INTERPROCESS_POSIX_UNNAMED_SEMAPHORES
+          #endif
+          #if defined(__osf__) || defined(__vms)
+@@ -118,7 +123,10 @@
+             #define BOOST_INTERPROCESS_POSIX_NAMED_SEMAPHORES
+          #endif
+          //MacOsX declares _POSIX_SEMAPHORES but sem_init returns ENOSYS
+-         #if !defined(__APPLE__)
++         //VxWorks: unnamed sem_init(pshared) is not cross-RTP (see above / man
++         //sem_init(2rtp): "pshared ... ignored. Unnamed semaphores cannot be
++         //accessed from other RTPs."). Use the spin fallback.
++         #if !defined(__APPLE__) && !defined(__VXWORKS__)
+             #define BOOST_INTERPROCESS_POSIX_UNNAMED_SEMAPHORES
+          #endif
+          #if defined(__osf__) || defined(__vms)

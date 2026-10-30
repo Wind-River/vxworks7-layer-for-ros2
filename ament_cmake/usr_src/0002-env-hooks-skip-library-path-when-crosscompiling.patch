@@ -1,41 +1,51 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
-Date: Fri, 30 Oct 2026 21:00:00 +0100
-Subject: [PATCH] env hooks: skip LD_LIBRARY_PATH library_path hook when
- cross-compiling
+Date: Fri, 30 Oct 2026 22:50:00 +0100
+Subject: [PATCH] env hooks: skip library_path hook when cross-compiling
 
-ament registers a per-package environment hook that prepends the package's
-install `lib` dir to LD_LIBRARY_PATH. colcon sources the install base when it
-assembles each package's build command environment, so for a cross-build the
-VxWorks target install lib dir (full of target .so files -- libc.so.1,
-libzstd.so.1, ...) lands on the HOST LD_LIBRARY_PATH during the build.
+The library_path environment hook prepends a package's install lib dir to
+LD_LIBRARY_PATH. colcon sources the install base when it assembles each
+package's build command environment, so for a cross-build the VxWorks target
+install lib dir (target .so files incl. libc.so.1) lands on the HOST
+LD_LIBRARY_PATH during the build.
 
-That entry is useless for a cross-build: the VxWorks compiler/linker resolve
-target libs via -L/-rpath-link (toolchain / cc-conf), not LD_LIBRARY_PATH, and
-the target runtime loader uses its own path config -- not the host
-LD_LIBRARY_PATH. But it breaks any dynamically-linked HOST tool invoked during
-the build (e.g. ccache, cargo's host build-script linker): the host loader
-picks a VxWorks soname and fails to start:
+That entry is useless for a cross-build: the compiler/linker resolve target
+libs via -L/-rpath-link (toolchain / cc-conf), and the target runtime loader
+uses its own path config -- not the host LD_LIBRARY_PATH. But it breaks any
+dynamically-linked HOST tool invoked during the build (ccache, cargo's host
+build-script linker), whose loader picks a VxWorks soname and fails to start:
 
   <tool>: error while loading shared libraries: libc.so.1: cannot open shared object file
 
-Guard the hook on CMAKE_CROSSCOMPILING so it is only emitted for native builds.
-CMAKE_CROSSCOMPILING is TRUE whenever CMAKE_SYSTEM_NAME is set in the toolchain
-(VxWorks here), so native builds are unaffected.
+The hook is registered from several places (the ament_cmake_core default
+descriptor, ament_export_libraries(), and directly from packages such as rclpy
+and ros_workspace). Guard it once at the common chokepoint -- ament_environment_
+hooks() -- so every emitter is covered: when CMAKE_CROSSCOMPILING is set, skip
+any hook named 'library_path'. CMAKE_CROSSCOMPILING is TRUE whenever the
+toolchain sets CMAKE_SYSTEM_NAME (VxWorks), so native builds are unaffected.
 ---
- ament_cmake_core/ament_cmake_environment_hooks-extras.cmake | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ ament_cmake_core/cmake/environment_hooks/ament_environment_hooks.cmake | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/ament_cmake_core/ament_cmake_environment_hooks-extras.cmake b/ament_cmake_core/ament_cmake_environment_hooks-extras.cmake
+diff --git a/ament_cmake_core/cmake/environment_hooks/ament_environment_hooks.cmake b/ament_cmake_core/cmake/environment_hooks/ament_environment_hooks.cmake
 index 1111111..2222222 100644
---- a/ament_cmake_core/ament_cmake_environment_hooks-extras.cmake
-+++ b/ament_cmake_core/ament_cmake_environment_hooks-extras.cmake
-@@ -39,7 +39,7 @@ set(
- set(
-   AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_ament_prefix_path
-   "prepend-non-duplicate;AMENT_PREFIX_PATH;")
--if(NOT WIN32)
-+if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
-   if(NOT APPLE)
-     set(
-       AMENT_CMAKE_ENVIRONMENT_HOOKS_DESC_library_path
+--- a/ament_cmake_core/cmake/environment_hooks/ament_environment_hooks.cmake
++++ b/ament_cmake_core/cmake/environment_hooks/ament_environment_hooks.cmake
+@@ -38,6 +38,17 @@ function(ament_environment_hooks)
+ 
+     get_filename_component(hook_filename "${hook}" NAME)
+ 
++    # VxWorks cross-build: skip the library_path hook. It prepends the install
++    # lib dir (target .so files) to LD_LIBRARY_PATH, which is useless for a
++    # cross-build (compiler/linker use -rpath-link; target loader uses its own
++    # path) and breaks dynamically-linked host tools (ccache, cargo host linker)
++    # invoked during the build. Single chokepoint for all emitters
++    # (ament_cmake_core default, ament_export_libraries, rclpy, ros_workspace).
++    get_filename_component(_hook_basename_check "${hook}" NAME_WE)
++    if(CMAKE_CROSSCOMPILING AND _hook_basename_check STREQUAL "library_path")
++      continue()
++    endif()
++
+     # check if the file is a template
+     if(hook_filename MATCHES "^(.*)\\.in$")
+       set(is_template TRUE)

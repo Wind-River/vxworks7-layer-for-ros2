@@ -1,0 +1,30 @@
+From bea2ea48b554e3e2f7d18c55c2c37022e00ee848 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 17 Nov 2026 03:12:36 +0100
+Subject: [PATCH] use libyaml from the install prefix
+
+libyaml_vendor installs yaml.h into <prefix>/include (there is no
+include/libyaml_vendor), and the prefix libyaml must win over a libyaml in the
+target sysroot: put -L <prefix>/lib before the sysroot lib dir.
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fe3d929..045baf1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,8 +37,8 @@ if(CMAKE_CROSSCOMPILING)
+       PYTHON=${PY_DRIVER}
+       "CC=${CMAKE_C_COMPILER}"
+       "LDSHARED=${CMAKE_C_COMPILER} -shared"
+-      "CFLAGS=-I ${PY_INCLUDE} -I ${PREFIX}/include/libyaml_vendor"
+-      "LDFLAGS=-L ${DEV}/lib -lpython3 -L ${PREFIX}/lib -lyaml"
++      "CFLAGS=-I ${PY_INCLUDE} -I ${PREFIX}/include"
++      "LDFLAGS=-L ${PREFIX}/lib -lyaml -L ${DEV}/lib -lpython3"
+       _PYTHON_HOST_PLATFORM=${PY_HOST_PLATFORM}
+       _PYTHON_SYSCONFIGDATA_NAME=${PY_SYSCONFIG}
+       "PYTHONPATH=${DEV}/lib/${PYTAG}/:${DEV}/lib/${PYTAG}/site-packages")
+-- 
+2.43.0
+

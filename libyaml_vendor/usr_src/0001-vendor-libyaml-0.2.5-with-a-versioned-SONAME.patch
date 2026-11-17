@@ -1,0 +1,102 @@
+From 5a36de562c0fef4a48d8f79c08a4dbd4909a13b5 Mon Sep 17 00:00:00 2001
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Tue, 17 Nov 2026 03:10:33 +0100
+Subject: [PATCH] vendor libyaml 0.2.5 with a versioned SONAME on VxWorks
+
+Upstream 1.8.x (#67) removed ament_vendor and expects a system libyaml. The
+VxWorks SDK libyaml is built by libyaml's CMake, which sets no SOVERSION, so its
+SONAME is the unversioned 'libyaml.so' that dpkg shlibs cannot express. Build
+libyaml 0.2.5 here again, with a patch adding VERSION/SOVERSION (SONAME
+libyaml.so.0, set by the linker; patchelf would add a third PT_LOAD, which the
+VxWorks dynamic linker rejects).
+---
+ CMakeLists.txt                                | 20 ++++++++++++
+ package.xml                                   |  1 +
+ ...SION-SOVERSION-on-the-shared-libyaml.patch | 32 +++++++++++++++++++
+ 3 files changed, 53 insertions(+)
+ create mode 100644 patches/0001-set-VERSION-SOVERSION-on-the-shared-libyaml.patch
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 29f293f..dd0a626 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,6 +13,26 @@ endif()
+ 
+ find_package(ament_cmake REQUIRED)
+ 
++# VxWorks: vendor libyaml 0.2.5 again (upstream #67 dropped ament_vendor and
++# relies on a system libyaml). The VxWorks SDK ships libyaml built by upstream's
++# CMake, which sets no SOVERSION: SONAME "libyaml.so", which dpkg shlibs cannot
++# express. patches/ adds VERSION/SOVERSION, giving libyaml.so.0 set by the linker.
++find_package(ament_cmake_vendor_package REQUIRED)
++list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
++find_package(yaml 0.2.5 EXACT QUIET)
++
++ament_vendor(libyaml_vendor
++  SATISFIED ${yaml_FOUND}
++  VCS_URL https://github.com/yaml/libyaml.git
++  VCS_VERSION 0.2.5
++  PATCHES patches
++  CMAKE_ARGS
++    -DBUILD_SHARED_LIBS=ON
++    -DBUILD_TESTING=OFF
++)
++
++ament_export_dependencies(yaml)
++
+ if(BUILD_TESTING)
+   list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+   find_package(yaml REQUIRED)
+diff --git a/package.xml b/package.xml
+index 69885a5..acd860c 100644
+--- a/package.xml
++++ b/package.xml
+@@ -19,6 +19,7 @@
+   <author>Mikael Arguedas</author>
+ 
+   <buildtool_depend>ament_cmake</buildtool_depend>
++  <buildtool_depend>ament_cmake_vendor_package</buildtool_depend>
+   <buildtool_depend>pkg-config</buildtool_depend>
+ 
+   <buildtool_export_depend>pkg-config</buildtool_export_depend>
+diff --git a/patches/0001-set-VERSION-SOVERSION-on-the-shared-libyaml.patch b/patches/0001-set-VERSION-SOVERSION-on-the-shared-libyaml.patch
+new file mode 100644
+index 0000000..8be2dda
+--- /dev/null
++++ b/patches/0001-set-VERSION-SOVERSION-on-the-shared-libyaml.patch
+@@ -0,0 +1,32 @@
++From 55d4eea12d8482109ffee67d25bd2be88fe5a66b Mon Sep 17 00:00:00 2001
++From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
++Date: Tue, 17 Nov 2026 03:10:00 +0100
++Subject: [PATCH] Set VERSION/SOVERSION on the shared libyaml
++
++---
++ CMakeLists.txt | 9 +++++++++
++ 1 file changed, 9 insertions(+)
++
++diff --git a/CMakeLists.txt b/CMakeLists.txt
++index 4f81148..f100928 100644
++--- a/CMakeLists.txt
+++++ b/CMakeLists.txt
++@@ -65,6 +65,15 @@ set_target_properties(yaml
++   PROPERTIES DEFINE_SYMBOL YAML_DECLARE_EXPORT
++   )
++ 
+++# VxWorks: a versioned shared library, as the autotools build produces, so the
+++# SONAME is libyaml.so.0 instead of the unversioned libyaml.so (dpkg shlibs need
+++# a version). The SONAME must be set by the linker: patchelf would add a third
+++# PT_LOAD, which the VxWorks dynamic linker rejects.
+++set_target_properties(yaml PROPERTIES
+++  VERSION ${YAML_VERSION_STRING}
+++  SOVERSION ${YAML_VERSION_MAJOR}
+++  )
+++
++ target_compile_definitions(yaml
++   PRIVATE HAVE_CONFIG_H
++   PUBLIC
++-- 
++2.43.0
++
+-- 
+2.43.0
+

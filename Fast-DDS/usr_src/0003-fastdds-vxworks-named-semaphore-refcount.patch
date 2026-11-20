@@ -1,0 +1,97 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 20 Nov 2026 14:00:00 +0100
+Subject: [PATCH] Fast-DDS VxWorks: count named semaphore opens per process (boost)
+
+VxWorks 26.03 does not reference-count named semaphores within an RTP: a second
+sem_open() of an open named semaphore returns the same sem_t*, and the first
+sem_close() releases it for every opener in the RTP (os/core/user/src/posix/rt/
+semPxLib.c keeps one node per name and frees it on any close). The next
+sem_post()/sem_wait() through the other opener fails with EINVAL. POSIX keeps the
+semaphore usable while an earlier sem_open() is not matched by a sem_close()
+(glibc counts the opens).
+
+Fast-DDS guards each SHM port with a boost::interprocess::named_mutex
+(fastdds_port<N>_mutex, a POSIX named semaphore) that several threads of one
+participant open and close independently (open_port, Port::~Port). When one
+closed it while another held it, the holder's unlock threw
+interprocess_exception "invalid argument" with no handler on the PDP send path
+(PDPSimple::announceParticipantState -> SharedMemTransport::send ->
+find_port -> open_port_internal), so the RTP aborted ("libc++abi: terminating
+due to uncaught exception of type boost::interprocess::interprocess_exception:
+invalid argument"). Seen in the SHM pub/sub tests, mostly on 4-CPU hosts.
+
+Count the opens per handle in boost's semaphore_wrapper and sem_close() only on
+the last one; sem_open+count and count+sem_close run under one process-local
+lock. Guarded by __VXWORKS__.
+---
+--- a/thirdparty/boost/include/boost/interprocess/sync/posix/semaphore_wrapper.hpp
++++ b/thirdparty/boost/include/boost/interprocess/sync/posix/semaphore_wrapper.hpp
+@@ -32,6 +32,10 @@
+ #include <semaphore.h>  //sem_* family, SEM_VALUE_MAX
+ #include <sys/stat.h>   //mode_t, S_IRWXG, S_IRWXO, S_IRWXU,
+ #include <boost/assert.hpp>
++#if defined(__VXWORKS__)
++#include <map>          //vx_named_sems: open count per handle
++#include <mutex>
++#endif
+ 
+ #ifdef SEM_FAILED
+ #define BOOST_INTERPROCESS_POSIX_SEM_FAILED (reinterpret_cast<sem_t*>(SEM_FAILED))
+@@ -53,10 +57,31 @@
+ 
+ #ifdef BOOST_INTERPROCESS_POSIX_NAMED_SEMAPHORES
+ 
++#if defined(__VXWORKS__)
++//VxWorks: within one RTP, sem_open() of a named semaphore that is already open
++//returns the same sem_t*, but the opens are not counted: the first sem_close()
++//releases the semaphore for every opener in the RTP, whose next sem_post() /
++//sem_wait() then fails with EINVAL (os/core/user/src/posix/rt/semPxLib.c keeps
++//one node per name and frees it on any close). POSIX keeps the semaphore usable
++//while an earlier sem_open() is not matched by a sem_close() (glibc counts).
++//Count the opens per handle here and sem_close() only on the last one. sem_open
++//+ count and count + sem_close run under one lock, so a close cannot release a
++//handle another thread has just been given. Never destroyed (used until exit).
++struct vx_named_sems
++{
++   std::mutex mtx;
++   std::map<sem_t*, unsigned long> opens;
++   static vx_named_sems &get() { static vx_named_sems *s = new vx_named_sems; return *s; }
++};
++#endif   //__VXWORKS__
++
+ inline bool semaphore_open
+    (sem_t *&handle, create_enum_t type, const char *origname,
+     unsigned int count = 0, const permissions &perm = permissions())
+ {
++   #if defined(__VXWORKS__)
++   std::lock_guard<std::mutex> vx_lock(vx_named_sems::get().mtx);
++   #endif
+    std::string name;
+    #ifndef BOOST_INTERPROCESS_FILESYSTEM_BASED_POSIX_SEMAPHORES
+    add_leading_slash(origname, name);
+@@ -109,11 +134,25 @@
+       throw interprocess_exception(error_info(errno));
+    }
+ 
++   #if defined(__VXWORKS__)
++   ++vx_named_sems::get().opens[handle];
++   #endif
+    return true;
+ }
+ 
+ inline void semaphore_close(sem_t *handle)
+ {
++   #if defined(__VXWORKS__)
++   vx_named_sems &vs = vx_named_sems::get();
++   std::lock_guard<std::mutex> vx_lock(vs.mtx);
++   std::map<sem_t*, unsigned long>::iterator it = vs.opens.find(handle);
++   if(it != vs.opens.end() && --it->second != 0){
++      return;   //still open elsewhere in this RTP
++   }
++   if(it != vs.opens.end()){
++      vs.opens.erase(it);
++   }
++   #endif
+    int ret = sem_close(handle);
+    if(ret != 0){
+       BOOST_ASSERT(0);

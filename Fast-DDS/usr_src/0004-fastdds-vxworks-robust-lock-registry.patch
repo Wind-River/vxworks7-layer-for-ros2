@@ -1,0 +1,328 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 20 Nov 2026 17:00:00 +0100
+Subject: [PATCH] Fast-DDS VxWorks: robust locks never reopen a lock file this process holds
+
+VxWorks has no flock(); unixextra emulates it with fcntl() record locks, which
+belong to the process, and the kernel drops all of them on a file as soon as
+the process closes ANY descriptor of it (POSIX fcntl() semantics). The SHM
+transport's RobustExclusiveLock / RobustSharedLock open a second descriptor
+for Port::is_zombie() and is_locked() and close it again. On a lock file the
+process holds itself that
+  - answered wrongly: the process' own lock does not conflict, so it judged
+    its own live port a zombie (exclusive and shared), and
+  - dropped the real lock on close, so a peer then saw the port unlocked.
+(0002 fixed one instance of this, stat() on the path, with fstat().)
+
+Add RobustLockRegistry, the lock files this process holds (path -> descriptor,
+holders, exclusive/shared), and answer from it: acquiring an exclusive lock the
+process holds throws (as with BSD flock()), a second shared lock joins the
+existing holder (same descriptor; closed with the last holder), is_locked() /
+test_lock() report LOCKED, all without opening the file. Acquire and release
+run under the registry lock. Guarded by __VXWORKS__.
+
+Verified on QEMU (zombie test, holder runs both is_zombie() checks on its own
+ports, another process probes the locks): stock headers judge both own ports
+zombie and lose both locks; patched: not zombie, locks held, released after
+the holders go.
+---
+--- a/src/cpp/utils/shared_memory/RobustLockRegistry.hpp
++++ b/src/cpp/utils/shared_memory/RobustLockRegistry.hpp
+@@ -0,0 +1,96 @@
++// Copyright 2026 Wind River Systems, Inc.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#ifndef _FASTDDS_ROBUST_LOCK_REGISTRY_H_
++#define _FASTDDS_ROBUST_LOCK_REGISTRY_H_
++
++#ifdef __VXWORKS__
++
++#include <map>
++#include <mutex>
++#include <string>
++
++namespace eprosima {
++namespace fastdds {
++namespace rtps {
++
++/**
++ * VxWorks: the lock files this process holds (RobustExclusiveLock / RobustSharedLock).
++ *
++ * VxWorks has no flock(); unixextra emulates it with fcntl() record locks, which belong to
++ * the process, and the kernel drops all of them on a file as soon as the process closes
++ * ANY descriptor of it. The robust locks open a second descriptor for zombie tests and
++ * is_locked() and close it again, which on a file the process holds itself both gave the
++ * wrong answer (the process' own lock does not conflict) and dropped the real lock (a peer
++ * then removed a live port as zombie, and its listener never received data).
++ *
++ * So the process never opens a second descriptor on a lock file it holds: it answers from
++ * here. Acquire and release run under mutex(), so two threads cannot race on one file.
++ */
++class RobustLockRegistry
++{
++public:
++
++    struct Entry
++    {
++        int fd;
++        unsigned count;     // holders: 1 for exclusive, >= 1 for shared
++        bool exclusive;
++    };
++
++    static std::recursive_mutex& mutex()
++    {
++        static std::recursive_mutex* m = new std::recursive_mutex;  // never destroyed: used until exit
++        return *m;
++    }
++
++    // the entry for the lock file at path, or nullptr; call with mutex() held
++    static Entry* find(
++            const std::string& path)
++    {
++        auto it = entries().find(path);
++        return it == entries().end() ? nullptr : &it->second;
++    }
++
++    static void add(
++            const std::string& path,
++            int fd,
++            bool exclusive)
++    {
++        entries()[path] = Entry{fd, 1, exclusive};
++    }
++
++    static void erase(
++            const std::string& path)
++    {
++        entries().erase(path);
++    }
++
++private:
++
++    static std::map<std::string, Entry>& entries()
++    {
++        static std::map<std::string, Entry>* e = new std::map<std::string, Entry>;
++        return *e;
++    }
++
++};
++
++} // namespace rtps
++} // namespace fastdds
++} // namespace eprosima
++
++#endif // ifdef __VXWORKS__
++
++#endif // _FASTDDS_ROBUST_LOCK_REGISTRY_H_
+--- a/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustExclusiveLock.hpp
+@@ -30,6 +30,7 @@
+ #include <cerrno>
+ 
+ #include "SharedDir.hpp"
++#include "RobustLockRegistry.hpp"
+ 
+ namespace eprosima {
+ namespace fastdds {
+@@ -56,6 +57,15 @@
+     {
+         auto file_path = SharedDir::get_lock_path(name);
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (RobustLockRegistry::find(file_path) != nullptr)
++        {
++            // held by this process: a second descriptor would only drop that lock on close
++            throw std::runtime_error("open_and_lock_file failed for path: " + file_path +
++                          " (locked by this process)");
++        }
++#endif // ifdef __VXWORKS__
+         if ((fd_ = open_and_lock_file(file_path, was_lock_created)) == -1)
+         {
+             throw std::runtime_error(
+@@ -65,6 +75,9 @@
+             );
+         }
+ 
++#ifdef __VXWORKS__
++        RobustLockRegistry::add(file_path, fd_, true);
++#endif // ifdef __VXWORKS__
+         name_ = name;
+     }
+ 
+@@ -80,11 +93,21 @@
+ 
+         auto file_path = SharedDir::get_lock_path(name);
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (RobustLockRegistry::find(file_path) != nullptr)
++        {
++            throw std::runtime_error("open_and_lock_file failed (locked by this process)");
++        }
++#endif // ifdef __VXWORKS__
+         if ((fd_ = open_and_lock_file(file_path, &was_lock_created)) == -1)
+         {
+             throw std::runtime_error("open_and_lock_file failed");
+         }
+ 
++#ifdef __VXWORKS__
++        RobustLockRegistry::add(file_path, fd_, true);
++#endif // ifdef __VXWORKS__
+         name_ = name;
+     }
+ 
+@@ -99,6 +122,13 @@
+ 
+         auto file_path = SharedDir::get_lock_path(name);
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (RobustLockRegistry::find(file_path) != nullptr)
++        {
++            return true;    // held by this process
++        }
++#endif // ifdef __VXWORKS__
+         int fd;
+         if ((fd = open_and_lock_file(file_path, &was_lock_created)) == -1)
+         {
+@@ -115,6 +145,10 @@
+      */
+     ~RobustExclusiveLock()
+     {
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        RobustLockRegistry::erase(SharedDir::get_lock_path(name_));
++#endif // ifdef __VXWORKS__
+         unlock_and_close(fd_, name_);
+     }
+ 
+--- a/src/cpp/utils/shared_memory/RobustSharedLock.hpp
++++ b/src/cpp/utils/shared_memory/RobustSharedLock.hpp
+@@ -28,6 +28,7 @@
+ #include <fcntl.h>
+ 
+ #include "SharedDir.hpp"
++#include "RobustLockRegistry.hpp"
+ 
+ namespace eprosima {
+ namespace fastdds {
+@@ -55,8 +56,19 @@
+     {
+         auto file_path = SharedDir::get_lock_path(name);
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (join_held(file_path, was_lock_created, was_lock_released))
++        {
++            name_ = name;
++            return;
++        }
++#endif // ifdef __VXWORKS__
+         fd_ = open_and_lock_file(file_path, was_lock_created, was_lock_released);
+ 
++#ifdef __VXWORKS__
++        RobustLockRegistry::add(file_path, fd_, false);
++#endif // ifdef __VXWORKS__
+         name_ = name;
+     }
+ 
+@@ -72,8 +84,19 @@
+ 
+         auto file_path = SharedDir::get_lock_path(name);
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (join_held(file_path, &was_lock_created, nullptr))
++        {
++            name_ = name;
++            return;
++        }
++#endif // ifdef __VXWORKS__
+         fd_ = open_and_lock_file(file_path, &was_lock_created, nullptr);
+ 
++#ifdef __VXWORKS__
++        RobustLockRegistry::add(file_path, fd_, false);
++#endif // ifdef __VXWORKS__
+         name_ = name;
+     }
+ 
+@@ -112,6 +135,35 @@
+     std::string name_;
+     int fd_;
+ 
++#ifdef __VXWORKS__
++    // A shared lock this process already holds on file_path: join it (same descriptor, one
++    // more holder) instead of opening a second descriptor, whose close would drop the lock.
++    // As with BSD flock(), the existing shared lock means "not released". Registry held.
++    bool join_held(
++            const std::string& file_path,
++            bool* was_lock_created,
++            bool* was_lock_released)
++    {
++        RobustLockRegistry::Entry* e = RobustLockRegistry::find(file_path);
++        if (e == nullptr)
++        {
++            return false;
++        }
++        if (e->exclusive)
++        {
++            throw std::runtime_error(("failed to lock " + file_path + " (locked by this process)").c_str());
++        }
++        e->count++;
++        fd_ = e->fd;
++        *was_lock_created = false;
++        if (was_lock_released != nullptr)
++        {
++            *was_lock_released = false;
++        }
++        return true;
++    }
++#endif // ifdef __VXWORKS__
++
+     enum class LockStatus
+     {
+         NOT_LOCKED,
+@@ -418,6 +470,18 @@
+ 
+     void unlock_and_close()
+     {
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        RobustLockRegistry::Entry* e = RobustLockRegistry::find(SharedDir::get_lock_path(name_));
++        if (e != nullptr && --e->count > 0)
++        {
++            return;     // other holders in this process keep the descriptor and the lock
++        }
++        if (e != nullptr)
++        {
++            RobustLockRegistry::erase(SharedDir::get_lock_path(name_));
++        }
++#endif // ifdef __VXWORKS__
+         flock(fd_, LOCK_UN | LOCK_NB);
+         close(fd_);
+ 
+@@ -430,6 +494,13 @@
+     {
+         LockStatus lock_status;
+ 
++#ifdef __VXWORKS__
++        std::lock_guard<std::recursive_mutex> registry_lock(RobustLockRegistry::mutex());
++        if (RobustLockRegistry::find(file_path) != nullptr)
++        {
++            return LockStatus::LOCKED;  // held by this process
++        }
++#endif // ifdef __VXWORKS__
+         auto fd = open(file_path.c_str(), LOCK_FILE_OPEN_MODE, 0);
+ 
+         if (fd != -1)

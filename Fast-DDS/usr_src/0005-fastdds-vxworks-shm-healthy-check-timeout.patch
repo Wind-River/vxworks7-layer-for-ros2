@@ -1,0 +1,38 @@
+From: Andrei Kholodnyi <andrei.kholodnyi@windriver.com>
+Date: Fri, 20 Nov 2026 17:00:00 +0100
+Subject: [PATCH] Fast-DDS VxWorks: 10 s SHM healthy check timeout by default
+
+A participant opening a peer's SHM port runs Port::healthy_check(): every
+listener waiting on the port must show it is alive (wake up and bump its
+status counter, every healthy_check_timeout_ms / 3) within
+healthy_check_timeout_ms, default 1000 ms, or the port is judged "NOT Healthy"
+and removed and re-created. Under QEMU on small hosts (8 vCPUs on 4 host CPUs,
+60 Hz tick) the owner's listener thread missed that 1 s while the new
+participant started: a live port was removed, its owner kept listening on the
+removed segment and the pub/sub never connected (listener silent, CI test04 /
+test06 on GitHub's 4-CPU runners).
+
+Default to 10 s on VxWorks (listeners then wake every 3.3 s; a dead port is
+detected after up to 10 s). Verified on QEMU pinned to 4 host CPUs: 10/10
+talker/listener SHM rounds connect, no "NOT Healthy" (1 s: silent listener
+within 1-7 rounds). Guarded by __VXWORKS__.
+---
+--- a/include/fastdds/rtps/transport/shared_mem/SharedMemTransportDescriptor.hpp
++++ b/include/fastdds/rtps/transport/shared_mem/SharedMemTransportDescriptor.hpp
+@@ -51,7 +51,16 @@
+ {
+     static constexpr uint32_t shm_default_segment_size = 0;
+     static constexpr uint32_t shm_default_port_queue_capacity = 512;
++#ifdef __VXWORKS__
++    //! VxWorks: a peer judges a port "NOT Healthy" and removes it when the port's listener
++    //! threads do not report within this time. Under QEMU on small hosts (8 vCPUs on 4 host
++    //! CPUs, 60 Hz tick) the owner's listener thread can miss 1 s while a new participant
++    //! starts, and a live port was removed: its owner kept listening on the removed segment
++    //! and never received data. 10 s (listeners wake every timeout / 3).
++    static constexpr uint32_t shm_default_healthy_check_timeout_ms = 10000;
++#else
+     static constexpr uint32_t shm_default_healthy_check_timeout_ms = 1000;
++#endif // ifdef __VXWORKS__
+     static constexpr uint32_t shm_implicit_segment_size = 512 * 1024;
+ 
+     //! Destructor

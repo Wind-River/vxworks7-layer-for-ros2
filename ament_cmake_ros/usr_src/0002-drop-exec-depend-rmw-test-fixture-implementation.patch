@@ -1,0 +1,13 @@
+diff --git a/ament_cmake_ros/package.xml b/ament_cmake_ros/package.xml
+index 44d2e9d..ba2303f 100644
+--- a/ament_cmake_ros/package.xml
++++ b/ament_cmake_ros/package.xml
+@@ -20,8 +20,6 @@
+   <buildtool_export_depend>ament_cmake_pytest</buildtool_export_depend>
+   <buildtool_export_depend>ament_cmake_ros_core</buildtool_export_depend>
+ 
+-  <exec_depend>rmw_test_fixture_implementation</exec_depend>
+-
+   <test_depend>ament_lint_auto</test_depend>
+   <test_depend>ament_lint_common</test_depend>
+ 
